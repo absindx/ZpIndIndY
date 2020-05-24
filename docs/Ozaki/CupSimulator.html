@@ -1,0 +1,622 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>Ozaki Cup Simulator</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <style type="text/css">
+<!--
+
+	body{
+		margin			: 0px;
+		padding			: 0px;
+		color			: #002A88;
+		background-color	: #64B0FF;
+	}
+	h1{
+		margin			: 8px;
+		padding			: 2px;
+	}
+	main{
+		margin			: 8px;
+		padding			: 2px;
+		min-width		: 1076px;
+		color			: #388700;
+		background-color	: #BDF4AB;
+	}
+	section{
+	}
+
+	.note{
+		font-size		: 80%;
+	}
+
+	fieldset{
+		border			: solid 2px #388700;
+		margin			: 2px 8px;
+	}
+
+	dl{
+		margin			: 2px 4px;
+	}
+	dt{
+		float			: left;
+		clear			: left;
+		width			: 128px;
+	}
+	dt, dd{
+		vertical-align		: middle;
+	}
+	dd:before{
+		content			: ": ";
+	}
+
+	input[type="range"]{
+		width			: 384px;
+	}
+	input[type="number"]{
+		text-align		: right;
+	}
+
+	#LoadingMessage{
+		text-align		: center;
+	}
+
+	#Simulated{
+		display			: block;
+		margin			: 4px auto 8px auto;
+		border-radius		: 5px;
+	}
+
+	footer{
+	}
+	#Lesson{
+		display			: block;
+		position		: fixed;
+		margin			: 0px;
+		padding			: 0px;
+		right			: 0px;
+		bottom			: 0px;
+		width			: 232px;
+		height			: 64px;
+	}
+	#Lesson div{
+		margin			: 0px;
+		padding			: 0px;
+		height			: 64px;
+	}
+	#Lesson .Text{
+		width			: 168px;
+		background-image	: url(Images/Lesson.png);
+		float			: left;
+		overflow		: hidden;
+		background-repeat	: no-repeat;
+		background-position	: 0px -128px;
+	}
+	#Lesson .Ozaki{
+		margin-left		: auto;
+		width			: 64px;
+		background-image	: url(Images/Ozaki.png);
+	}
+
+-->
+  </style>
+  <script type="text/javascript">
+<!--
+	//--------------------------------------------------
+	// Const
+	//--------------------------------------------------
+
+	const CupBaseX	= [
+		0x40,0x34,0x54,0x34,0x54,0x7C,0x34,0x20,0x74,	// East 01-09
+		0x40,0x48,0x40,0x24,0x50,0x5C,0x3C,0x48,0x34,	// East 10-18
+		0x24,0x70,0x74,0x40,0x50,0x40,0x3C,0x34,0x60,	// West 01-09
+		0x40,0x54,0x34,0x38,0x20,0x50,0x30,0x44,0x74,	// West 10-18
+	];
+	const CupBaseY	= [
+		0x24,0x40,0x64,0x24,0x54,0x20,0x2C,0x24,0x24,	// East 01-09
+		0x3C,0x20,0x30,0x14,0x58,0x14,0x24,0x18,0x44,	// East 10-18
+		0x14,0x24,0x28,0x24,0x54,0x2C,0x1C,0x40,0x1C,	// West 01-09
+		0x3C,0x20,0x44,0x3C,0x24,0x48,0x24,0x18,0x20,	// West 10-18
+	];
+	const Zoom2xOffsetX	= [
+		0x20,0x18,0x30,0x10,0x30,0x50,0x14,0x08,0x50,	// East 01-09
+		0x20,0x28,0x20,0x08,0x30,0x38,0x20,0x28,0x18,	// East 10-18
+		0x08,0x48,0x50,0x20,0x30,0x20,0x20,0x18,0x38,	// West 01-09
+		0x20,0x28,0x18,0x18,0x08,0x30,0x10,0x28,0x50,	// West 10-18
+	];
+	const Zoom2xOffsetY	= [
+		0x14,0x34,0x5C,0x14,0x3C,0x14,0x14,0x0C,0x14,	// East 01-09
+		0x24,0x0C,0x1C,0x04,0x54,0x04,0x0C,0x04,0x2C,	// East 10-18
+		0x04,0x14,0x14,0x0C,0x3C,0x1C,0x14,0x34,0x04,	// West 01-09
+		0x24,0x0C,0x2C,0x24,0x0C,0x34,0x14,0x04,0x14,	// West 10-18
+	];
+	const CupRandomX	= [
+		0x28,0x68,0x50,0x50, 0x28,0x70,0x20,0x28, 0x68,0x20,0x38,0x68, 0x58,0x20,0x28,0x50, 0x48,0x78,0x28,0x60, 0x30,0x20,0x70,0x38,	// East 01-06
+		0x40,0x20,0x60,0x28, 0x60,0x78,0x20,0x60, 0x58,0x70,0x40,0x58, 0x28,0x70,0x40,0x58, 0x58,0x48,0x20,0x70, 0x78,0x30,0x78,0x30,	// East 07-12
+		0x30,0x70,0x30,0x68, 0x48,0x60,0x78,0x38, 0x28,0x50,0x70,0x30, 0x48,0x20,0x78,0x48, 0x28,0x48,0x28,0x70, 0x78,0x78,0x48,0x28,	// East 13-18
+		0x38,0x60,0x78,0x38, 0x30,0x60,0x28,0x60, 0x70,0x70,0x28,0x48, 0x4C,0x4C,0x20,0x78, 0x60,0x28,0x4C,0x70, 0x68,0x50,0x20,0x68,	// West 01-06
+		0x28,0x48,0x60,0x70, 0x28,0x48,0x70,0x28, 0x68,0x28,0x48,0x70, 0x28,0x48,0x70,0x48, 0x30,0x48,0x58,0x28, 0x50,0x78,0x48,0x28,	// West 07-12
+		0x44,0x28,0x70,0x44, 0x68,0x28,0x20,0x70, 0x28,0x70,0x58,0x38, 0x28,0x70,0x68,0x30, 0x28,0x48,0x28,0x70, 0x28,0x58,0x78,0x28,	// West 13-18
+	];
+	const CupRandomY	= [
+		0x28,0x28,0x40,0x70, 0x28,0x48,0x50,0x78, 0x20,0x60,0x70,0x70, 0x28,0x48,0x70,0x70, 0x18,0x28,0x30,0x78, 0x20,0x50,0x50,0x78,	// East 01-06
+		0x28,0x38,0x38,0x68, 0x18,0x60,0x70,0x78, 0x28,0x40,0x48,0x68, 0x28,0x38,0x70,0x70, 0x20,0x48,0x50,0x70, 0x30,0x40,0x68,0x70,	// East 07-12
+		0x28,0x30,0x68,0x68, 0x20,0x30,0x50,0x60, 0x38,0x48,0x68,0x70, 0x20,0x68,0x68,0x70, 0x28,0x48,0x70,0x70, 0x20,0x40,0x50,0x70,	// East 13-18
+		0x20,0x28,0x48,0x68, 0x30,0x38,0x60,0x60, 0x20,0x48,0x78,0x78, 0x20,0x50,0x70,0x70, 0x28,0x40,0x4C,0x60, 0x28,0x50,0x68,0x78,	// West 01-06
+		0x28,0x48,0x68,0x78, 0x28,0x50,0x50,0x78, 0x20,0x28,0x48,0x70, 0x30,0x40,0x40,0x78, 0x30,0x50,0x68,0x70, 0x28,0x40,0x50,0x70,	// West 07-12
+		0x18,0x48,0x48,0x70, 0x20,0x38,0x70,0x70, 0x28,0x28,0x58,0x78, 0x28,0x30,0x68,0x70, 0x28,0x48,0x78,0x78, 0x30,0x38,0x50,0x70,	// West 13-18
+	];
+	const WindMaxVolume	= [
+		6, 10, 13	// Amateur, Single, Professional
+	];
+	const WindAddRandom	= [
+		0, 0, -1, 0, 0, 1, 1, 2
+	];
+
+	//--------------------------------------------------
+	// RNG
+	//--------------------------------------------------
+
+	let RandPool_Index_Long		= [];
+	let RandPool_Index_Short	= [];
+	let RandPool_Rand_Long		= [];
+	let RandPool_Rand_Short		= [];
+
+	function GetRand(seed){
+		for(let i=0; i<11; i++){
+			let t	= (seed >> 15) ^ (seed >> 1) ^ (seed);
+			seed	= ((seed << 1) | (~t & 1)) & 0xFFFF;
+		}
+		return seed;
+	}
+	function RandIndexToRand(index){
+		if(index >= 0){
+			// 0, 1, ...
+			return RandPool_Index_Long[index % RandPool_Index_Long.length];
+		}
+		else{
+			// -1, -2, ...
+			return RandPool_Index_Short[(-index - 1) % RandPool_Index_Short.length];
+		}
+	}
+	function RandRandToIndex(rand){
+		rand		= rand & 0xFFFF;
+		return (RandPool_Rand_Long[rand]) ?? (-RandPool_Rand_Short[rand] - 1);
+	}
+	function GetNextRand(seed, step){
+		step	= step ?? 1;
+		const index	= RandRandToIndex(seed);
+		if(index >= 0){
+			return RandIndexToRand(index + step);
+		}
+		else{
+			return RandIndexToRand(index - step);
+		}
+	}
+
+	function InitializeRandPool(){
+		const generate	= (indexPool, randPool, seed) => {
+			const start	= seed;
+			let index	= 0;
+			do{
+				indexPool[index]	= seed;
+				randPool[seed]		= index;
+				index++;
+				seed	= GetRand(seed);
+			}while(start !== seed);
+		}
+		generate(RandPool_Index_Long, RandPool_Rand_Long, 0x0000);
+		generate(RandPool_Index_Short, RandPool_Rand_Short, 0x5555);
+	}
+
+	//--------------------------------------------------
+	// Simulation
+	//--------------------------------------------------
+
+	function SimulateHoleBaseWind(seed){
+		seed		= GetNextRand(seed, 1);
+		const baseDir	= (seed >> 5) & 0x07;
+
+		seed		= GetNextRand(seed, 1);
+		let baseVol	= seed & 0x0F;
+		if(baseVol >= 11){
+			baseVol	-= 8;
+		}
+
+		return {
+			direction	: baseDir,
+			volume		: baseVol,
+			seed		: seed,
+		};
+	}
+	function SimulateHoleWind(baseWind, difficulty, seed){
+		const maxVol	= WindMaxVolume[difficulty];
+		let direction	= baseWind.direction;
+		seed		= GetNextRand(seed, 1);
+		let volume	= baseWind.volume + WindAddRandom[seed & 0x07];
+
+		if(volume < 0){
+			direction	^= 0x04;
+			volume		= 1;
+		}
+		while(volume >= maxVol){
+			volume	-= 5;
+		}
+
+		return {
+			direction	: direction,
+			volume		: volume,
+			seed		: seed,
+		};
+	}
+
+	function GetCupPosition(course, hole, rand){
+		const cupBaseIndex	= (course * 18 + hole);
+		const cupRandIndex	= (course * 18 + hole) * 4 + (rand & 3);
+		const x			= (CupBaseX[cupBaseIndex] << 8) + (CupRandomX[cupRandIndex] << 5) + 0x10;
+		const y			= (CupBaseY[cupBaseIndex] << 8) + (CupRandomY[cupRandIndex] << 5) + 0x10;
+
+		return [x, y];
+	}
+	function ToDrawPosition(course, hole, zoom, x, y){
+		const cupBaseIndex	= (course * 18 + hole);
+		switch(zoom){
+			case 0:{	// x1 : PPPP PPPP pppp pppp
+				return [
+					x >> 8,
+					(y >> 8) - 8 + 1,			// char height(8), ball offset(1)?
+				];
+			}
+			case 1:{	// x2 : PPPP PPPP Pppp pppp
+				// NOTE : F1B8 : ADC #$11
+				const xOffset		= Zoom2xOffsetX[cupBaseIndex] << 8;
+				const yOffset		= (Zoom2xOffsetY[cupBaseIndex]) << 8;
+				return [
+					(x - xOffset) >> 7,
+					((y - yOffset) >> 7) + 17 + 1,		// draw offset(17), ball offset(1)?
+				];
+			}
+			case 2:{	// x4 : PPPP PPPP PPPp pppp
+				// NOTE : F2D3 : ADC #$2E
+				const xOffset	= CupBaseX[cupBaseIndex] << 8;
+				const yOffset	= CupBaseY[cupBaseIndex] << 8;
+				return [
+					((x - xOffset) >> 5) - 1,
+					((y - yOffset) >> 5) + 46 - 16 + 1,	// draw offset(46), character offset(16), ball offset(1)?
+				];
+			}
+		}
+	}
+
+	//--------------------------------------------------
+
+	function UpdateSimulationImage(){
+		let canvas	= document.getElementById('Simulated');
+		if(!canvas){
+			return;
+		}
+		let context	= canvas.getContext('2d');
+		if(!context){
+			return;
+		}
+
+		// get setting
+		const difficulty	= GetSetting_Difficulty();
+		const course		= GetSetting_Course();
+		const zoom		= GetSetting_Zoom();
+		const rand		= GetSetting_Rand();
+
+		// fill background
+		context.fillStyle = '#000';
+		context.fillRect(0, 0, canvas.width, canvas.height);
+
+		// draw map
+		for(let hole=0; hole<18; hole++){
+			let seed	= GetNextRand(rand, 18 - hole);	// 17 - hole + 1
+			DrawMap(difficulty, context, course, hole, zoom, seed);
+		}
+	}
+	function DrawMap(difficulty, context, course, hole, zoom, seed){
+		const x		= hole % 6;
+		const y		= Math.floor(hole / 6);
+		const baseX	= x * MapImageWidth;
+		const baseY	= y * MapHeight;
+		const holeStr	= ('00' + (hole + 1)).slice(-2);
+		const seedStr	= ('0000' + seed.toString(16).toUpperCase()).slice(-4);
+
+		// hole image
+		DrawRawImage(context, HoleImages[course][hole][zoom], baseX, baseY);
+		DrawString(context, baseX, baseY + MapImageHeight, `${holeStr}\x5B RNG=${seedStr} #${(seed & 3).toString()}`);
+		if(hole === 0){
+			const baseWind	= SimulateHoleBaseWind(seed);
+			const wind	= SimulateHoleWind(baseWind, difficulty, baseWind.seed);
+			const windStr	= ('00' + wind.volume).slice(-2);
+			DrawImageChip(context, FontImages, baseX, baseY, wind.direction * 16, 0, 16, 16);
+			DrawString(context, baseX + 16, baseY + 4, `${windStr}\x5D`);
+		}
+
+		// cup flag
+		const cupPosition	= GetCupPosition(course, hole, seed)
+		const flagPosition	= ToDrawPosition(course, hole, zoom, cupPosition[0], cupPosition[1]);
+		switch(zoom){
+			case 0:{	// x1
+				const x	= baseX + flagPosition[0];
+				const y	= baseY + flagPosition[1];
+				DrawImageChip(context, FontImages, x, y, 14*8, 6*8, 8, 8);
+				break;
+			}
+			case 1:{	// x2
+				const x	= baseX + flagPosition[0];
+				const y	= baseY + flagPosition[1];
+				DrawImageChip(context, FontImages, x, y, 14*8, 7*8, 8, 8);
+				break;
+			}
+			case 2:{	// x4
+				const x	= baseX + flagPosition[0];
+				const y	= baseY + flagPosition[1];
+				DrawImageChip(context, FontImages, x, y, 15*8, 5*8, 8, 8*3);
+				break;
+			}
+		}
+
+	}
+
+	//--------------------------------------------------
+	// Page
+	//--------------------------------------------------
+
+	const CourseDifficulty	= {
+		Amateur		: 0,
+		Single		: 1,
+		Professional	: 2,
+	};
+	const CourseDefine	= {
+		East		: 0,
+		West		: 1,
+	};
+	const ZoomDefine	= {
+		x1		: 0,
+		x2		: 1,
+		x4		: 2,
+	};
+
+	function Initialize(){
+		InitializeRandPool();
+		SetLesson(0);
+		UpdateForm(1);
+		LoadImages();
+	}
+
+	function GetSetting_Difficulty(){
+		let value	= CourseDifficulty[document.forms['Setting'].difficulty.value];
+		return value ?? 0;
+	}
+	function GetSetting_Course(){
+		let value	= CourseDefine[document.forms['Setting'].course.value];
+		return value ?? 0;
+	}
+	function GetSetting_Zoom(){
+		let value	= ZoomDefine[document.forms['Setting'].zoom.value];
+		return value ?? 0;
+	}
+	function GetSetting_Rand(){
+		let elem	= document.getElementById('randnumber');
+		if(!elem){
+			return 0;
+		}
+		return parseInt(elem.value);
+	}
+
+	let ignoreUpdate	= false;
+	function UpdateForm(kind){
+		if(ignoreUpdate){
+			return;
+		}
+		ignoreUpdate	= true;
+
+		let elemId;
+		let randType	= 0;
+		switch(kind){
+			case 1:
+				elemId	= 'randrange';
+				randType= 1;
+				break;
+			case 2:
+				elemId	= 'randnumber';
+				randType= 1;
+				break;
+			case 3:
+				elemId	= 'indexrange';
+				randType= 2;
+				break;
+			case 4:
+				elemId	= 'indexnumber';
+				randType= 2;
+				break;
+		}
+		let elem	= document.getElementById(elemId);
+		if(elem){
+			let seed, index;
+			if(randType == 1){
+				seed	= parseInt(elem.value);
+				index	= RandRandToIndex(seed);
+			}
+			else if(randType == 2){
+				index	= parseInt(elem.value);
+				seed	= RandIndexToRand(index);
+			}
+			if(randType !== 0){
+				const randhex	= ('0000' + (seed.toString(16).toUpperCase())).slice(-4);
+				document.getElementById('randrange').value	= seed;
+				document.getElementById('randnumber').value	= seed;
+				document.getElementById('randhex').textContent	= randhex;
+				document.getElementById('indexrange').value	= index;
+				document.getElementById('indexnumber').value	= index;
+			}
+		}
+
+		ignoreUpdate	= false;
+	}
+
+	//--------------------------------------------------
+	// Graphic
+	//--------------------------------------------------
+
+	let loadImageCount	= 0;
+	const imageCount	= (2 * 18 * 3) + 1;
+	const MapImageWidth	= 176;
+	const MapImageHeight	= 240;
+	const MapHeight		= MapImageHeight + 8;
+	const HoleImages	= [];
+	let FontImages;
+
+	function OnImageLoaded(){
+		loadImageCount++;
+		if(imageCount <= loadImageCount){
+			document.getElementById('LoadingMessage').remove();
+			document.getElementById('SimulationSetting').removeAttribute('disabled');
+			UpdateSimulationImage();
+		}
+	}
+
+	function LoadImage(path){
+		let img	= new Image();
+		img.addEventListener('load', OnImageLoaded, false);
+		img.src	= path;
+		return img;
+	}
+
+	function LoadMapImage(course, hole, zoom, zoomindex){
+		let path	= `Map/${(course + 1)}_${('00' + (hole + 1)).slice(-2)}H_x${zoom}.png`;
+		HoleImages[course][hole][zoomindex]	= LoadImage(path);
+	}
+
+	function LoadImages(){
+		for(let course=0; course<2; course++){
+			HoleImages[course]	= [];
+			for(let hole=0; hole<18; hole++){
+				HoleImages[course][hole]	= [];
+				LoadMapImage(course, hole, 1, 0);
+				LoadMapImage(course, hole, 2, 1);
+				LoadMapImage(course, hole, 4, 2);
+			}
+		}
+		FontImages	= LoadImage('Images/Font.png');
+	}
+
+	//--------------------------------------------------
+
+	function DrawRawImage(context, image, x, y){
+		context.drawImage(image, x, y);
+	}
+	function DrawImageChip(context, image, dx, dy, sx, sy, w, h){
+		context.drawImage(image, sx, sy, w, h, dx, dy, w, h);
+	}
+	function DrawTile(context, x, y, chip){
+		const sx	= (chip & 0x0F) * 8;
+		const sy	= (chip >> 1) & 0x78;
+		DrawImageChip(context, FontImages, x, y, sx, sy, 8, 8);
+	}
+	function DrawString(context, x, y, str){
+		for(let i=0; i<str.length; i++){
+			const chip	= str.charCodeAt(i);
+			DrawTile(context, x, y, chip);
+			x	+= 8;
+		}
+	}
+
+	//--------------------------------------------------
+	// IIZO 
+	//--------------------------------------------------
+
+	let ClickCounter	= 0;
+	function OzakiClick(){
+		ClickCounter++;
+		switch(ClickCounter){
+			case 1:
+				SetLesson(1);
+				break;
+			case 3:
+				SetLesson(2);
+				break;
+			case 10:
+				SetLesson(3);
+				break;
+			case 100:
+				SetLesson(4);
+				break;
+		}
+	}
+	function SetLesson(index){
+		const elem	= document.getElementById('LessonText');
+		if(!elem){
+			return;
+		}
+		elem.style.backgroundPositionY = (-64 * index) + 'px';
+	}
+
+-->
+  </script>
+ </head>
+ <body>
+  <header>
+   <h1>Ozaki Cup Simulator</h1>
+  </header>
+  <main>
+   <section>
+    <form id="Setting" autocomplete="off">
+     <fieldset id="SimulationSetting" disabled>
+      <legend>設定</legend>
+      <dl>
+       <dt>難易度</dt><dd
+       > <label><input type="radio" name="difficulty" value="Amateur"		onchange="UpdateSimulationImage();" checked	>Amateur</input></label
+       > <label><input type="radio" name="difficulty" value="Single"		onchange="UpdateSimulationImage();"		>Single</input></label
+       > <label><input type="radio" name="difficulty" value="Professional"	onchange="UpdateSimulationImage();"		>Professional</input></label
+       ></dd>
+       <dt>コース</dt><dd
+       > <label><input type="radio" name="course" value="East"	onchange="UpdateSimulationImage();" checked	>East</input></label
+       > <label><input type="radio" name="course" value="West"	onchange="UpdateSimulationImage();"		>West</input></label
+       ></dd>
+       <dt>拡大率</dt><dd
+       > <label><input type="radio" name="zoom" value="x1"	onchange="UpdateSimulationImage();" checked	>x1</input></label
+       > <label><input type="radio" name="zoom" value="x2"	onchange="UpdateSimulationImage();"		>x2</input></label
+       > <label><input type="radio" name="zoom" value="x4"	onchange="UpdateSimulationImage();"		>x4</input></label
+       ></dd>
+       <dt>初期乱数（値）</dt><dd
+       > <label><input type="range"  id="randrange"  n ame="randrange"   min="0" max="65535" value="65535" onchange="UpdateForm(1);UpdateSimulationImage();"
+       > <label><input type="number" id="randnumber"  name="randnumber"  min="0" max="65535" value="65535" onchange="UpdateForm(2);UpdateSimulationImage();"
+       > <span>[$<span id="randhex">0000</span>]
+       </dd>
+       <dt>初期乱数（位置）</dt><dd
+       > <label><input type="range"  id="indexrange"  name="indexrange"  min="-2" max="65533" value="0" onchange="UpdateForm(3);UpdateSimulationImage();"
+       > <label><input type="number" id="indexnumber" name="indexnumber" min="-2" max="65533" value="0" onchange="UpdateForm(4);UpdateSimulationImage();"
+       > <span class="note">（マイナスを指定すると短周期乱数になります）</span>
+       </dd>
+      </dl>
+     </fieldset>
+     <p id="LoadingMessage">画像読み込み中 <span class="note">（読み込みが完了しない場合はブラウザを変えてご利用ください）</span></p>
+    </form>
+   </section>
+
+   <section id="SimulationOutput">
+    <!-- width = 176 * 6, height = (240 + 8) * 3 -->
+    <canvas id="Simulated" width="1056" height="744" />
+   </section>
+  </main>
+
+  <footer>
+   <div id="Lesson">
+    <div class="Text" id="LessonText"></div>
+    <div class="Ozaki" onclick="OzakiClick();"></div>
+   </div>
+  </footer>
+  <script type="text/javascript">
+<!--
+	window.onload	= function(){
+		Initialize();
+	}
+-->
+  </script>
+ </body>
+</html>
