@@ -1,0 +1,708 @@
+﻿<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <title>6502 Trainer</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <script type="text/javascript">
+<!--
+	//--------------------------------------------------
+	// 6502 instruction data
+	//--------------------------------------------------
+
+	const addressing		= {
+		Imp	: 0,
+		Acc	: 1,
+		Imm	: 2,
+		Zpg	: 3,
+		ZpX	: 4,
+		ZpY	: 5,
+		Abs	: 6,
+		AbX	: 7,
+		AbY	: 8,
+		ZXI	: 9,
+		ZIY	: 10,
+		AbI	: 11,
+		Rel	: 12,
+	};
+	const a				= addressing;
+	const addressingName		= [
+		'Implied',
+		'Accumulator',
+		'Immediate',
+		'Zeropage',
+		'Zeropage Indexed X',
+		'Zeropage Indexed Y',
+		'Absolute',
+		'Absolute Indexed X',
+		'Absolute Indexed Y',
+		'Indexed X Indirect',
+		'Indirect Indexed Y',
+		'Absolute Indirect',
+		'Relative',
+	];
+	const addressingShortName	= [
+		'impl',
+		'A',
+		'#imm',
+		'zp',
+		'zp, X',
+		'zp, Y',
+		'abs',
+		'abs, X',
+		'abs, Y',
+		'(zp, X)',
+		'(zp), Y',
+		'(abs)',
+		'rel',
+	];
+	const instructionName		= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		'BRK','ORA','STP','SLO','NOP','ORA','ASL','SLO','PHP','ORA','ASL','ANC','NOP','ORA','ASL','SLO',	// 00
+		'BPL','ORA','STP','SLO','NOP','ORA','ASL','SLO','CLC','ORA','NOP','SLO','NOP','ORA','ASL','SLO',	// 10
+		'JSR','AND','STP','RLA','BIT','AND','ROL','RLA','PLP','AND','ROL','ANC','BIT','AND','ROL','RLA',	// 20
+		'BMI','AND','STP','RLA','NOP','AND','ROL','RLA','SEC','AND','NOP','RLA','NOP','AND','ROL','RLA',	// 30
+		'RTI','EOR','STP','SRE','NOP','EOR','LSR','SRE','PHA','EOR','LSR','ALR','JMP','EOR','LSR','SRE',	// 40
+		'BVC','EOR','STP','SRE','NOP','EOR','LSR','SRE','CLI','EOR','NOP','SRE','NOP','EOR','LSR','SRE',	// 50
+		'RTS','ADC','STP','RRA','NOP','ADC','ROR','RRA','PLA','ADC','ROR','ARR','JMP','ADC','ROR','RRA',	// 60
+		'BVS','ADC','STP','RRA','NOP','ADC','ROR','RRA','SEI','ADC','NOP','RRA','NOP','ADC','ROR','RRA',	// 70
+		'NOP','STA','NOP','SAX','STY','STA','STX','SAX','DEY','NOP','TXA','XAA','STY','STA','STX','SAX',	// 80
+		'BCC','STA','STP','AHX','STY','STA','STX','SAX','TYA','STA','TXS','TAS','SHY','STA','SHX','AHX',	// 90
+		'LDY','LDA','LDX','LAX','LDY','LDA','LDX','LAX','TAY','LDA','TAX','LAX','LDY','LDA','LDX','LAX',	// A0
+		'BCS','LDA','STP','LAX','LDY','LDA','LDX','LAX','CLV','LDA','TSX','LAS','LDY','LDA','LDX','LAX',	// B0
+		'CPY','CMP','NOP','DCP','CPY','CMP','DEC','DCP','INY','CMP','DEX','AXS','CPY','CMP','DEC','DCP',	// C0
+		'BNE','CMP','STP','DCP','NOP','CMP','DEC','DCP','CLD','CMP','NOP','DCP','NOP','CMP','DEC','DCP',	// D0
+		'CPX','SBC','NOP','ISC','CPX','SBC','INC','ISC','INX','SBC','NOP','SBC','CPX','SBC','INC','ISC',	// E0
+		'BEQ','SBC','STP','ISC','NOP','SBC','INC','ISC','SED','SBC','NOP','ISC','NOP','SBC','INC','ISC',	// F0
+	];
+	const instructionAddressing	= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		a.Imp,a.ZXI,a.Imp,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Acc,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// 00
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// 10
+		a.Abs,a.ZXI,a.Imp,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Acc,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// 20
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// 30
+		a.Imp,a.ZXI,a.Imp,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Acc,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// 40
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// 50
+		a.Imp,a.ZXI,a.Imp,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Acc,a.Imm,a.AbI,a.Abs,a.Abs,a.Abs,	// 60
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// 70
+		a.Imm,a.ZXI,a.Imm,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Imp,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// 80
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpY,a.ZpY,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbY,a.AbY,	// 90
+		a.Imm,a.ZXI,a.Imm,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Imp,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// A0
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpY,a.ZpY,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbY,a.AbY,	// B0
+		a.Imm,a.ZXI,a.Imm,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Imp,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// C0
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// D0
+		a.Imm,a.ZXI,a.Imm,a.ZXI,a.Zpg,a.Zpg,a.Zpg,a.Zpg,a.Imp,a.Imm,a.Imp,a.Imm,a.Abs,a.Abs,a.Abs,a.Abs,	// E0
+		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// F0
+	];
+	const instructionCycle		= [
+	//	0 1 2 3 4 5 6 7 8 9 A B C D E F
+		7,6,0,8,3,3,5,5,3,2,2,2,4,4,6,6,	// 00
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 10
+		6,6,0,8,3,3,5,5,4,2,2,2,4,4,6,6,	// 20
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 30
+		6,6,0,8,3,3,5,5,3,2,2,2,3,4,6,6,	// 40
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 50
+		6,6,0,8,3,3,5,5,4,2,2,2,5,4,6,6,	// 60
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 70
+		2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,	// 80
+		2,6,0,6,4,4,4,4,2,5,2,5,5,5,5,5,	// 90
+		2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,	// A0
+		2,5,0,5,4,4,4,4,2,4,2,4,4,4,4,4,	// B0
+		2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,	// C0
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// D0
+		2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,	// E0
+		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// F0
+	];
+	const instructionUnofficial	= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		false,false,true, true, true, false,false,true, false,false,false,true, true, false,false,true,	// 00
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 10
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// 20
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 30
+		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,	// 40
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 50
+		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,	// 60
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 70
+		true, false,true, true, false,false,false,true, false,true, false,true, false,false,false,true,	// 80
+		false,false,true, true, false,false,false,true, false,false,false,true, true, false,true, true,	// 90
+		false,false,false,true, false,false,false,true, false,false,false,true, false,false,false,true,	// A0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// B0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// C0
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// D0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// E0
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// F0
+	];
+
+	const hexCharacter	= [
+		'0','1','2','3','4','5','6','7',
+		'8','9','A','B','C','D','E','F',
+	];
+
+	//--------------------------------------------------
+	// 6502 Trainer used data
+	//--------------------------------------------------
+
+	const trainingMode		= {
+		OpToHex		: 0,
+		HexToOp		: 1,
+		OpToCycle	: 2,
+		HexToCycle	: 3,
+	};
+	const trainingModeName		= [
+		'OpToHex',
+		'HexToOp',
+		'OpToCycle',
+		'HexToCycle',
+	];
+
+	//--------------------------------------------------
+	// Utility
+	//--------------------------------------------------
+
+	function SortArray(a){
+		a.sort(function(a, b){
+			if(a < b){
+				return -1;
+			}
+			else if(a > b){
+				return 1;
+			}
+			else{
+				return 0;
+			}
+		});
+	}
+
+	function ToUniqueItemArray(a){
+		return a.filter(function(x, i, self){
+			return self.indexOf(x) === i;
+		});
+	}
+
+	function GetIntegerRandom(min, max){
+		if(max < min){
+			const tmp	= min;
+			min		= max;
+			max		= min;
+		}
+		const range	= max - min;
+		return min + Math.floor(Math.random() * range);
+	}
+
+	function ToHexString(value, digit){
+		let hex	= value.toString(16).toUpperCase();
+		if(digit){
+			digit	= digit - hex.length;
+			if(digit > 0){
+				hex	= '0'.repeat(digit) + hex;
+			}
+		}
+		return hex;
+	}
+
+	//--------------------------------------------------
+	// DOM Utility
+	//--------------------------------------------------
+
+	function DeleteAllChildren(element){
+		if(!element || !element.lastChild){
+			return;
+		}
+		try{
+			while(element.lastChild){
+				element.removeChild(element.lastChild);
+			}
+		}
+		catch(e){
+		}
+	}
+
+	function AddComboboxItem(combobox, text, value, maxSize){
+		let item	= document.createElement('option');
+		item.textContent= text;
+		item.value	= value;
+		combobox.appendChild(item);
+		if(maxSize && (combobox.size < maxSize)){
+			combobox.size++;
+		}
+	}
+
+	//--------------------------------------------------
+	// Processing code
+	//--------------------------------------------------
+
+	let useOpCode;
+	let allOpCode;
+	let modeSetting;
+
+	let nowQuestion;
+	let questionCount;
+	let correctCount;
+
+	function Initialize(){
+		// Clear value
+		nowQuestion	= null;
+		questionCount	= 0;
+		correctCount	= 0;
+
+		// Get mode
+		modeSetting	= GetModeSetting();
+
+		// Answer visibility
+		const elemHideModeSelect	= [
+			document.getElementById('Question'),
+			document.getElementById('Answer'),
+			document.getElementById('Correct'),
+			document.getElementById('Statistics'),
+		];
+
+		const hideModeSelectStyle	= (modeSetting)? 'block' : 'none';
+		elemHideModeSelect.filter(function(elem){
+			elem.style.display		= hideModeSelectStyle;
+		});
+
+		// check Mode
+		if(!modeSetting){
+			return;
+		}
+
+		// Create questions candidate
+		allOpCode	= [];
+		useOpCode	= [];
+		instructionName.map(function(instName, index){
+			const addr	= instructionAddressing[index];
+			const addrName	= addressingName[instructionAddressing[index]];
+			const addrShort	= addressingShortName[instructionAddressing[index]];
+			const op	= {
+				OpCode			: index,
+				OpCodeString		: ToHexString(index, 2),
+				InstructionName		: instName,
+				Addressing		: addr,
+				AddressingName		: addrName,
+				AddressingShortName	: addrShort,
+				ShortFormatted		: (addr !== addressing.Imp)? instName + ' ' + addrShort : instName,
+				Cycle			: instructionCycle[index],
+			};
+
+			allOpCode.push(op);
+			if(modeSetting.Unofficial || !instructionUnofficial[index]){
+				useOpCode.push(op);
+			}
+		});
+
+		// Create answers form
+		// OpCode
+		{
+			const elemAnswerOpInst	= document.getElementById('AnswerOpCode_OpCode');
+			const elemAnswerOpAddr	= document.getElementById('AnswerOpCode_Addressing');
+
+			DeleteAllChildren(elemAnswerOpInst);
+			DeleteAllChildren(elemAnswerOpAddr);
+			elemAnswerOpInst.size	= 0;
+			elemAnswerOpAddr.size	= 0;
+
+			let instList	= [];
+			useOpCode.map(function(op){
+				instList.push(op.InstructionName);
+			});
+			instList	= ToUniqueItemArray(instList);
+			SortArray(instList);
+			instList.filter(function(inst){
+				AddComboboxItem(elemAnswerOpInst, inst, inst, addressingName.length);
+			});
+
+			addressingName.filter(function(addr, index){
+				AddComboboxItem(elemAnswerOpAddr, addr, index, addressingName.length);
+			});
+		}
+
+		// Binary
+		{
+			const elemAnswerBinHigh	= document.getElementById('AnswerBinary_High');
+			const elemAnswerBinLow	= document.getElementById('AnswerBinary_Low');
+
+			DeleteAllChildren(elemAnswerBinHigh);
+			DeleteAllChildren(elemAnswerBinLow);
+			elemAnswerBinHigh.size	= 0;
+			elemAnswerBinLow.size	= 0;
+
+			hexCharacter.filter(function(ch, index){
+				AddComboboxItem(elemAnswerBinHigh, ch, index, 16);
+				AddComboboxItem(elemAnswerBinLow, ch, index, 16);
+			});
+		}
+
+		// Cycle
+		{
+			const elemAnswerCycle	= document.getElementById('AnswerCycle_Cycle');
+
+			DeleteAllChildren(elemAnswerCycle);
+
+			elemAnswerCycle.size	= 0;
+
+			let cycleList	= [];
+			useOpCode.map(function(op){
+				cycleList.push(op.Cycle);
+			});
+			cycleList	= ToUniqueItemArray(cycleList);
+			SortArray(cycleList);
+
+			cycleList.filter(function(cycle){
+				AddComboboxItem(elemAnswerCycle, cycle, cycle, 16);
+			});
+		}
+
+		// Hide unused answer forms
+		const formAnswerOpCode	= document.getElementById('AnswerOpCode');
+		const formAnswerBinary	= document.getElementById('AnswerBinary');
+		const formAnswerCycle	= document.getElementById('AnswerCycle');
+		formAnswerOpCode.style.display	= 'none';
+		formAnswerBinary.style.display	= 'none';
+		formAnswerCycle.style.display	= 'none';
+
+		switch(modeSetting.Mode){
+			case trainingMode.OpToHex:
+				formAnswerBinary.style.display	= 'block';
+				break;
+			case trainingMode.HexToOp:
+				formAnswerOpCode.style.display	= 'block';
+				break;
+			case trainingMode.OpToCycle:
+			case trainingMode.HexToCycle:
+				formAnswerCycle.style.display	= 'block';
+				break;
+		}
+
+		Question();
+	}
+
+	function Question(){
+		if(Number.isInteger(nowQuestion)){
+			const elemCorrectUser		= document.getElementById('CorrectText_User');
+			const elemCorrectCorrect	= document.getElementById('CorrectText_Correct');
+			switch(modeSetting.Mode){
+				case trainingMode.OpToHex:{
+					const userAnswer		= GetAnswerBinary();
+					const correctAnswer		= useOpCode[nowQuestion];
+
+					if((userAnswer < 0) || (0x100 <= userAnswer)){
+						QuestionIncorrect();
+						break;
+					}
+
+					let correctAnswersString	= null;
+					let isCorrect			= false;
+					useOpCode.filter(function(op){
+						if((op.InstructionName === correctAnswer.InstructionName) && (op.Addressing === correctAnswer.Addressing)){
+							if(correctAnswersString){
+								correctAnswersString	= correctAnswersString + ', ' + op.OpCodeString;
+							}
+							else{
+								correctAnswersString	= op.OpCodeString;
+							}
+
+							if(op.OpCode === userAnswer){
+								isCorrect	= true;
+							}
+						}
+					});
+
+					elemCorrectUser.textContent	= ToHexString(userAnswer, 2) + ' (' + allOpCode[userAnswer].ShortFormatted + ')';
+					elemCorrectCorrect.textContent	= correctAnswersString;
+
+					QuestionCorrect(isCorrect);
+
+					break;
+				}
+				case trainingMode.HexToOp:{
+					const userAnswer		= GetAnswerOpCode();
+					const correctAnswer		= useOpCode[nowQuestion];
+					if(!userAnswer){
+						QuestionIncorrect();
+						break;
+					}
+
+					let userAnswersString	= null;
+					useOpCode.filter(function(op){
+						if((op.InstructionName === userAnswer.InstructionName) && (op.Addressing === userAnswer.Addressing)){
+							if(userAnswersString){
+								userAnswersString	= userAnswersString + ', ' + op.OpCodeString;
+							}
+							else{
+								userAnswersString	= op.OpCodeString;
+							}
+						}
+					});
+
+					elemCorrectUser.textContent	= userAnswer.ShortFormatted + ' (' + userAnswersString + ')';
+					elemCorrectCorrect.textContent	= correctAnswer.ShortFormatted;
+
+					QuestionCorrect(userAnswer.ShortFormatted === correctAnswer.ShortFormatted);
+
+					break;
+				}
+				case trainingMode.OpToCycle:
+				case trainingMode.HexToCycle:{
+					const userAnswer		= GetAnswerCycle();
+					const correctAnswer		= useOpCode[nowQuestion].Cycle;
+
+					elemCorrectUser.textContent	= userAnswer;
+					elemCorrectCorrect.textContent	= correctAnswer;
+
+					QuestionCorrect(userAnswer === correctAnswer);
+
+					break;
+				}
+			}
+		}
+
+		// Generate next question
+		let qIndex;
+		do{
+			qIndex	= GetIntegerRandom(0, useOpCode.length);
+		}while(qIndex === nowQuestion);
+		nowQuestion	= qIndex;
+
+		// Display question
+		const elemQuestion	= document.getElementById('QuestionText');
+		const qOp		= useOpCode[nowQuestion];
+		let qMessage;
+		switch(modeSetting.Mode){
+			case trainingMode.OpToHex:
+			case trainingMode.OpToCycle:
+				qMessage	= qOp.ShortFormatted;
+				break;
+			case trainingMode.HexToOp:
+			case trainingMode.HexToCycle:
+				qMessage	= qOp.OpCodeString;
+				break;
+		}
+		elemQuestion.textContent	= qMessage;
+	}
+
+	function ConfirmQuestion(){
+		Question();
+	}
+
+	function GetModeSetting(){
+		const modeString	= document.forms['ModeSelectForm'].mode.value;
+		const modeUnofficial	= document.forms['ModeSelectForm'].unofficial.checked;
+		let mode		= null;
+
+		trainingModeName.filter(function(name, index){
+			if(modeString === name){
+				mode	= {
+					Mode		: index,
+					Unofficial	: modeUnofficial,
+				};
+			}
+		});
+
+		return mode;
+	}
+
+	function GetAnswerOpCode(){
+		let inst	= document.forms['AnswerForm'].AnswerOpCode_OpCode.value.toUpperCase();
+		let addr	= parseInt(document.forms['AnswerForm'].AnswerOpCode_Addressing.value);
+		if(isNaN(addr)){
+			return null;
+		}
+		const addrName	= addressingName[addr];
+		const addrShort	= addressingShortName[addr];
+		return {
+			InstructionName		: inst,
+			Addressing		: addr,
+			AddressingName		: addrName,
+			AddressingShortName	: addrShort,
+			ShortFormatted		: (addr !== addressing.Imp)? inst + ' ' + addrShort : inst,
+		};
+	}
+	function GetAnswerBinary(){
+		let high	= parseInt(document.forms['AnswerForm'].AnswerBinary_High.value, 10);
+		let low		= parseInt(document.forms['AnswerForm'].AnswerBinary_Low.value, 10);
+		if(isNaN(high) || isNaN(low)){
+			return -1;
+		}
+		else{
+			return high * 16 + low;
+		}
+	}
+	function GetAnswerCycle(){
+		let cycle	= parseInt(document.forms['AnswerForm'].AnswerCycle_Cycle.value, 10);
+		if(isNaN(cycle)){
+			return -1;
+		}
+		else{
+			return cycle;
+		}
+	}
+
+	function QuestionCorrect(correct){
+		questionCount++;
+		if(correct){
+			correctCount++;
+		}
+
+		const elemQuestion	= document.getElementById('StatisticsText_Question');
+		const elemCorrect	= document.getElementById('StatisticsText_Correct');
+		const elemIncorrect	= document.getElementById('StatisticsText_Incorrect');
+		elemQuestion.textContent	= questionCount;
+		elemCorrect.textContent		= correctCount;
+		elemIncorrect.textContent	= questionCount - correctCount;
+
+		const elemCorrectBg	= document.getElementById('Statistics_Correct');
+		const elemIncorrectBg	= document.getElementById('Statistics_Incorrect');
+		if(correct){
+			elemCorrectBg.classList.add('AnswerCorrect');
+			elemIncorrectBg.classList.remove('AnswerIncorrect');
+		}
+		else{
+			elemCorrectBg.classList.remove('AnswerCorrect');
+			elemIncorrectBg.classList.add('AnswerIncorrect');
+		}
+	}
+
+-->
+  </script>
+  <style type="text/css">
+<!--
+
+	p{
+		margin		: 2px 4px;
+	}
+	dl{
+		margin		: 2px 4px;
+	}
+	dt{
+		float		: left;
+		clear		: left;
+		width		: 128px;
+	}
+	dd:before{
+		content		: ": ";
+	}
+
+	.Code{
+		font-family	: "Consolas", "Courier New", "monospace";
+		text-align	: center;
+	}
+
+	.AnswerInput{
+		text-align	: center;
+	}
+	.AnswerInput select{
+		font-size	: 100%;
+	}
+	#AnswerForm select option{
+		padding		: 0px 32px;
+	}
+
+	#QuestionText{
+		font-size	: 200%;
+	}
+
+	#Confirm{
+		width		: 100%;
+		font-size	: 200%;
+	}
+	#ApplyMode{
+		float		: right;
+	}
+	input[type="button"]{
+	}
+
+	.AnswerCorrect{
+		background-color: rgba(0, 255, 0, 0.125);
+	}
+	.AnswerIncorrect{
+		background-color: rgba(255, 0, 0, 0.125);
+	}
+
+-->
+  </style>
+ </head>
+ <body>
+  <noscript>
+   <p>Javascript is disable.</p>
+  </noscript>
+
+  <main>
+   <section id="Question">
+    <fieldset>
+     <legend>Question</legend>
+     <p id="QuestionText" class="Code"></p>
+    </fieldset>
+   </section>
+
+   <section id="Correct">
+    <fieldset>
+     <legend>Correct</legend>
+     <dl>
+      <dt>Your answer		</dt><dd id="CorrectText_User"		></dd>
+      <dt>Correct answer	</dt><dd id="CorrectText_Correct"	></dd>
+     </dl>
+    </fieldset>
+   </section>
+
+   <section id="Answer">
+    <form id="AnswerForm" autocomplete="off">
+     <fieldset>
+      <legend>Answer</legend>
+      <fieldset id="AnswerOpCode">
+       <legend>OpCode</legend>
+       <p class="AnswerInput">
+        <select id="AnswerOpCode_OpCode"></select>
+        <select id="AnswerOpCode_Addressing"></select>
+       </p>
+      </fieldset>
+      <fieldset id="AnswerBinary">
+       <legend>Binary</legend>
+       <p class="AnswerInput">
+        <select id="AnswerBinary_High"></select>
+        <select id="AnswerBinary_Low"></select>
+       </p>
+      </fieldset>
+      <fieldset id="AnswerCycle">
+       <legend>Cycle</legend>
+       <p class="AnswerInput">
+        <select id="AnswerCycle_Cycle"></select>
+       </p>
+      </fieldset>
+      <input id="Confirm" type="button" value="Answer" onclick="ConfirmQuestion();"></input>
+     </fieldset>
+    </form>
+   </section>
+
+   <section id="Statistics">
+    <fieldset>
+     <legend>Statistics</legend>
+     <dl>
+      <div id="Statistics_Question"	><dt>Question		</dt><dd id="StatisticsText_Question"	></dd></div>
+      <div id="Statistics_Correct"	><dt>Correct		</dt><dd id="StatisticsText_Correct"	></dd></div>
+      <div id="Statistics_Incorrect"	><dt>Incorrect		</dt><dd id="StatisticsText_Incorrect"	></dd></div>
+     </dl>
+    </fieldset>
+   </section>
+
+   <section>
+    <form id="ModeSelectForm" autocomplete="off">
+     <fieldset>
+      <legend>Mode select</legend>
+      <label  ><input type="radio" name="mode" value="OpToHex" checked	>OpCode -&gt; Hex</input></label
+      > <label><input type="radio" name="mode" value="HexToOp"		>Hex -&gt; OpCode</input></label
+      > <label><input type="radio" name="mode" value="OpToCycle"	>OpCode -&gt; Cycle</input></label
+      > <label><input type="radio" name="mode" value="HexToCycle"	>Hex -&gt; Cycle</input></label
+      > / <label><input type="checkbox" name="unofficial"				>Unofficial instruction</input></label
+      > <input id="ApplyMode" type="button" value="Apply" onclick="Initialize();"></input>
+     </fieldset>
+    </form>
+   </section>
+
+  </main>
+  <script type="text/javascript">
+<!--
+	Initialize();
+-->
+  </script>
+ </body>
+</html>
