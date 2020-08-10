@@ -1,0 +1,117 @@
+@charset "UTF-8";
+
+body{
+	margin			: 0px;
+	padding			: 0px;
+}
+
+h1, h2{
+	font-weight		: normal;
+}
+
+h1{
+	margin			: 0px;
+	padding			: 4px 8px;
+	color			: #002C3C;
+	border-bottom		: 1px solid #00AEEF;
+	background-color	: RGBA(0, 174, 239, 0.25);
+}
+h2{
+	padding-left		: 8px;
+	border-bottom		: 1px solid #00AEEF;
+}
+h3{
+	padding-left		: 16px;
+	border-bottom		: 1px solid RGBA(0, 174, 239, 0.50);
+}
+h4{
+	padding-left		: 24px;
+}
+h5{
+	padding-left		: 28px;
+}
+h6{
+	padding-left		: 32px;
+}
+
+footer{
+	display			: block;
+	margin			: 64px 0px 0px 0px;
+	padding			: 8px;
+	border-top		: 1px solid RGBA(0, 0, 0, 0.25);
+	background-color	: RGBA(0, 0, 0, 0.125);
+}
+
+footer .author{
+	text-align		: center;
+}
+
+
+p{
+	margin-left		: 32px;
+	line-height		: 1.5em;
+}
+.large{
+	font-size		: 120%;
+}
+.small{
+	font-size		: 80%;
+}
+
+img{
+	display			: block;
+	margin			: 8px auto;
+}
+
+pre{
+	margin			: 8px 32px;
+	padding			: 2px 4px;
+	border			: 1px solid RGBA(0, 0, 0, 0.25);
+}
+
+code .keyword{
+	color			: #0000ff;
+}
+code .string, code .quote{
+	color			: #800000;
+}
+code .comment{
+	color			: #008000;
+}
+
+code, kbd{
+	font-family		: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+table{
+	display			: block;
+	margin			: 12px 32px;
+
+	border-collapse		: collapse;
+}
+th{
+	border			: solid 1px RGBA(0, 0, 0, 0.125);
+	background-color	: RGBA(0, 0, 0, 0.1);
+}
+tr:hover{
+	background-color	: RGBA(0, 174, 239, 0.1);
+}
+td{
+	border			: solid 1px #cccccc;
+}
+td, th{
+	padding			: 2px 8px;
+}
+td.center{
+	text-align		: center;
+}
+dl{
+	margin-left		: 16px;
+}
+dt{
+	float			: left;
+	clear			: left;
+	width			: 128px;
+}
+
+

@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>ワンポイントレッスン</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <style type="text/css">
+<!--
+
+	body{
+		margin			: 0px;
+		padding			: 0px;
+		color			: #002A88;
+		background-color	: #64B0FF;
+	}
+	h1{
+		margin			: 8px;
+		padding			: 2px;
+	}
+	h2{
+		margin			: 8px 8px;
+		padding			: 2px;
+		border-bottom		: solid 1px #388700;
+	}
+	h3{
+		margin			: 8px 16px;
+		padding			: 2px;
+	}
+	h4{
+		margin			: 8px 24px;
+		padding			: 2px;
+	}
+	main{
+		margin			: 8px;
+		padding			: 2px;
+		color			: #388700;
+		background-color	: #BDF4AB;
+	}
+	section{
+	}
+
+	p{
+		margin			: 8px 32px;
+	}
+	.center{
+		text-align		: center;
+	}
+	.note{
+		font-size		: 80%;
+	}
+	.warning{
+		font-weight		: bold;
+	}
+
+	dl{
+		margin			: 2px 4px;
+	}
+	dt{
+		float			: left;
+		clear			: left;
+		width			: 128px;
+	}
+	dt, dd{
+		vertical-align		: middle;
+	}
+	dd:before{
+		content			: ": ";
+	}
+
+	img{
+		display			: block;
+		margin			: 8px auto;
+	}
+
+	footer{
+	}
+	#Lesson{
+		display			: block;
+		position		: fixed;
+		margin			: 0px;
+		padding			: 0px;
+		right			: 0px;
+		bottom			: 0px;
+		width			: 232px;
+		height			: 64px;
+	}
+	#Lesson div{
+		margin			: 0px;
+		padding			: 0px;
+		height			: 64px;
+	}
+	#Lesson .Text{
+		width			: 168px;
+		background-image	: url(Images/Lesson.png);
+		float			: left;
+		overflow		: hidden;
+		background-repeat	: no-repeat;
+		background-position	: 0px -128px;
+	}
+	#Lesson .Ozaki{
+		margin-left		: auto;
+		width			: 64px;
+		background-image	: url(Images/Ozaki.png);
+	}
+
+-->
+  </style>
+  <script type="text/javascript">
+<!--
+	//--------------------------------------------------
+	// IIZO 
+	//--------------------------------------------------
+
+	let ClickCounter	= 0;
+	function OzakiClick(){
+		ClickCounter++;
+		switch(ClickCounter){
+			case 1:
+				SetLesson(1);
+				break;
+			case 3:
+				SetLesson(2);
+				break;
+			case 10:
+				SetLesson(3);
+				break;
+			case 100:
+				SetLesson(4);
+				break;
+		}
+	}
+	function SetLesson(index){
+		const elem	= document.getElementById('LessonText');
+		if(!elem){
+			return;
+		}
+		elem.style.backgroundPositionY = (-64 * index) + 'px';
+	}
+-->
+  </script>
+ </head>
+ <body>
+  <header>
+   <h1>ワンポイントレッスン</h1>
+  </header>
+  <main>
+
+   <section>
+    <h2>乱数</h2>
+    <article>
+     <h3>乱数の初期値について</h3>
+     <p>
+      このゲームはところどころFCプログラムとして行儀の悪いところがあり、メモリの初期化をしていない領域を使用していることがあります。<br>
+      乱数もその一つであり、乱数の初期値は本体のメモリ初期値に依存しています。
+     </p>
+    </article>
+    <article>
+     <h3>FC本体のメモリ初期値</h3>
+     <p>
+      ハードウェア依存なので実際に調べるのが手っ取り早いと思います。<br>
+      所持している赤白ファミコン（HVC-CPU-GPM-02, MOTOROLA MCM2018AN35）の初期値は全領域 0xFF(255) でした。<br>
+      <span class="note">ほかに所持している本体は後日調査します。ニューファミコンや互換機は所持していないので他の方に…。</span><br>
+      <a href="https://github.com/absindx/NES-RamEdit">Ram edit</a>を使うとメモリ初期値の確認と、後述のメモリ操作が任意にできます。（宣伝）
+     </p>
+     <p>
+      現在確認しているメモリIC
+      <ul>
+       <li>TOSHIBA TMM2115AP-15</li>
+       <li>FUJITSU MB8416A-15-SK</li>
+       <li>MOTOROLA MCM2018AN35 : 初期値 0xFF</li>
+       <li>NEC D4016CX-20</li>
+       <li>SHARP LH5216ED</li>
+       <li>HITACHI HM6116LFP-4（SOP）</li>
+       <li>ROHM BR6216B-10LL</li>
+       <li>GoldStar GM76C28K-10</li>
+      </ul>
+     </p>
+     <p>
+      電源再投入時に既定の値（0xFFとか）に初期化されるものと、以前の値が残るものがあります。 <br>
+      後者の値が残るものの場合、時間経過によってメモリセルの電荷が減衰していき、特定の値に落ち着きます。<br>
+      減衰中はどこのビットが変化するかわからないため、実質ランダムな状態になります。<br>
+      温度等によって回路の電気抵抗も変化するため、減衰時間は都度変動します。
+     </p>
+    </article>
+    <article>
+     <h3>乱数初期値の固定化</h3>
+     <p>
+      電源投入直後のメモリが固定値である本体は、状況再現が可能となります。<br>
+      テニスをプレイ中にカセットを引っこ抜き、スーパーマリオブラザーズに入れ替えると任意のワールドをプレイできるというバグ技があります。<br>
+      これを応用して、別カセット（メモリの内容が把握できていれば何でも構いません）によりメモリを初期化してもらうことで乱数初期値を固定化することができます。
+     </p>
+     <p>
+      電源を入れたままカセットを引っこ抜くのは<b>本体やカセットにダメージを与える</b>可能性があるのでご注意ください。（トーテム尾崎もですが）<br>
+      リセットボタンを押している間はCPUへのクロック供給が止まるので、少し優しいかもしれません。
+     </p>
+     <h4>仲介起動系</h4>
+     <p>
+      GAME GENIEやEver Driveなど独自のメニューを挟んでからゲームに移行する場合、それらがメモリを初期化してくれるかもしれません。（未所持のため不明）
+     </p>
+     <h4>ソフトウェアエミュレーション系</h4>
+     <p>
+      レトロフリークなど、内部がエミュレータのもの。<br>
+      大抵メモリ初期値は固定なので何もしなくても固定化済み。（未所持のため不明）
+     </p>
+    </article>
+    <article>
+     <h3>乱数処理</h3>
+     <p>
+      <a href="https://ja.wikipedia.org/wiki/%E7%B7%9A%E5%BD%A2%E5%B8%B0%E9%82%84%E3%82%B7%E3%83%95%E3%83%88%E3%83%AC%E3%82%B8%E3%82%B9%E3%82%BF">線形帰還シフトレジスタ</a>ベースのアルゴリズムです。<br>
+      周期は65534 = 2^16-2 なので<a href="https://ja.wikipedia.org/wiki/M%E7%B3%BB%E5%88%97">M系列</a>ではないです。<br>
+      メインメモリの$32が出力値、$33が乱数生成用ワークになっています。<br>
+      詳しい処理内容については<a href="https://github.com/absindx/ZpIndIndY/resources/Ozaki/Disasm/OzakiRand.asm">逆アセンブル</a>と<a href="https://github.com/absindx/ZpIndIndY/resources/Ozaki/Sources/OzakiRand.cpp">C言語書き下し</a>をご参照ください。
+     </p>
+     <img src="Images/Rand.png" alt="乱数生成1ステップ">
+     <p>
+      1回生成のたびにこの処理を11回繰り返して、下位バイトである$32を使用します。
+     </p>
+     <p>
+      乱数初期値が`$5555`か`$AAAA`だった場合、この2種類だけを交互に繰り返すようになります。<br>
+      南西または東の風で、風速は1mか4mの4パターンのどれかになります。<br>
+      乱数はほとんど無視できるようになりますが、あまり良い状態にはならないようです。
+     </p>
+    </article>
+    <article>
+     <h3>乱数消費</h3>
+     <p>
+      <ul>
+       <li>タイトル画面の難易度選択時 +21
+        <ul>
+         <li>カップ位置 18ホール +18</li>
+         <li>ホール開始 +3</li>
+        </ul>
+       </li>
+       <li>ホール開始時 +3
+        <ul>
+         <li>基準風向 +1</li>
+         <li>基準風量 +1</li>
+         <li>風量変更 +1</li>
+        </ul>
+       </li>
+       <li>ショット時 +1
+        <ul>
+         <li>風量変更 +1</li>
+        </ul>
+       </li>
+       <li>ラフからのショット時 +1</li>
+       <li>ウォーターハザード時 +1</li>
+       <li>尾崎先生 +たくさん
+        <ul>
+         <li>5フレーム毎（まばたき） +1</li>
+         <li>5フレーム毎1文字表示（口パク） +1</li>
+        </ul>
+       </li>
+      </ul>
+     </p>
+    </article>
+    <article>
+     <h3>カップ位置</h3>
+     <p>
+      難易度選択後に18ホール分、18ホール目から逆順に生成しています。<br>
+      起動後（乱数初期値固定）最初に使用される乱数であり、プレイの影響は受けないためカップ位置の固定ができています。
+     </p>
+     <p>
+      位置の決定には乱数の下位2bitを利用しており、4パターンの中から選ぶことになります。
+     </p>
+     <p>
+      <a href="CupSimulator.html">シミュレータ</a>もご利用ください。
+     </p>
+    </article>
+    <article>
+     <h3>風</h3>
+     <p>
+      ホール開始時に基準風向と風量が決定されます。<br>
+      風向は乱数生成して上位3bit、$00 = 北, $20 = 北東, ... と時計回りに決まります。<br>
+      風量は再度乱数生成して下位4bitを利用し、11以上の場合は8を引きます。（<code>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 3, 4, 5, 6, 7]</code>）  
+     </p>
+     <p>
+      ショット毎に乱数生成して下位3bitを以下のリストで変換し、基準風量に加算します。<span class="note">（本当は計算してるけど式にするのがだるい）  </span>
+      <code>[0, 0, -1, 0, 0, 1, 1, 2]</code>
+     </p>
+     <p>
+      風量がマイナスになった場合（基準風量=0, 乱数風量=-1 : 1/128の確率）、風向を反転して、風量1mとします。プラスの場合は各難易度の最大風量を下回るまで5を引き続けます。
+      <ul>
+       <li>Amateur = 6</li>
+       <li>Single = 10</li>
+       <li>Professional = 13</li>
+      </ul>
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>トーテム尾崎</h2>
+     <p class="center" style="margin:16px; font-weight:bold;">いいぞ。</p>
+    <article>
+     <h3>カセットのピンアサイン</h3>
+     <p>
+      <a href="http://bootgod.dyndns.org:7777/profile.php?id=3942">カセット内の基板</a>の部品がいろいろ乗っているPCB Frontが、実際は後ろを向いてファミコンに刺さっています。
+      カセット左側がプログラム、右側が画像データにアクセスできるように<a href="https://wiki.nesdev.com/w/index.php/Cartridge_connector">ピンアサイン</a>されています。
+     </p>
+    </article>
+    <article>
+     <h3>ネームテーブル</h3>
+     <p>
+      ファミコンの映像用メモリ（VRAM）はコストダウンのため2KBしか搭載されていませんが、実際には倍の4KBを認識できるようになっています。<br>
+      そのため、不足しているアドレス用信号ピンを他の信号ピンで代用しています。
+      すると、画面の半分は同じ画像になり、これを<a href="https://wiki.nesdev.com/w/index.php/Mirroring#Nametable_Mirroring">ミラーリング</a>と呼んでいます。
+     </p>
+     <p>
+      この不足しているピン <code>CIRAM A10</code> はカセットによって制御が様々で、基板のはんだパッドによって選択していたり（NROM）、マッパーによって制御されており場面に応じて切り替えて可能なものもあります。<br>
+      尾崎には<a href="https://wiki.nesdev.com/w/index.php/MMC1">MMC1</a>というマッパーが乗っており、マッパーを制御することでミラーリング方向を切り替えられるようになっています。
+     </p>
+     <p>
+      ネームテーブルとは画面に表示するタイル（ツクールとかでいうマップチップ）の並びが格納されるメモリ領域のことです。（PPU $2000-$3FFF）
+     </p>
+    </article>
+    <article>
+     <h3>オープンバス</h3>
+     <p>
+      信号線のことをバスと呼び、これが未接続（オープン）になることを<a href="https://wiki.nesdev.com/w/index.php/Open_bus_behavior">オープンバス</a>と呼んでいます。<br>
+      未接続の信号を読み込むと内容は不定ですが、少しの間はバスに残っている以前の値を読むことができたりします。
+     </p>
+    </article>
+    <article>
+     <h3>バンク切り替え</h3>
+     <p>
+      ファミコン初期はプログラム32KB, グラフィック8KBに収めないといけない厳しい制約でしたが、マッパーと呼ばれるチップをカセット内に積むことによって大容量のゲームを実現しました。<br>
+      本体は変わらないので、一部領域を"取り換える"ことによって見せかけの領域は同じにしつつ、様々なプログラムやグラフィックを使用できるようにしています（バンク切り替え）。
+     </p>
+    </article>
+    <article>
+     <h3>もうめんどうみきれよう。</h3>
+     <p>
+      <span class="warning">全部解析していないため一部推測が含まれています</span>
+     </p>
+     <p>
+      カセット右側を半挿しして <code>CIRAM A10</code> の信号をオープンバス状態にします（これよりさらに抜くとプログラム用信号まで巻き込んでしまうためフリーズします）。
+      これにより、本来更新するはずのネームテーブルのあて先が狂います。<br>
+      ワンポイントレッスン移行時は画面を丸々書き換えていますが、本来とは異なる、見えていない領域に更新内容を書いてしまいます。
+      そのため更新前のショット画面のタイルの並びのまま、ワンポイントレッスン用グラフィックに切り替わり、偶然にも森のグラフィックと尾崎先生の顔が同じ領域だったことによってトーテム尾崎となってしまいました。
+     </p>
+    </article>
+   </section>
+
+   <p class="center" style="margin:16px; font-size:150%;">
+    ΩND
+   </p>
+  </main>
+
+  <footer>
+   <div id="Lesson">
+    <div class="Text" id="LessonText"></div>
+    <div class="Ozaki" onclick="OzakiClick();"></div>
+   </div>
+  </footer>
+  <script type="text/javascript">
+<!--
+	window.onload	= function(){
+		SetLesson(0);
+	}
+-->
+  </script>
+ </body>
+</html>
