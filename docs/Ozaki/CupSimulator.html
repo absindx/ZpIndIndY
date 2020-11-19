@@ -58,6 +58,10 @@
 		text-align		: right;
 	}
 
+	table{
+		border-collapse		: collapse;
+	}
+
 	#LoadingMessage{
 		text-align		: center;
 	}
@@ -66,6 +70,37 @@
 		display			: block;
 		margin			: 4px auto 8px auto;
 		border-radius		: 5px;
+	}
+
+	#WindTable{
+		margin			: 4px auto 8px auto;
+	}
+	#WindTable td, #WindTable th{
+		border			: solid 1px #388700;
+	}
+	#WindTable th{
+		background-color	: RGBA(56, 135, 0, 0.50);
+		padding-left		: 4px;
+		padding-right		: 4px;
+	}
+	#WindTable .ColWind canvas{
+		margin			: 0px auto;
+		vertical-align		: middle;
+	}
+	#WindTable .HoleSeparator{
+		background-color	: RGBA(56, 135, 0, 0.25);
+	}
+	#WindTable .ColShot{	/* 0 */
+		text-align		: center;
+	}
+	#WindTable .ColWind{	/* 1 */
+		text-align		: center;
+	}
+	#WindTable .ColCond{	/* 2 */
+		text-align		: center;
+	}
+	#WindTable .ColRow{	/* 3 */
+		text-align		: center;
 	}
 
 	footer{
@@ -153,6 +188,9 @@
 	const WindAddRandom	= [
 		0, 0, -1, 0, 0, 1, 1, 2
 	];
+
+	const eastShot	= [4, 5, 3, 5, 3, 4, 4, 5, 4, 4, 4, 4, 4, 3, 5, 4, 4, 3];	// 0x1CCF5
+	const westShot	= [4, 4, 4, 4, 3, 4, 4, 4, 5, 4, 4, 3, 4, 4, 3, 5, 4, 5];	// 0x1CD07
 
 	//--------------------------------------------------
 	// RNG
@@ -316,6 +354,8 @@
 			let seed	= GetNextRand(rand, 18 - hole);	// 17 - hole + 1
 			DrawMap(difficulty, context, course, hole, zoom, seed);
 		}
+
+		UpdateWindSimulation();
 	}
 	function DrawMap(difficulty, context, course, hole, zoom, seed){
 		const x		= hole % 6;
@@ -386,6 +426,34 @@
 		SetLesson(0);
 		UpdateForm(1);
 		LoadImages();
+		ProcessUrlParameter();
+		InitializeWindSimulator();
+	}
+
+	function ProcessUrlParameter(){
+		let params	= location.search.substring(1).split('&');
+		for(let i=0;i<params.length;i++){
+			let param	= params[i].split('=');
+			if(param[0]=='r'){
+				let rand	= parseInt(param[1]);
+				rand		= rand & 0xFFFF;
+				document.getElementById('randnumber').value	= rand;
+				UpdateForm(2);
+			}
+			if(param[0]=='i'){
+				let index	= parseInt(param[1]);
+				if(index >= 0){
+					index	%= RandPool_Index_Long.length;
+				}
+				else{
+					index	= -index - 1;
+					index	%= RandPool_Index_Short.length;
+					index	= -index - 1;
+				}
+				document.getElementById('indexnumber').value	= index;
+				UpdateForm(4);
+			}
+		}
 	}
 
 	function GetSetting_Difficulty(){
@@ -458,6 +526,21 @@
 
 		ignoreUpdate	= false;
 	}
+	function AddRandIndex(add){
+		let elem	= document.getElementById('indexnumber');
+		let index	= parseInt(elem.value);
+		if(index >= 0){
+			const length	= RandPool_Index_Long.length;
+			index	= (index + add + length) % length;
+		}
+		else{
+			const length	= RandPool_Index_Short.length;
+			index	= -index - 1;	// -1, -2, ... -> 0, 1, ...
+			index	= (index + add + length) % length;
+			index	= -index - 1;	// 0, 1, ... -> -1, -2, ...
+		}
+		elem.value	= index;
+	}
 
 	//--------------------------------------------------
 	// Graphic
@@ -527,6 +610,221 @@
 	}
 
 	//--------------------------------------------------
+	// Wind simulation
+	//--------------------------------------------------
+
+	const RoughCaption	= 'ラフ打';
+	const PutterCaption	= 'グリーン以外パター';
+	const WaterCaption	= '入水 x1→x1';
+	const AddRowCaption	= '追加';
+	const DelRowCaption	= '削除';
+
+	function InitializeWindSimulator(){
+		const table	= document.getElementById('WindTable');
+		const colLength	= table.rows[0].getElementsByTagName('th').length;
+		for(let i=0; i<18; i++){
+			let row			= AddTableRow(table);
+			let cell		= row.insertCell(0);
+			row.className		= 'HoleSeparator'
+			cell.textContent	= 'Hole ' + (i + 1);
+			cell.colSpan		= colLength;
+
+			for(let j=0; j<eastShot[i]; j++){
+				InsertShotRow(table.rows.length);
+			}
+		}
+
+		StandardizeWindTable();
+	}
+
+	function AddTableRow(table){
+		const length	= table.rows.length;
+		return table.insertRow(length);
+	}
+
+	function InsertShotRow(index){
+		const table	= document.getElementById('WindTable');
+		const colLength	= table.rows[0].getElementsByTagName('th').length;
+
+		const row	= table.insertRow(index);
+		const cellShot	= row.insertCell(0);
+		const cellWind	= row.insertCell(1);
+		const cellCond	= row.insertCell(2);
+		const cellRow	= row.insertCell(3);
+
+		cellShot.className	= 'ColShot';
+
+		cellWind.className	= 'ColWind';
+		cellWind.innerHTML	= '<canvas class="WindCanvas" width="40" height="16" />';
+
+		cellCond.className	= 'ColCond';
+		cellCond.innerHTML	= 
+			'<input type="checkbox" class="PenaltyRough" onclick="UpdateWindSimulation()"><label>+1（' + RoughCaption + '）</label>' +
+			' / ' +
+			'<input type="checkbox" class="PenaltyRough" onclick="UpdateWindSimulation()"><label>+1（' + PutterCaption + '）</label>' +
+			' / ' +
+			'<input type="checkbox" class="PenaltyWater" onclick="UpdateWindSimulation()"><label>+1（' + WaterCaption + '）</label>'
+		;
+		cellRow.className	= 'ColRow';
+		cellRow.innerHTML	= 
+			'<input type="button" class="AddRow" value="' + AddRowCaption + '" onclick="AddWindRow(this)">' +
+			'<input type="button" class="DelRow" value="' + DelRowCaption + '" onclick="DelWindRow(this)">'
+		;
+	}
+
+	function AddWindRow(button){
+		const index	= button.parentElement.parentElement.rowIndex;
+		InsertShotRow(index + 1);
+		UpdateWindSimulation();
+	}
+	function DelWindRow(button){
+		const index	= button.parentElement.parentElement.rowIndex;
+		const table	= document.getElementById('WindTable');
+		table.deleteRow(index);
+		UpdateWindSimulation();
+	}
+
+	//--------------------------------------------------
+
+	function StandardizeWindTable(){
+		const table	= document.getElementById('WindTable');
+		let status	= [];
+		let holeStatus	= null;
+
+		let hole	= 0;
+		let shot	= 1;
+		let randOffset	= 18;
+		let roughDelay	= false;
+		let waterElem	= null;
+
+		let pushHoleStatus	= function(){
+			if(holeStatus && (holeStatus.length > 0)){
+				// enable button on first shot
+				const firstShot	= table.rows[holeStatus[0].Row];
+				firstShot.getElementsByClassName('DelRow')[0].disabled	= (holeStatus.length <= 1);
+
+				// push
+				status.push(holeStatus);
+			}
+
+			if(waterElem){
+				waterElem.checked	= false;
+				waterElem.disabled	= true;
+				waterElem		= null;
+			}
+
+			holeStatus	= [];
+
+			hole++;
+			shot		= 1;
+			randOffset	+= 2;
+		}
+
+		for(let i=1; i<table.rows.length; i++){
+			const row	= table.rows[i];
+			if(row.className === 'HoleSeparator'){
+				pushHoleStatus();
+				continue;
+			}
+
+			const canvasId		= 'WindCanvas_' + hole + '_' + shot;
+			const roughName		= 'RoughShot_' + hole + '_' + shot;
+			const putterName	= 'PutterShot_' + hole + '_' + shot;
+			const waterName		= 'WaterIn_' + hole + '_' + shot;
+
+			const conditionCell	= row.cells[2];
+			const roughElem		= conditionCell.children[0];
+			const putterElem	= conditionCell.children[2];
+			const waterElem		= conditionCell.children[4];
+
+			roughElem.disabled	= (shot <= 1);
+
+			row.className							= 'Hole_' + hole;
+			row.cells[0].textContent					= shot;
+			row.cells[1].getElementsByClassName('WindCanvas')[0].id		= canvasId;
+			conditionCell.children[0].id					= roughName;	// rough - checkbox
+			conditionCell.children[0].name					= roughName;	// rough - checkbox
+			conditionCell.children[1].htmlFor				= roughName;	// rough - label
+			conditionCell.children[2].id					= putterName;	// putter - checkbox
+			conditionCell.children[2].name					= putterName;	// putter - checkbox
+			conditionCell.children[3].htmlFor				= putterName;	// putter - label
+			conditionCell.children[4].id					= waterName;	// water - checkbox
+			conditionCell.children[4].name					= waterName;	// water - checkbox
+			conditionCell.children[5].htmlFor				= waterName;	// water - label
+
+			const roughChecked	= roughElem.checked;
+			if(roughChecked){
+				waterElem.checked	= false;
+				waterElem.disabled	= true;
+			}
+			else{
+				waterElem.disabled	= false;
+			}
+			const putterChecked	= putterElem.checked;
+			const waterChecked	= waterElem.checked;
+
+			holeStatus.push({
+				Hole		: hole,
+				Shot		: shot,
+				Row		: i,
+				RandOffset	: randOffset,
+				CanvasId	: canvasId,
+			});
+
+			shot++;
+			randOffset++;
+
+			if(roughChecked){
+				randOffset++;
+			}
+			if(putterChecked){
+				randOffset++;
+			}
+			if(waterChecked){
+				randOffset++;
+			}
+			roughDelay	= roughChecked;
+		}
+
+		pushHoleStatus();
+
+		return status;
+	}
+
+	function UpdateWindSimulation(){
+		const difficulty	= GetSetting_Difficulty();
+		const status		= StandardizeWindTable();
+		const rand		= GetSetting_Rand();
+
+		// hole
+		for(let hole=0; hole<status.length; hole++){
+			const holeData	= status[hole];
+			let randOffset	= holeData[0].RandOffset - 2;
+			let baseWind	= SimulateHoleBaseWind(GetNextRand(rand, randOffset));
+
+			for(let shot=0; shot<holeData.length; shot++){
+				let canvas	= document.getElementById(holeData[shot].CanvasId);
+				if(!canvas){
+					return;
+				}
+				let context	= canvas.getContext('2d');
+				if(!context){
+					return;
+				}
+
+				// fill background
+				context.fillStyle = '#000';
+				context.fillRect(0, 0, canvas.width, canvas.height);
+
+				const wind	= SimulateHoleWind(baseWind, difficulty, GetNextRand(rand, holeData[shot].RandOffset));
+				const windStr	= ('00' + wind.volume).slice(-2);
+				DrawImageChip(context, FontImages, 0, 0, wind.direction * 16, 0, 16, 16);
+				DrawString(context, 16, 4, `${windStr}\x5D`);
+			}
+		}
+	}
+
+	//--------------------------------------------------
 	// IIZO 
 	//--------------------------------------------------
 
@@ -591,6 +889,8 @@
        <dt>初期乱数（位置）</dt><dd
        > <label><input type="range"  id="indexrange"  name="indexrange"  min="-2" max="65533" value="0" onchange="UpdateForm(3);UpdateSimulationImage();"
        > <label><input type="number" id="indexnumber" name="indexnumber" min="-2" max="65533" value="0" onchange="UpdateForm(4);UpdateSimulationImage();"
+       > <input id="PrevResetRand" type="button" value="← Reset(-21)" onclick="AddRandIndex(-21);UpdateForm(4);UpdateSimulationImage();"></input
+       > <input id="NextResetRand" type="button" value="Reset(+21) →" onclick="AddRandIndex( 21);UpdateForm(4);UpdateSimulationImage();"></input
        > <span class="note">（マイナスを指定すると短周期乱数になります）</span>
        </dd>
       </dl>
@@ -603,6 +903,21 @@
     <!-- width = 176 * 6, height = (240 + 8) * 3 -->
     <canvas id="Simulated" width="1056" height="744" />
    </section>
+
+   <section id="WindSimulation">
+     <fieldset id="SimulationSetting">
+      <legend>風シミュレーション</legend>
+      <table id="WindTable">
+       <tr>
+        <th>ショット</th>
+        <th>風</th>
+        <th>条件</th>
+        <th>行操作</th>
+       </tr>
+      </table>
+     </fieldset>
+   </section>
+
   </main>
 
   <footer>
