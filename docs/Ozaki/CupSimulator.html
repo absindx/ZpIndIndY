@@ -303,7 +303,7 @@
 			case 0:{	// x1 : PPPP PPPP pppp pppp
 				return [
 					x >> 8,
-					(y >> 8) - 8 + 1,			// char height(8), ball offset(1)?
+					(y >> 8) - 8 + 1,			// char height(8), sprite offset(1)?
 				];
 			}
 			case 1:{	// x2 : PPPP PPPP Pppp pppp
@@ -312,7 +312,7 @@
 				const yOffset		= (Zoom2xOffsetY[cupBaseIndex]) << 8;
 				return [
 					(x - xOffset) >> 7,
-					((y - yOffset) >> 7) + 17 + 1,		// draw offset(17), ball offset(1)?
+					((y - yOffset) >> 7) + 17 + 1,		// draw offset(17), sprite offset(1)?
 				];
 			}
 			case 2:{	// x4 : PPPP PPPP PPPp pppp
@@ -321,7 +321,7 @@
 				const yOffset	= CupBaseY[cupBaseIndex] << 8;
 				return [
 					((x - xOffset) >> 5) - 1,
-					((y - yOffset) >> 5) + 46 - 16 + 1,	// draw offset(46), character offset(16), ball offset(1)?
+					((y - yOffset) >> 5) + 46 - 16 + 1,	// draw offset(46), character offset(16), sprite offset(1)?
 				];
 			}
 		}
@@ -369,7 +369,10 @@
 		DrawRawImage(context, HoleImages[course][hole][zoom], baseX, baseY);
 		DrawString(context, baseX, baseY + MapImageHeight, `${holeStr}\x5B RNG=${seedStr} #${(seed & 3).toString()}`);
 		if(hole === 0){
-			const baseWind	= SimulateHoleBaseWind(seed);
+			const tournamentMode	= (GetSetting_PlayStyle() >= 1);
+			const windSeed		= GetNextRand(seed, (tournamentMode)? 424 : 0);
+
+			const baseWind	= SimulateHoleBaseWind(windSeed);
 			const wind	= SimulateHoleWind(baseWind, difficulty, baseWind.seed);
 			const windStr	= ('00' + wind.volume).slice(-2);
 			DrawImageChip(context, FontImages, baseX, baseY, wind.direction * 16, 0, 16, 16);
@@ -406,6 +409,12 @@
 	// Page
 	//--------------------------------------------------
 
+	const PlayStyleDefine	= {
+		//Stroke	: 0,
+		//Match		: 1,
+		Play		: 0,	// Stroke + Match
+		Tournament	: 1,	// 1Day, 4Day
+	};
 	const CourseDifficulty	= {
 		Amateur		: 0,
 		Single		: 1,
@@ -456,6 +465,10 @@
 		}
 	}
 
+	function GetSetting_PlayStyle(){
+		let value	= PlayStyleDefine[document.forms['Setting'].playstyle.value];
+		return value ?? 0;
+	}
 	function GetSetting_Difficulty(){
 		let value	= CourseDifficulty[document.forms['Setting'].difficulty.value];
 		return value ?? 0;
@@ -614,7 +627,8 @@
 	//--------------------------------------------------
 
 	const RoughCaption	= 'ラフ打';
-	const PutterCaption	= 'グリーン以外パター';
+	const PutterCaption	= 'グリーン以外パター, 木衝突';
+	const FlagCaption	= 'ピンフラッグ衝突';
 	const WaterCaption	= '入水 x1→x1';
 	const AddRowCaption	= '追加';
 	const DelRowCaption	= '削除';
@@ -659,11 +673,10 @@
 
 		cellCond.className	= 'ColCond';
 		cellCond.innerHTML	= 
-			'<input type="checkbox" class="PenaltyRough" onclick="UpdateWindSimulation()"><label>+1（' + RoughCaption + '）</label>' +
-			' / ' +
-			'<input type="checkbox" class="PenaltyRough" onclick="UpdateWindSimulation()"><label>+1（' + PutterCaption + '）</label>' +
-			' / ' +
-			'<input type="checkbox" class="PenaltyWater" onclick="UpdateWindSimulation()"><label>+1（' + WaterCaption + '）</label>'
+			'<input type="checkbox" class="PenaltyRough"  onclick="UpdateWindSimulation()"><label>+1（' + RoughCaption + '）</label> '	+
+			'<input type="checkbox" class="PenaltyPutter" onclick="UpdateWindSimulation()"><label>+1（' + PutterCaption + '）</label> '	+
+			'<input type="checkbox" class="PenaltyFlag"   onclick="UpdateWindSimulation()"><label>+2（' + FlagCaption + '）</label> '	+
+			'<input type="checkbox" class="PenaltyWater"  onclick="UpdateWindSimulation()"><label>+1（' + WaterCaption + '）</label>'
 		;
 		cellRow.className	= 'ColRow';
 		cellRow.innerHTML	= 
@@ -697,6 +710,13 @@
 		let roughDelay	= false;
 		let waterElem	= null;
 
+		const cursor		= (GetSetting_Difficulty() >= 1)? 1 : 0;
+		const tournamentMode	= (GetSetting_PlayStyle() >= 1);
+
+		if(tournamentMode){
+			randOffset	+= 360;
+		}
+
 		let pushHoleStatus	= function(){
 			if(holeStatus && (holeStatus.length > 0)){
 				// enable button on first shot
@@ -718,6 +738,9 @@
 			hole++;
 			shot		= 1;
 			randOffset	+= 2;
+			if(tournamentMode){
+				randOffset	+= 64;
+			}
 		}
 
 		for(let i=1; i<table.rows.length; i++){
@@ -730,12 +753,14 @@
 			const canvasId		= 'WindCanvas_' + hole + '_' + shot;
 			const roughName		= 'RoughShot_' + hole + '_' + shot;
 			const putterName	= 'PutterShot_' + hole + '_' + shot;
+			const flagName		= 'FlagShot_' + hole + '_' + shot;
 			const waterName		= 'WaterIn_' + hole + '_' + shot;
 
 			const conditionCell	= row.cells[2];
 			const roughElem		= conditionCell.children[0];
 			const putterElem	= conditionCell.children[2];
-			const waterElem		= conditionCell.children[4];
+			const flagElem		= conditionCell.children[4];
+			const waterElem		= conditionCell.children[6];
 
 			roughElem.disabled	= (shot <= 1);
 
@@ -748,9 +773,12 @@
 			conditionCell.children[2].id					= putterName;	// putter - checkbox
 			conditionCell.children[2].name					= putterName;	// putter - checkbox
 			conditionCell.children[3].htmlFor				= putterName;	// putter - label
-			conditionCell.children[4].id					= waterName;	// water - checkbox
-			conditionCell.children[4].name					= waterName;	// water - checkbox
-			conditionCell.children[5].htmlFor				= waterName;	// water - label
+			conditionCell.children[4].id					= flagName;	// flag - checkbox
+			conditionCell.children[4].name					= flagName;	// flag - checkbox
+			conditionCell.children[5].htmlFor				= flagName;	// flag - label
+			conditionCell.children[6].id					= waterName;	// water - checkbox
+			conditionCell.children[6].name					= waterName;	// water - checkbox
+			conditionCell.children[7].htmlFor				= waterName;	// water - label
 
 			const roughChecked	= roughElem.checked;
 			if(roughChecked){
@@ -761,6 +789,7 @@
 				waterElem.disabled	= false;
 			}
 			const putterChecked	= putterElem.checked;
+			const flagChecked	= flagElem.checked;
 			const waterChecked	= waterElem.checked;
 
 			holeStatus.push({
@@ -773,12 +802,16 @@
 
 			shot++;
 			randOffset++;
+			randOffset		+= cursor;
 
 			if(roughChecked){
 				randOffset++;
 			}
 			if(putterChecked){
 				randOffset++;
+			}
+			if(flagChecked){
+				randOffset	+= 2;
 			}
 			if(waterChecked){
 				randOffset++;
@@ -867,6 +900,10 @@
      <fieldset id="SimulationSetting" disabled>
       <legend>設定</legend>
       <dl>
+       <dt>モード</dt><dd
+       > <label><input type="radio" name="playstyle" value="Play"		onchange="UpdateSimulationImage();" checked	>Stroke / Match</input></label
+       > <label><input type="radio" name="playstyle" value="Tournament"		onchange="UpdateSimulationImage();"		>Tournament</input></label
+       ></dd>
        <dt>難易度</dt><dd
        > <label><input type="radio" name="difficulty" value="Amateur"		onchange="UpdateSimulationImage();" checked	>Amateur</input></label
        > <label><input type="radio" name="difficulty" value="Single"		onchange="UpdateSimulationImage();"		>Single</input></label
