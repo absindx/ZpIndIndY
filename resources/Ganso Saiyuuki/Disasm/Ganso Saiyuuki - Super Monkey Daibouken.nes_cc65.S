@@ -3,6 +3,15 @@
 ;* Ganso Saiyuuki - Super Monkey Daibouken Disassembly                         *
 ;*******************************************************************************
                 .setcpu "6502"
+Sound_Sq1_      =       $10
+Sound_Sq1_MainSequencePointer = $11
+Sound_Sq2_      =       $18
+Sound_Sq2_MainSequencePointer = $19
+Sound_Tri_      =       $20
+Sound_Tri_MainSequencePointer = $21
+Sound_Noi       =       $28
+Sound_Noi_      =       $28
+Sound_Noi_MainSequencePointer = $29
 VmMem_Pointer   =       $32
 VmMem_Temp      =       $34
 VmMem_SecondStack =     $36
@@ -26,7 +35,10 @@ PaletteBuffer   =       $0300
 PadBuffer_Now   =       $0320                           ;ABsS^v<>
 PadBuffer_Prev  =       $0328                           ;ABsS^v<>
 PadBuffer_Trigger =     $0330                           ;ABsS^v<>
+OperatingParty  =       $0354                           ;0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai
+HelperParty     =       $0355                           ;0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai
 PartyLifes      =       $03C8                           ;Goku, Sanzo, Horse, Sagojo, Chohakkai
+FieldTime       =       $03D4                           ;Low:$00-$1F, High:$00-$3F
 PartyIn_Chohakkai =     $047E
 PartyIn_Sagojo  =       $047F
 VmStack_Low     =       $0600
@@ -4625,7 +4637,7 @@ VmOp_ReadAddressWord:
 
 ; Argument: Y=Offset
 VmOp_ReadOffsetByte:
-                JSR     VmOp_Add_AB                     ;Stack[1] = Mem[Stack[0] + stack[1]]
+                JSR     VmOp_Add_AB                     ;Stack[1] = Mem[Stack[0] + Stack[1]]
 VmOp_ReadByte:  JSR     VmOp_CopyPointer                ;Stack[0] = Mem[Stack[0]]
                 LDA     (VmMem_Pointer),y
                 STA     VmStack_Low,x
@@ -4771,17 +4783,20 @@ L9645:          LDY     VmMem_SecondStack
                 STA     $07A0,y
                 RTS
 
-L9695:          LDY     VmMem_SecondStack
-@L9697:         DEX
+VmSecond_CopySecondStack_Reload:
+                LDY     VmMem_SecondStack
+VmSecond_CopySecondStack:
+                DEX
                 LDA     $0780,y
                 STA     VmStack_Low,x
                 LDA     $07A0,y
                 STA     VmStack_High,x
                 RTS
 
+VmSecond_PopSecondStack:
                 LDY     VmMem_SecondStack
                 INY
-                JMP     @L9697
+                JMP     VmSecond_CopySecondStack
 
 VmOp_PopRegister:
                 LDY     VmStack_Low,x
@@ -8606,7 +8621,7 @@ NMI:            PHA                                     ;Prologue
                 BEQ     @LAE61
                 DEC     $FE
                 JSR     @LAE6E
-@LAE61:         JSR     SetDisplayScreenPosition        ;if over VBlank, raise "lag" frame
+@LAE61:         JSR     SetDisplayScreenPosition
                 LDA     #$01
                 STA     $51
                 PLA
@@ -8842,14 +8857,14 @@ LAFE6:          LDA     RleExpandIndex
                 JSR     LB6AD
                 JSR     LB04F
                 INC     $52
-                JSR     LF0CD
+                JSR     WaitNmiFinish
                 JSR     LAFD6
                 LDA     $55
                 CMP     #$0B
                 BCC     @LAFF6
                 JSR     LB04F
                 INC     $53
-                JSR     LF0CD
+                JSR     WaitNmiFinish
 LB014:          LDA     RleExpandIndex
                 ASL     A
                 TAY
@@ -8905,7 +8920,7 @@ LB04F:          LDA     PpuControlBuffer
                 LDA     #$00
                 STA     PPUSCROLL
                 STA     PPUSCROLL
-                JSR     LB77D
+                JSR     PlaySubSequence
                 LDA     $0473
                 BNE     @LB091
                 JSR     LDE68
@@ -9025,13 +9040,13 @@ LB11E:          LDA     #$8C
 LB127:          JSR     LB6AD
                 JSR     LB04F
                 INC     $52
-                JSR     LF0CD
+                JSR     WaitNmiFinish
                 JSR     LAFD6
                 JSR     LB10E
                 INC     $55
                 RTS
 
-LB13B:          JSR     LF0CD
+LB13B:          JSR     WaitNmiFinish
                 LDA     #$B0
                 STA     $65
                 LDA     #$9E
@@ -9048,7 +9063,7 @@ LB13B:          JSR     LF0CD
                 JSR     LB127
                 JSR     LB127
                 JSR     LB04F
-                JSR     LF0CD
+                JSR     WaitNmiFinish
                 JMP     LB11E
 
 LB168:          .byte   $BC
@@ -9140,11 +9155,13 @@ LB1A8:          LDA     LE708
                 BPL     @LB1C9
 @LB1D8:         RTS
 
-LB1D9:          LDA     $03D4
+VmHelper_LoadFieldTime_Low:
+                LDA     FieldTime
                 JMP     VmOp_PushByte
 
-LB1DF:          JSR     VmOp_PopRegister
-                STY     $03D4
+VmHelper_WriteFieldTime_Low:
+                JSR     VmOp_PopRegister
+                STY     FieldTime
                 RTS
 
 LB1E6:          LDA     PartyLifes-1
@@ -9236,11 +9253,13 @@ LB291:          JSR     LB1EC
                 JSR     LB228
                 JMP     LB27C
 
-LB2A0:          LDA     $03D5
+VmHelper_LoadFieldTime_High:
+                LDA     FieldTime+1
                 JMP     VmOp_PushByte
 
-LB2A6:          JSR     VmOp_PopRegister
-                STY     $03D5
+VmHelper_WriteFieldTime_High:
+                JSR     VmOp_PopRegister
+                STY     FieldTime+1
                 RTS
 
 LB2AD:          JSR     LB1EC
@@ -9250,12 +9269,12 @@ LB2AD:          JSR     LB1EC
                 JSR     VmOp_Decrement
                 JMP     LB243
 
-LB2BF:          JSR     LB1D9
+LB2BF:          JSR     VmHelper_LoadFieldTime_Low
                 JSR     VmOp_ExitTrue
-                JSR     LB2A0
+                JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0010
                 JSR     VmOp_Compare_Equal
-                JSR     LB2A0
+                JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0030
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_Or
@@ -9330,7 +9349,7 @@ LB37A:          JSR     LB2EF
 @LB388:         JSR     VmHelper_PushConst_0001
                 JMP     LB2AD
 
-LB38E:          JSR     LB1D9
+LB38E:          JSR     VmHelper_LoadFieldTime_Low
                 JSR     VmHelper_PushConst_001F
                 JSR     VmOp_And
                 JSR     VmOp_ExitTrue
@@ -9344,7 +9363,7 @@ LB3A9:          JSR     LB1EC
                 JSR     VmHelper_PushConst_000F
                 JSR     LB24E
                 JSR     L9601
-@LB3B5:         JSR     L9695
+@LB3B5:         JSR     VmSecond_CopySecondStack_Reload
                 JSR     LB243
                 JSR     LB04F
                 JSR     LBA24
@@ -9352,7 +9371,7 @@ LB3A9:          JSR     LB1EC
                 BCC     @LB3B5
                 RTS
 
-LB3C7:          JSR     L9695
+LB3C7:          JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmHelper_PushConst_0004
                 JSR     VmOp_Compare_Equal
                 LDA     PartyIn_Chohakkai
@@ -9361,7 +9380,7 @@ LB3C7:          JSR     L9695
                 JSR     VmOp_Compare_Equal
                 JMP     VmOp_And
 
-LB3DF:          JSR     L9695
+LB3DF:          JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmHelper_PushConst_0003
                 JSR     VmOp_Compare_Equal
                 LDA     PartyIn_Sagojo
@@ -9374,7 +9393,7 @@ LB3F7:          JSR     LB3C7
                 JSR     VmOp_ExitTrue
                 JSR     LB3DF
                 JSR     VmOp_ExitTrue
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JMP     LB3A9
 
 LB409:          JSR     VmHelper_PushConst_0006
@@ -9393,15 +9412,15 @@ LB41B:          LDA     $03FE
 @LB425:         LDA     #$25
                 JMP     VmOp_PushByte
 
-LB42A:          JSR     LB2A0
+LB42A:          JSR     VmHelper_LoadFieldTime_High     ;FieldTime_High++
                 JSR     VmOp_Increment
                 LDA     #$3F
                 JSR     VmOp_PushByte
                 JSR     VmOp_And
-                JSR     LB2A6
+                JSR     VmHelper_WriteFieldTime_High
                 JMP     LB5FF
 
-LB43E:          JSR     LB2A0
+LB43E:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0010
                 JMP     VmOp_Add_AB
 
@@ -9423,15 +9442,15 @@ LB447:          JSR     VmHelper_PushConst_0007
                 JSR     LB1F8
                 JSR     VmOp_AddConst_03
                 JSR     VmOp_WriteByte
-                JSR     LB1D9
-                JSR     VmOp_Increment
-                JSR     LB1DF
-                JSR     LB1D9
+                JSR     VmHelper_LoadFieldTime_Low      ;Increment field time
+                JSR     VmOp_Increment                  ;FieldTime_Low++
+                JSR     VmHelper_WriteFieldTime_Low
+                JSR     VmHelper_LoadFieldTime_Low      ;carry high byte
                 JSR     VmHelper_PushConst_0020
-                JSR     VmOp_Compare_BGeatherThanOrEqual
+                JSR     VmOp_Compare_BGeatherThanOrEqual ;0x20 <= FieldTime_Low
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushConst_0000
-                JSR     LB1DF
+                JSR     VmHelper_WriteFieldTime_Low
                 JMP     LB42A
 
                 .byte   $07
@@ -9477,7 +9496,7 @@ LB4CC:          JSR     VmOp_PopRegister
                 .byte   $06
 
 LB4DB:          JSR     @LB500
-                JSR     LB1D9
+                JSR     VmHelper_LoadFieldTime_Low
                 JSR     VmHelper_PushConst_0007
                 JSR     VmOp_And
                 JSR     VmOp_Duplicate
@@ -9490,18 +9509,18 @@ LB4DB:          JSR     @LB500
                 JSR     VmHelper_PushConst_0000
                 JMP     LB4CC
 
-@LB500:         JSR     LB1D9
+@LB500:         JSR     VmHelper_LoadFieldTime_Low
                 JSR     VmHelper_PushConst_0003
                 JSR     VmOp_And
                 JSR     VmOp_ExitTrue
-                JMP     LB75D
+                JMP     SongRequest_13
 
 LB50F:          JSR     LB4C6
                 JSR     VmOp_ExitFalse
                 JSR     VmOp_PopDiscard
                 JMP     LB4DB
 
-LB51B:          JSR     LB2A0
+LB51B:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmOp_Lsr_03
                 JSR     LB4AB
                 JSR     VmOp_Add_AB
@@ -9531,7 +9550,7 @@ LB540:          JSR     VmHelper_SaveMemTemp_06
                 JSR     VmOp_Increment
 @LB565:         JSR     L9601
 @LB568:         JSR     VmHelper_ReadTempAddressWord_02
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_WriteByte
                 JSR     VmHelper_PushConst_0004
                 JSR     L9645
@@ -9573,7 +9592,7 @@ LB5BD:          JSR     VmHelper_PushConst_0005
                 JSR     LB447
                 JMP     LB540
 
-LB5CF:          JSR     LB2A0
+LB5CF:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0030
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_ExitFalse
@@ -9584,7 +9603,7 @@ LB5CF:          JSR     LB2A0
                 BPL     @LB5DD
                 RTS
 
-LB5E7:          JSR     LB2A0
+LB5E7:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0010
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_ExitFalse
@@ -9598,10 +9617,10 @@ LB5F3:          LDY     #$20
 LB5FF:          JSR     LB5CF
                 JMP     LB5E7
 
-LB605:          JSR     L9695
+LB605:          JSR     VmSecond_CopySecondStack_Reload
                 JMP     VmOp_Add_AB
 
-LB60B:          JSR     L9695
+LB60B:          JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Asl_01
                 JMP     VmOp_Add_AB
 
@@ -9669,7 +9688,7 @@ VmHelper_PushConst_8000:
 
                 JSR     LB04F
                 JSR     SetFieldChrBank
-                JSR     LF0CD
+                JSR     WaitNmiFinish
                 RTS
 
 PpuControl_EnableDirection:
@@ -9741,40 +9760,21 @@ LB6F1:          JSR     VmOp_PopRegister
                 STY     $54
                 RTS
 
-                .byte   $A5
-                .byte   $55
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
+                LDA     $55
+                JMP     VmOp_PushByte
 
 LB6FC:          JSR     VmOp_PopRegister
                 STY     $55
                 RTS
 
-                .byte   $20
-                .byte   $1C
-                .byte   $B6
-                .byte   $20
-                .byte   $0B
-                .byte   $98
-                .byte   $20
-                .byte   $27
-                .byte   $B6
-                .byte   $20
-                .byte   $29
-                .byte   $98
-                .byte   $20
-                .byte   $4E
-                .byte   $97
-                .byte   $20
-                .byte   $57
-                .byte   $B6
-                .byte   $20
-                .byte   $4E
-                .byte   $97
-                .byte   $4C
-                .byte   $7E
-                .byte   $95
+                JSR     VmHelper_PushFieldPageY
+                JSR     VmOp_Asl_06
+                JSR     VmHelper_PushFieldPageX
+                JSR     VmOp_Asl_01
+                JSR     VmOp_Add_AB
+                JSR     VmHelper_PushConst_999B
+                JSR     VmOp_Add_AB
+                JMP     VmOp_ReadAddressWord
 
 LB71A:          LDY     #$04
                 LDA     #$F0
@@ -9783,74 +9783,74 @@ LB71A:          LDY     #$04
                 BNE     @LB71E
                 RTS
 
-LB725:          JSR     EnableApuChannel
+SongRequest_01: JSR     EnableApuChannel
                 LDA     #$01
-                BNE     LB76B
+                BNE     SongRequest
 
-LB72C:          JSR     EnableApuChannel
+SongRequest_03: JSR     EnableApuChannel
                 LDA     #$03
-                BNE     LB76B
+                BNE     SongRequest
 
-LB733:          JSR     EnableApuChannel
+SongRequest_04: JSR     EnableApuChannel
                 LDA     #$04
-                BNE     LB76B
+                BNE     SongRequest
 
-LB73A:          JSR     EnableApuChannel
+SongRequest_05: JSR     EnableApuChannel
                 LDA     #$05
-                BNE     LB76B
+                BNE     SongRequest
 
-LB741:          LDA     #$06
-                BNE     LB76B
+SongRequest_06: LDA     #$06
+                BNE     SongRequest
 
-LB745:          LDA     #$09
-                BNE     LB76B
+SongRequest_09: LDA     #$09
+                BNE     SongRequest
 
-LB749:          LDA     #$0A
-                BNE     LB76B
+SongRequest_0A: LDA     #$0A
+                BNE     SongRequest
 
-LB74D:          LDA     #$0E
-                BNE     LB76B
+SongRequest_0E: LDA     #$0E
+                BNE     SongRequest
 
-LB751:          LDA     #$0F
-                BNE     LB76B
+SongRequest_0F: LDA     #$0F
+                BNE     SongRequest
 
-LB755:          LDA     #$11
-                BNE     LB76B
+SongRequest_11: LDA     #$11
+                BNE     SongRequest
 
-                .byte   $A9
-                .byte   $12
-                .byte   $D0
-                .byte   $0E
+SongRequest_12: LDA     #$12
+                BNE     SongRequest
 
-LB75D:          LDA     #$13
-                BNE     LB76B
+SongRequest_13: LDA     #$13
+                BNE     SongRequest
 
-LB761:          LDA     #$15
-                BNE     LB76B
+SongRequest_15: LDA     #$15
+                BNE     SongRequest
 
-LB765:          LDA     #$16
-                BNE     LB76B
+SongRequest_16: LDA     #$16
+                BNE     SongRequest
 
-LB769:          LDA     #$00
-LB76B:          TAY
+SongRequest_00: LDA     #$00
+SongRequest:    TAY
                 TXA
                 PHA
                 TYA
-                JSR     LF1D0
+                JSR     JumpSongRequest
                 PLA
                 TAX
                 RTS
 
-LB775:          TXA
+InitializeSounddriver:
+                TXA
                 PHA
-                JSR     LF1DC
+                JSR     JumpInitializeSounddriver
                 PLA
                 TAX
                 RTS
 
-LB77D:          TXA
+PlaySubSequence:
+                TXA
                 PHA
-                JSR     LF1D3
+                JSR     JumpPlaySubSequence
                 PLA
                 TAX
                 RTS
@@ -9911,7 +9911,7 @@ Field_MainLoop: JSR     IsAnnihilation
                 JSR     VmProc_SetTargetPointScreenX
                 JSR     VmProc_SetTargetPointScreenY
                 JSR     ReadJoypad
-                JSR     LB98C
+                JSR     VmProc_CheckFieldTile
                 JSR     CheckPause
                 JSR     VmProc_ProcessFieldFrame        ;[1F] Wait frame
                 JSR     SetFieldPartySprite
@@ -9920,11 +9920,11 @@ Field_MainLoop: JSR     IsAnnihilation
                 STA     $0484                           ;Message screen flag?
                 JSR     VmProc_MoveFieldLeft
                 JSR     VmProc_ProcessFieldFrame        ;[01] Wait frame
-                JSR     LBF7A
-                JSR     LBF98
+                JSR     VmProc_CheckDstField_Up
+                JSR     VmProc_CheckDstField_Down
                 JSR     VmProc_ProcessFieldFrameWithMove ;[02] Wait frame
-                JSR     LBF20
-                JSR     LBF68
+                JSR     VmProc_SetDstField_Right
+                JSR     VmProc_SetDstField_Left
                 JSR     VmProc_ProcessFieldFrame        ;[03] Wait frame
                 JSR     LBF2F
                 JSR     LBF71
@@ -9990,85 +9990,99 @@ VmHelper_PopPositions:
                 JSR     VmHelper_PopFieldPageY
                 JMP     VmHelper_PopFieldPageX
 
-LB8C1:          JSR     VmOp_Duplicate
+VmProc_ModScreenTileYOffset:
+                JSR     VmOp_Duplicate                  ;mod 15
                 JSR     VmHelper_PushConst_000E
                 JSR     VmOp_Compare_BGeatherThan
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushConst_000F
                 JMP     VmOp_Sub_BA
 
-LB8D3:          JSR     VmOp_Duplicate
+VmProc_ModScreenTileXOffset:
+                JSR     VmOp_Duplicate                  ;mod 16
                 JSR     VmHelper_PushConst_000F
                 JSR     VmOp_Compare_BGeatherThan
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushConst_0010
                 JMP     VmOp_Sub_BA
 
-LB8E5:          JSR     VmHelper_SaveMemTemp_06
-                JSR     LC0E1
-                JSR     VmOp_Add_AB
-                JSR     LB8C1
+; Check the destination tile and invalidate the controller input
+; if it is a wall attribute.
+; Wall : 0, 1, 6, 7, 8, 9, 10, 11, 12, 16
+; Argument:
+;   Stack[0] = Y offset (base:6)
+;   Stack[1] = X offset (base:8)
+VmProc_CheckFieldDestinationTile:
+                JSR     VmHelper_SaveMemTemp_06         ;prologue
+                JSR     VmProc_GetMemoryOffsetY_ChipY
+                JSR     VmOp_Add_AB                     ;(Y + (6 + yArg)) % 15
+                JSR     VmProc_ModScreenTileYOffset
                 JSR     VmOp_Asl_04
-                JSR     VmOp_Swap
+                JSR     VmOp_Swap                       ;save Y, calculate X
                 JSR     VmHelper_PushFieldChipX
-                JSR     VmOp_Add_AB
-                JSR     LB8D3
-                JSR     VmOp_Add_AB
-                JSR     VmHelper_PushConst_0500
-                JSR     VmOp_ReadOffsetByte
+                JSR     VmOp_Add_AB                     ;(X + (8 + xArg)) % 16
+                JSR     VmProc_ModScreenTileXOffset
+                JSR     VmOp_Add_AB                     ;(Y << 4) + X
+                JSR     VmHelper_PushConst_0500         ;$0500 = Map data (reg Y = 0)
+                JSR     VmOp_ReadOffsetByte             ;read map tile
                 JSR     VmHelper_WriteTempAddressWord_02
                 JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmHelper_PushConst_0000
-                JSR     VmOp_Compare_Equal
+                JSR     VmOp_Compare_Equal              ;if(  (tile ==  0) // sea
                 JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmHelper_PushConst_0001
-                JSR     VmOp_Compare_Equal
+                JSR     VmOp_Compare_Equal              ;  || (tile ==  1) // bushes
                 JSR     VmOp_Or
                 JSR     VmHelper_ReadTempAddressWord_02
-                JSR     VmHelper_PushConst_0010
+                JSR     VmHelper_PushConst_0010         ;  || (tile == 16) // door of time
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_Or
                 JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmHelper_PushConst_0006
-                JSR     VmOp_Compare_BGeatherThanOrEqual
+                JSR     VmOp_Compare_BGeatherThanOrEqual ;  || ((6 <= tile) && (tile <= 12))
                 JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmHelper_PushConst_000C
                 JSR     VmOp_Compare_AGeatherThanOrEqual
                 JSR     VmOp_And
                 JSR     VmOp_Or
-                JSR     VmOp_CheckNotZero
-                BCC     @LB94D
-                JSR     ClearJoypad
-@LB94D:         JMP     VmOp_ReadTempMemAddr
+                JSR     VmOp_CheckNotZero               ;){
+                BCC     @Accept                         ;  ClearJoypad();
+                JSR     ClearJoypad                     ;}
+@Accept:        JMP     VmOp_ReadTempMemAddr            ;epilogue
 
-LB950:          JSR     VmHelper_PushPad_Up
+VmProc_CheckFieldTile_Up:
+                JSR     VmHelper_PushPad_Up
                 JSR     VmOp_ExitFalse                  ;not press : Exit
                 JSR     VmHelper_PushConst_0008         ;8+0
                 JSR     VmHelper_PushConst_0005         ;6-1
-                JMP     LB8E5
+                JMP     VmProc_CheckFieldDestinationTile
 
-LB95F:          JSR     VmHelper_PushPad_Down
+VmProc_CheckFieldTile_Down:
+                JSR     VmHelper_PushPad_Down
                 JSR     VmOp_ExitFalse                  ;not press : Exit
                 JSR     VmHelper_PushConst_0008         ;8+0
                 JSR     VmHelper_PushConst_0007         ;6+1
-                JMP     LB8E5
+                JMP     VmProc_CheckFieldDestinationTile
 
-LB96E:          JSR     VmHelper_PushPad_Right
+VmProc_CheckFieldTile_Right:
+                JSR     VmHelper_PushPad_Right
                 JSR     VmOp_ExitFalse                  ;not press : Exit
                 JSR     VmHelper_PushConst_0009         ;8+1
                 JSR     VmHelper_PushConst_0006         ;6+0
-                JMP     LB8E5
+                JMP     VmProc_CheckFieldDestinationTile
 
-LB97D:          JSR     VmHelper_PushPad_Left
+VmProc_CheckFieldTile_Left:
+                JSR     VmHelper_PushPad_Left
                 JSR     VmOp_ExitFalse                  ;not press : Exit
                 JSR     VmHelper_PushConst_0007         ;8-1
                 JSR     VmHelper_PushConst_0006         ;6+0
-                JMP     LB8E5
+                JMP     VmProc_CheckFieldDestinationTile
 
-LB98C:          JSR     LB950
-                JSR     LB95F
-                JSR     LB96E
-                JMP     LB97D
+VmProc_CheckFieldTile:
+                JSR     VmProc_CheckFieldTile_Up
+                JSR     VmProc_CheckFieldTile_Down
+                JSR     VmProc_CheckFieldTile_Right
+                JMP     VmProc_CheckFieldTile_Left
 
 LB998:          LDA     #$C3
                 LDY     #$EA
@@ -10220,7 +10234,7 @@ Return1:        RTS
 
 LBAD5:          JSR     VmHelper_PushPositions
                 JSR     VmProc_IncrementFieldPageY
-                JSR     LBEC9
+                JSR     VmProc_SetDstField_Down
                 LDA     #$1F
                 STA     ProcessStateCounter
                 STA     ProcessedStateCounter
@@ -10229,7 +10243,7 @@ LBAD5:          JSR     VmHelper_PushPositions
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
 @LBAF0:         JSR     LBA24
-                JSR     LBF7A
+                JSR     VmProc_CheckDstField_Up
                 JSR     LBA24
                 JSR     LBF83
                 JSR     LBA24
@@ -10335,7 +10349,7 @@ WaitNextFrame:  LDA     $04DA
                 BNE     @StatusareaBlackLoop
                 PLA                                     ;Restore software stack pointer
                 TAX
-                JSR     LB77D                           ;sound...?
+                JSR     PlaySubSequence                 ;sound...?
                 JSR     SetZeroSprite
                 JSR     SetOamDmaRequest
 ; Bug : 1/7 chance that NMI will not be executed
@@ -10348,7 +10362,7 @@ WaitNextFrame:  LDA     $04DA
                 JMP     SetDisplayScreenPosition
 
 LBBE8:          JSR     DisableApuChannel
-                JSR     LB761
+                JSR     SongRequest_15
                 JSR     VmHelper_PopFieldPageX
                 JSR     VmHelper_PopFieldPageY
                 LDA     #$01
@@ -10361,7 +10375,7 @@ LBBE8:          JSR     DisableApuChannel
                 STA     ScreenX+1
                 STA     PpuControlBuffer
                 JSR     SetPpuControl
-                JSR     LB765
+                JSR     SongRequest_16
                 JSR     EnableApuChannel
                 JSR     VmProc_SetTargetPointScreenX
                 JSR     VmProc_SetTargetPointScreenY
@@ -10500,11 +10514,11 @@ LBD1E:          JSR     VmHelper_SaveMemTemp_0E
                 JSR     VmHelper_PushConst_000F
                 JSR     VmHelper_PushFieldChipX
                 JSR     L9601
-@LBD45:         JSR     L9695
+@LBD45:         JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmHelper_PushFieldChipY
                 JSR     LBCEC
                 JSR     VmHelper_ReadTempAddressWord_08
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Add_AB
                 JSR     VmOp_WriteByte
                 JSR     L9620
@@ -10522,11 +10536,11 @@ LBD1E:          JSR     VmHelper_SaveMemTemp_0E
                 JSR     LBD15
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
-@LBD85:         JSR     L9695
+@LBD85:         JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmHelper_PushFieldChipY
                 JSR     LBCEC
                 JSR     VmHelper_ReadTempAddressWord_08
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Add_AB
                 JSR     VmOp_WriteByte
                 JSR     L9620
@@ -10540,10 +10554,10 @@ LBDA2:          JSR     VmHelper_PushFieldPageX
                 JMP     LBCBC
 
 LBDB1:          JSR     VmHelper_PushFieldChipX
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     LBCEC
-                JSR     L9695
-                JSR     LC0C0
+                JSR     VmSecond_CopySecondStack_Reload
+                JSR     VmProc_GetMemoryOffsetY
                 JSR     VmOp_Asl_04
                 JSR     VmHelper_ReadTempAddressWord_08
                 JSR     VmOp_Add_AB
@@ -10628,42 +10642,45 @@ VmProc_MoveFieldLeftChip:
                 JSR     VmOp_Decrement                  ;    FieldPageX--;
                 JMP     VmHelper_PopFieldPageX          ;}
 
-LBE9F:          JSR     VmHelper_PushFieldChipY
+VmProc_SetDstField_Down_Main:
+                JSR     VmHelper_PushFieldChipY         ;FieldChipY++;
                 JSR     VmOp_Add_AB
                 JSR     VmOp_Duplicate
                 JSR     VmHelper_PopFieldChipY
                 JSR     VmHelper_PushConst_000B
-                JSR     VmOp_Compare_BGeatherThan
-                JSR     VmOp_ExitFalse
-                JSR     VmHelper_PushFieldChipY
+                JSR     VmOp_Compare_BGeatherThan       ;(0x0B < FieldChipY)
+                JSR     VmOp_ExitFalse                  ;check page boundaries 11 -> 12
+                JSR     VmHelper_PushFieldChipY         ;set page upper position
                 JSR     VmHelper_PushConst_000C
                 JSR     VmOp_Sub_BA
                 JSR     VmHelper_PopFieldChipY
-                JSR     VmHelper_PushFieldPageY
+                JSR     VmHelper_PushFieldPageY         ;increment pange
                 JSR     VmOp_Increment
                 JMP     VmHelper_PopFieldPageY
 
-LBEC9:          JSR     VmHelper_PushFieldPageY
+VmProc_SetDstField_Down:
+                JSR     VmHelper_PushFieldPageY         ;check
                 JSR     VmHelper_PushConst_0018
-                JSR     VmOp_Compare_AGeatherThan
-                JSR     VmOp_ExitFalse
+                JSR     VmOp_Compare_AGeatherThan       ;(0x0018 > FieldPageY)
+                JSR     VmOp_ExitFalse                  ;page overrange
                 JSR     VmHelper_PushConst_0001
-                JMP     LBE9F
+                JMP     VmProc_SetDstField_Down_Main    ;update
 
-LBEDB:          JSR     VmHelper_PushFieldPageY
+VmProc_SetDstField_Up:
+                JSR     VmHelper_PushFieldPageY
                 JSR     VmHelper_PushFieldChipY
                 JSR     VmOp_Or
-                JSR     VmOp_ExitFalse
+                JSR     VmOp_ExitFalse                  ;check Y=0x0000
                 JSR     VmHelper_PushFieldChipY
                 JSR     VmOp_Decrement
                 JSR     VmOp_Duplicate
                 JSR     VmHelper_PopFieldChipY
                 JSR     VmHelper_PushConst_000B
                 JSR     VmOp_Compare_BGeatherThan
-                JSR     VmOp_ExitFalse
-                JSR     VmHelper_PushConst_000B
+                JSR     VmOp_ExitFalse                  ;check page boundaries 0 -> -1(overflow)
+                JSR     VmHelper_PushConst_000B         ;set page bottom position
                 JSR     VmHelper_PopFieldChipY
-                JSR     VmHelper_PushFieldPageY
+                JSR     VmHelper_PushFieldPageY         ;decrement page
                 JSR     VmOp_Decrement
                 JMP     VmHelper_PopFieldPageY
 
@@ -10671,20 +10688,22 @@ LBF0B:          JSR     VmHelper_PushPad_Right
                 JSR     VmOp_ExitFalse
                 JMP     LBE5D
 
-LBF14:          JSR     VmHelper_PushFieldPageX
+VmProc_SetDstField_Right_Inc:
+                JSR     VmHelper_PushFieldPageX
                 JSR     VmOp_Duplicate
                 JSR     VmOp_Increment
                 JMP     VmHelper_PopFieldPageX
 
-LBF20:          JSR     VmHelper_PushPad_Right
+VmProc_SetDstField_Right:
+                JSR     VmHelper_PushPad_Right
                 JSR     VmOp_ExitFalse
-                JSR     LBF14
+                JSR     VmProc_SetDstField_Right_Inc    ;push FieldX
                 JSR     LBDF0
-                JMP     VmHelper_PopFieldPageX
+                JMP     VmHelper_PopFieldPageX          ;pop FiledX
 
 LBF2F:          JSR     VmHelper_PushPad_Right
                 JSR     VmOp_ExitFalse
-                JSR     LBF14
+                JSR     VmProc_SetDstField_Right_Inc
                 JSR     LBE0D
                 JMP     VmHelper_PopFieldPageX
 
@@ -10706,7 +10725,8 @@ VmProc_MoveFieldLeft:
                 JSR     VmOp_ExitFalse
                 JMP     VmProc_MoveFieldLeftChip
 
-LBF68:          JSR     VmHelper_PushPad_Left
+VmProc_SetDstField_Left:
+                JSR     VmHelper_PushPad_Left
                 JSR     VmOp_ExitFalse
                 JMP     LBDF0
 
@@ -10714,23 +10734,25 @@ LBF71:          JSR     VmHelper_PushPad_Left
                 JSR     VmOp_ExitFalse
                 JMP     LBE0D
 
-LBF7A:          JSR     VmHelper_PushPad_Up
+VmProc_CheckDstField_Up:
+                JSR     VmHelper_PushPad_Up
                 JSR     VmOp_ExitFalse
-                JMP     LBEDB
+                JMP     VmProc_SetDstField_Up
 
 LBF83:          JSR     VmHelper_PushPad_Up
                 JSR     VmOp_ExitFalse
-                JSR     LC0E1
+                JSR     VmProc_GetMemoryOffsetY_ChipY
                 JMP     LBD1E
 
 VmProc_SetTargetPointScreenY:
-                JSR     LC0E1
+                JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     VmOp_Asl_04
                 JMP     VmHelper_PopScreenY
 
-LBF98:          JSR     VmHelper_PushPad_Down
+VmProc_CheckDstField_Down:
+                JSR     VmHelper_PushPad_Down
                 JSR     VmOp_ExitFalse
-                JMP     LBEC9
+                JMP     VmProc_SetDstField_Down
 
 LBFA1:          JSR     VmHelper_PushPad_Down
                 JSR     VmOp_ExitFalse
@@ -10738,7 +10760,7 @@ LBFA1:          JSR     VmHelper_PushPad_Down
                 JSR     VmHelper_PushFieldPageY
                 JSR     VmOp_Increment
                 JSR     VmHelper_PopFieldPageY
-                JSR     LC0E1
+                JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     LBD1E
                 JMP     VmHelper_PopFieldPageY
 
@@ -10759,7 +10781,7 @@ LBFCA:          JSR     VmHelper_SaveMemTemp_06
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
 @LBFE2:         JSR     VmHelper_ReadTempAddressWord_02
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Add_AB
                 JSR     VmOp_ReadByte
                 JSR     VmOp_Asl_02
@@ -10767,7 +10789,7 @@ LBFCA:          JSR     VmHelper_SaveMemTemp_06
                 JSR     VmOp_Add_AB
                 JSR     VmHelper_WriteTempAddressWord_04
                 JSR     LBFBC
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Asl_01
                 JSR     VmOp_Add_AB
                 JSR     VmHelper_WriteTempAddressWord_06
@@ -10847,33 +10869,36 @@ LC091:          JSR     LC032
                 BMI     LC07B
 LC096:          JSR     LC03E
                 BMI     LC086
-TC09B:          .byte   $00,$0C,$09,$06,$03,$00,$0C,$09,$06,$03
-                .byte   $00,$0C,$09,$06,$03,$00,$0C,$09,$06,$03
+FieldPageY_MemoryOffset:
+                .byte   $00,$0C,$09,$06,$03,$00,$0C,$09,$06,$03 ;field : mod 15, chip : mod 12
+                .byte   $00,$0C,$09,$06,$03,$00,$0C,$09,$06,$03 ;=> (12 * index) % 15
                 .byte   $00,$0C,$09,$06,$03,$00,$0C,$09,$06,$03
 
 VmHelper_PushConst_C09B:
-                LDA     #>TC09B
-                LDY     #<TC09B
+                LDA     #>FieldPageY_MemoryOffset
+                LDY     #<FieldPageY_MemoryOffset
                 JMP     VmOp_PushRegister
 
-; Argument: [0] ??? (FieldChipY or ???)
-; Return: [0] ???
-LC0C0:          JSR     VmHelper_PushConst_C09B         ;// arg = FieldPageY or ???
-                JSR     VmHelper_PushFieldPageY         ;Stack[0] = TC09B[FieldPageY] + arg
+; Argument: [0] Chip Y position
+; Return: [0] MemoryOffset Y (high nibble)
+VmProc_GetMemoryOffsetY:
+                JSR     VmHelper_PushConst_C09B         ;// arg = FieldChipY or ???
+                JSR     VmHelper_PushFieldPageY         ;Stack[0] = MemoryOffset[FieldPageY] + arg
                 JSR     VmOp_Add_AB
                 JSR     VmOp_ReadByte
                 JSR     VmOp_Add_AB
-                JSR     VmOp_Duplicate
+                JSR     VmOp_Duplicate                  ;return mod 15 (field memory height = 15)
                 JSR     VmHelper_PushConst_000E         ;if(#$000F <= Stack[0]){ Stack[0] -= #$000F; }
                 JSR     VmOp_Compare_BGeatherThan       ;  // #$000E < Stack[0]
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushConst_000F         ;  // Stack[0] -= #$000F
                 JMP     VmOp_Sub_BA
 
-LC0E1:          JSR     VmHelper_PushFieldChipY
-                JMP     LC0C0
+VmProc_GetMemoryOffsetY_ChipY:
+                JSR     VmHelper_PushFieldChipY
+                JMP     VmProc_GetMemoryOffsetY
 
-LC0E7:          JSR     LC0E1
+LC0E7:          JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     VmOp_Duplicate
                 JSR     LBFCA
                 JSR     LB6FC
@@ -10908,7 +10933,7 @@ LC135:          JSR     VmHelper_PushFieldPageY
                 JSR     VmHelper_PushFieldPageY
                 JSR     VmOp_Increment
                 JSR     VmHelper_PopFieldPageY
-                JSR     LC0E1
+                JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     VmOp_Duplicate
                 JSR     LBFCA
                 JSR     LB6FC
@@ -10936,7 +10961,7 @@ LC180:          JSR     VmOp_ReadByte
                 JMP     VmHelper_ReadTempAddressWord_06
 
 LC186:          JSR     VmHelper_ReadTempAddressWord_02
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Asl_04
                 JSR     VmOp_Add_AB
                 JSR     VmOp_ReadByte
@@ -10945,7 +10970,7 @@ LC186:          JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmOp_Add_AB
                 JSR     VmHelper_WriteTempAddressWord_04
                 JSR     LBFBC
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 JSR     VmOp_Asl_01
                 JSR     VmOp_Add_AB
                 JSR     VmHelper_WriteTempAddressWord_06
@@ -11018,7 +11043,7 @@ LC241:          JSR     VmHelper_PushPad_Right
                 JSR     LC20E
                 JSR     LB6F1
                 JSR     LC21D
-                JSR     LC0E1
+                JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     LB6FC
                 JSR     LC209
                 JSR     PpuControl_EnableDirection
@@ -12784,7 +12809,7 @@ SetFieldPartySprite:
                 .byte   $75
                 .byte   $CD
 
-@LCA2A:         JSR     LB2A0
+@LCA2A:         JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0020
                 JMP     VmOp_Compare_BGeatherThan
 
@@ -12803,7 +12828,7 @@ SetFieldPartySprite:
                 JSR     VmHelper_PushConst_0004
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
-@LCA5E:         JSR     L9695
+@LCA5E:         JSR     VmSecond_CopySecondStack_Reload
                 JSR     LB2AD
                 JSR     L9620
                 BCC     @LCA5E
@@ -12897,7 +12922,7 @@ SetFieldPartySprite:
                 JSR     LE431
                 JSR     @LCBF5
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCBFB
 
@@ -12905,7 +12930,7 @@ SetFieldPartySprite:
                 JSR     LE41F
                 JSR     @LCBF5
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCBFB
 
@@ -12914,7 +12939,7 @@ SetFieldPartySprite:
                 JSR     LE431
                 JSR     @LCC01
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCC07
 
@@ -12922,7 +12947,7 @@ SetFieldPartySprite:
                 JSR     LE431
                 JSR     @LCC01
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCC07
 
@@ -12931,7 +12956,7 @@ SetFieldPartySprite:
                 JSR     @LCB20
                 JSR     LE431
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCD9E
 
@@ -12940,7 +12965,7 @@ SetFieldPartySprite:
                 JSR     @LCB20
                 JSR     LE41F
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCD9E
 
@@ -12950,7 +12975,7 @@ SetFieldPartySprite:
                 JSR     LE41F
                 JSR     LE431
                 JSR     @LCDB6
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCD9E
 
@@ -12965,7 +12990,7 @@ SetFieldPartySprite:
                 JSR     VmHelper_PushConst_0002
                 JSR     LE37F
                 JSR     @LCDAA
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 JMP     @LCD9E
 
@@ -13113,7 +13138,7 @@ SetFieldPartySprite:
 
                 JSR     @LCD89
                 JSR     VmOp_ExitTrue
-                JSR     LB733
+                JSR     SongRequest_04
                 JSR     LD2CC
                 JSR     LD2D4
                 JSR     LD2DC
@@ -13122,7 +13147,7 @@ SetFieldPartySprite:
                 JSR     LD2F4
                 JSR     LD304
 @LCD6C:         JSR     LBA24
-                JSR     LB77D
+                JSR     PlaySubSequence
                 JMP     @LCD6C
 
                 .byte   $EA
@@ -13167,7 +13192,7 @@ SetFieldPartySprite:
                 JSR     @LCD77
                 JSR     LE171
                 JSR     @LCDB0
-                JSR     LB725
+                JSR     SongRequest_01
                 JMP     LE76A
 
                 JSR     @LCD89
@@ -13180,7 +13205,7 @@ SetFieldPartySprite:
                 JSR     @LCD77
                 JSR     LE168
 @LCDF1:         JSR     @LCDB6
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 JSR     @LCD9E
                 LDA     #$01
@@ -13205,7 +13230,7 @@ SetFieldPartySprite:
                 JSR     @LCD83
                 LDA     #$1F
                 STA     $045D
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 JSR     @LCD9E
                 INC     $047B
@@ -13233,7 +13258,7 @@ SetFieldPartySprite:
                 JSR     @LCDB0
                 LDA     #$1F
                 STA     $045D
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 JSR     @LCD9E
                 INC     $047C
@@ -13244,7 +13269,7 @@ SetFieldPartySprite:
                 JSR     VmHelper_PushConst_0003
                 JSR     LE362
                 JSR     LB409
-                JSR     LB73A
+                JSR     SongRequest_05
                 JSR     LE76A
                 JMP     @LCD9E
 
@@ -13270,7 +13295,7 @@ SetFieldPartySprite:
                 JSR     LE362
                 LDA     #$1F
                 STA     $045D
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 JSR     @LCD9E
                 INC     PartyIn_Chohakkai-1
@@ -13290,7 +13315,7 @@ SetFieldPartySprite:
                 JSR     @LCDB0
                 LDA     #$01
                 STA     $0480
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 INC     PartyIn_Chohakkai
                 LDA     #$00
@@ -13309,7 +13334,7 @@ SetFieldPartySprite:
                 JSR     @LCDB0
                 LDA     #$01
                 STA     $0481
-                JSR     LB725
+                JSR     SongRequest_01
                 JSR     LE76A
                 INC     PartyIn_Sagojo
                 LDA     #$00
@@ -13405,11 +13430,11 @@ SetFieldPartySprite:
                 JMP     VmHelper_PushConst_0006
 
 @LD021:         JSR     @LCDB0
-                JSR     LB725
+                JSR     SongRequest_01
                 JMP     LE76A
 
 @LD02A:         JSR     @LCDAA
-@LD02D:         JSR     LB725
+@LD02D:         JSR     SongRequest_01
                 JMP     LE76A
 
                 JSR     VmHelper_PushConst_0005
@@ -14393,7 +14418,7 @@ LD77D:          JSR     VmHelper_SaveMemTemp_02
 
 LD7AD:          JSR     L9601
 @LD7B0:         JSR     LE159
-                JSR     L9695
+                JSR     VmSecond_CopySecondStack_Reload
                 ASL     VmStack_Low,x
                 ASL     VmStack_Low,x
                 JSR     VmOp_Add_AB
@@ -14413,7 +14438,7 @@ LD7AD:          JSR     L9601
                 JSR     VmOp_Add_AB
                 JMP     VmOp_WriteByte
 
-@LD7E6:         JSR     L9695
+@LD7E6:         JSR     VmSecond_CopySecondStack_Reload
                 JMP     VmOp_ReadOffsetByte
 
 LD7EC:          JSR     VmOp_PopRegister
@@ -14468,7 +14493,7 @@ LD863:          JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     LD5BD
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_ExitTrue
-                JSR     LB745
+                JSR     SongRequest_09
                 JSR     LD5BD
                 JMP     LE0ED
 
@@ -14482,7 +14507,7 @@ LD87E:          JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     VmOp_ExitFalse
                 JSR     LD743
                 JSR     LE0ED
-                JMP     LB755
+                JMP     SongRequest_11
 
 LD89F:          JSR     LD83F
                 JSR     VmOp_ExitTrue
@@ -14641,7 +14666,7 @@ LDA07:          JSR     LE1F8
 
 LDA10:          JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     VmOp_ExitTrue
-                LDA     $0354
+                LDA     OperatingParty
                 CMP     #$05
                 BNE     @LDA20
                 JMP     LDBCA
@@ -14718,7 +14743,7 @@ LDA98:          JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     VmOp_ExitTrue
                 JSR     LDA5D
                 JSR     VmOp_ExitTrue
-                JSR     LB749
+                JSR     SongRequest_0A
                 LDA     #$FA
                 JSR     VmOp_PushByte
                 JSR     LDA7A
@@ -14856,12 +14881,12 @@ LDBB6:          JSR     LDB36
                 JSR     VmOp_CheckNotZero
                 BCC     LDBEA
 LDBCA:          LDA     #$00
-                STA     $0354
+                STA     OperatingParty
                 STA     $03B5
                 LDY     $035A
                 LDA     #$01
                 STA     $0361
-                JSR     LB745
+                JSR     SongRequest_09
                 JSR     LD5BD
                 JSR     LE0ED
                 JSR     LDB4B
@@ -14882,7 +14907,7 @@ LDBEA:          BCS     LDBE9
                 LDA     #$00
                 STA     $03FB
                 STA     $0361
-                JMP     LB745
+                JMP     SongRequest_09
 
 LDC14:          JSR     LDB0C
                 JSR     VmOp_ExitFalse
@@ -15319,11 +15344,11 @@ LDEF4:          JSR     LE1F8
                 JSR     VmHelper_PushConst_0004
                 JMP     VmOp_Compare_AGeatherThanOrEqual
 
-LDEFD:          LDA     $03D3
+LDEFD:          LDA     FieldTime-1
                 JMP     VmOp_PushByte
 
 LDF03:          JSR     VmOp_PopRegister
-                STY     $03D3
+                STY     FieldTime-1
                 RTS
 
 LDF0A:          LDY     $035A
@@ -15336,13 +15361,13 @@ LDF0A:          LDY     $035A
 @LDF1A:         RTS
 
 LDF1B:          JSR     LD74F
-                LDA     $0355
+                LDA     HelperParty
                 JSR     VmOp_PushByte
                 JSR     VmOp_Or
                 JSR     VmOp_ExitFalse
 LDF2A:          JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     VmOp_ExitFalse
-                JSR     LB741
+                JSR     SongRequest_06
                 JSR     VmHelper_PushConst_0003
                 JSR     VmHelper_WriteTempAddressWord_06
                 JSR     VmHelper_ReadTempAddressWord_0A
@@ -15354,7 +15379,7 @@ LDF45:          JSR     LD74F
                 JSR     VmOp_ExitTrue
                 JSR     VmHelper_PushConst_0001
                 JSR     LDF03
-                LDY     $0354
+                LDY     OperatingParty
                 LDA     PartyLifes,y
                 BEQ     @LDF5F
                 SEC
@@ -15389,7 +15414,7 @@ LDF9C:          JSR     VmHelper_ReadTempAddressWord_0A
                 LDA     $035A
                 CMP     #$01
                 BEQ     @LDFE2
-                LDA     $0355
+                LDA     HelperParty
                 CMP     #$06
                 BCS     @LDFE2
                 LDA     OamBuffer+80
@@ -15554,7 +15579,7 @@ LE101:          LDY     $035A
                 JSR     VmHelper_PushConst_0040
                 JSR     LDEB1
 @LE11F:         LDY     $035A
-                LDA     $0354,y
+                LDA     OperatingParty,y
                 CMP     #$05
                 BCS     @LE12E
                 LDA     #$00
@@ -15677,18 +15702,18 @@ LE1E0:          JSR     LDEF4
 @LE1F7:         RTS
 
 LE1F8:          LDY     $035A
-                LDA     $0354,y
+                LDA     OperatingParty,y
                 JMP     VmOp_PushByte
 
 LE201:          JSR     VmOp_PopRegister
                 TYA
                 LDY     $035A
-                STA     $0354,y
+                STA     OperatingParty,y
                 RTS
 
 LE20C:          LDY     #$05
                 LDA     #$00
-@LE210:         STA     $0354,y
+@LE210:         STA     OperatingParty,y
                 DEY
                 BPL     @LE210
                 RTS
@@ -15727,7 +15752,7 @@ LE246:          .byte   $00
 LE24C:          LDY     $035A
                 CPY     #$02
                 BCS     @LE261
-                LDA     $0354,y
+                LDA     OperatingParty,y
                 CMP     #$06
                 BCS     @LE261
                 TAY
@@ -15860,7 +15885,7 @@ LE368:          LDY     #$05
                 BNE     @LE36A
 @LE372:         JMP     VmHelper_PushConst_0001
 
-@LE375:         LDA     $0354,y
+@LE375:         LDA     OperatingParty,y
                 CMP     #$05
                 BCC     @LE372
                 JMP     VmHelper_PushConst_0000
@@ -16036,7 +16061,7 @@ LE45F:          JSR     LE419
                 JSR     VmHelper_PushConst_0090
                 JSR     VmOp_Compare_BGeatherThan
                 JSR     VmOp_ExitFalse
-                JSR     LB74D
+                JSR     SongRequest_0E
                 JSR     LE459
                 JSR     LE425
                 JMP     LE40A
@@ -16054,7 +16079,7 @@ LE492:          JSR     LE42B
                 JSR     VmHelper_PushConst_0090
                 JSR     VmOp_Compare_BGeatherThan
                 JSR     VmOp_ExitFalse
-                JSR     LB74D
+                JSR     SongRequest_0E
                 JSR     LE453
                 JSR     LE437
                 JMP     LE404
@@ -16143,7 +16168,7 @@ LE551:          JSR     LE53E
                 LDA     $0499
                 AND     #$03
                 BNE     @LE58E
-                JSR     LB751
+                JSR     SongRequest_0F
 @LE58E:         RTS
 
 LE58F:          LDA     $03FA
@@ -16263,7 +16288,7 @@ LE689:          LDA     PadBuffer_Trigger+2
                 STA     $0473
                 JMP     EnableApuChannel
 
-LE6B0:          JSR     LE7BE
+Fight_MainLoop: JSR     LE7BE
                 JSR     ReadJoypad
                 JSR     LE689
                 JSR     LEE9A
@@ -16291,7 +16316,7 @@ LE6B0:          JSR     LE7BE
                 JSR     LE4FF
                 JSR     LE721
                 LDA     $03FE
-                BEQ     LE6B0
+                BEQ     Fight_MainLoop
                 JMP     LE7D1
 
 LE708:          LDA     $03FE
@@ -16369,11 +16394,11 @@ LE76A:          JSR     DisableApuChannel
                 JSR     LE537
                 JSR     LE508
                 JSR     EnableApuChannel
-                JMP     LE6B0
+                JMP     Fight_MainLoop
 
 LE7BE:          JSR     SetOamDmaRequest
                 JSR     LB04F
-                JSR     LF0CD
+                JSR     WaitNmiFinish
                 LDY     RleExpandIndex
                 LDA     BankNumberTable,y
                 STA     ChrBankRequest
@@ -16408,7 +16433,7 @@ LE7D1:          LDA     #$01
                 JSR     LB014
                 JSR     LBA24
                 LDA     #$02
-                JSR     LB76B
+                JSR     SongRequest
                 JSR     LB1A8
                 JSR     SetOamDmaRequest
                 JSR     LBA24
@@ -16426,7 +16451,7 @@ LE7D1:          LDA     #$01
                 DEY
                 BPL     @LE845
                 LDA     #$00
-                STA     $0354
+                STA     OperatingParty
                 RTS
 
 LE851:          TXA
@@ -16444,7 +16469,7 @@ LE856:          LDA     $C2
                 JSR     LB71A
                 JSR     SetOamDmaRequest
                 JSR     LBA24
-                JSR     LB77D
+                JSR     PlaySubSequence
                 LDA     #$00
                 STA     $C2
                 LDA     #$0E
@@ -16500,7 +16525,7 @@ LE879:          LDY     #$00
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
 @LE8DA:         JSR     LBA24
-                JSR     LB77D
+                JSR     PlaySubSequence
                 JSR     L9620
                 BCC     @LE8DA
                 PLA
@@ -16512,7 +16537,7 @@ LE8E8:          TXA
                 LDA     $045C
                 BNE     @LE90C
                 LDY     #$03
-@LE8F1:         LDA     $0354,y
+@LE8F1:         LDA     OperatingParty,y
                 STA     $0464,y
                 LDA     $03DC,y
                 STA     $045E,y
@@ -16587,7 +16612,7 @@ LE8E8:          TXA
                 BNE     @LE93C
                 DEC     $045D
                 LDA     #$06
-                JSR     LB76B
+                JSR     SongRequest
                 LDA     RleExpandIndex
                 STA     $0494
                 LDA     #$0F
@@ -16621,7 +16646,7 @@ LE8E8:          TXA
                 LDA     #$01
                 STA     $03E2,y
                 LDA     $0464,y
-                STA     $0354,y
+                STA     OperatingParty,y
                 LDA     $045E,y
                 STA     $03DC,y
 @LE9E4:         DEY
@@ -16702,7 +16727,7 @@ LEA45:          TXA
                 ADC     #$00
                 STX     $045A
                 STY     $045B
-                JSR     LB76B
+                JSR     SongRequest                     ;#12 or #13
                 LDX     $045A
                 LDY     $045B
                 LDA     OamBuffer+48,y
@@ -16779,12 +16804,12 @@ LEA45:          TXA
                 TXA
                 PHA
                 LDA     #$08
-                JSR     LB76B
+                JSR     SongRequest
                 LDX     $045A
                 LDY     $045B
                 JMP     @LEB8A
 
-@LEB16:         LDA     $0355
+@LEB16:         LDA     HelperParty
                 CMP     #$05
                 BCC     @LEB20
                 JMP     @LEB8D
@@ -16824,7 +16849,7 @@ LEA45:          TXA
                 LDA     #$01
                 STA     $046A,x
                 LDA     #$08
-                JSR     LB76B
+                JSR     SongRequest
                 JSR     LEB9E
                 BNE     @LEB81
 @LEB7E:         DEX
@@ -17243,60 +17268,67 @@ IsAnnihilation: LDY     #$04                            ;5 characters
 
 @Alive:         JMP     VmHelper_PushConst_0000
 
-LEE5C:          LDY     #$00
-                LDA     PartyLifes
-                BEQ     @LEE64
+VmProc_PushAlivePartyCount:
+                LDY     #$00                            ;Y : Number of alive parties
+                LDA     PartyLifes                      ;Goku
+                BEQ     @CheckSanzo
                 INY
-@LEE64:         LDA     PartyLifes+1
-                BEQ     @LEE6A
+@CheckSanzo:    LDA     PartyLifes+1                    ;Sanzo
+                BEQ     @CheckHorse
                 INY
-@LEE6A:         LDA     PartyLifes+2
-                BEQ     @LEE70
+@CheckHorse:    LDA     PartyLifes+2                    ;Horse
+                BEQ     @CheckSagojo
                 INY
-@LEE70:         LDA     PartyLifes+3
-                BEQ     @LEE76
+@CheckSagojo:   LDA     PartyLifes+3                    ;Sagojo
+                BEQ     @CheckChohakkai
                 INY
-@LEE76:         LDA     PartyLifes+4
-                BEQ     @LEE7C
+@CheckChohakkai:
+                LDA     PartyLifes+4                    ;Chohakkai
+                BEQ     @Return
                 INY
-@LEE7C:         TYA
+@Return:        TYA
                 JMP     VmOp_PushByte
 
-LEE80:          LDY     $0354
+VmHelper_PushOperatingPartyLife:
+                LDY     OperatingParty
                 LDA     PartyLifes,y
                 JMP     VmOp_PushByte
 
-LEE89:          JSR     LEEB7
-                JSR     VmOp_ExitFalse
-                LDA     $0354
-                CMP     #$05
-                BEQ     @LEE99
-                JSR     LEEBD
-@LEE99:         RTS
+VmProc_NormalizeOperatingParty:
+                JSR     VmHelper_PushGokuLife
+                JSR     VmOp_ExitFalse                  ;if(GokuLife == 0){ return; }
+                LDA     OperatingParty
+                CMP     #$05                            ;Saturation
+                BEQ     @Return
+                JSR     SetOperatingPartyGoku
+@Return:        RTS
 
-LEE9A:          JSR     LEE89
+LEE9A:          JSR     VmProc_NormalizeOperatingParty
                 JSR     VmHelper_SaveMemTemp_08
-                JSR     LEE80
+                JSR     VmHelper_PushOperatingPartyLife
                 JSR     VmOp_CheckNotZero
-                BCC     @LEEAC
+                BCC     @OperatingPartyAlive
                 JSR     LEF69
-                SEC
-@LEEAC:         BCS     @LEEB4
+                SEC                                     ;BRA
+@OperatingPartyAlive:
+                BCS     @Return
                 JSR     LEEF4
                 JSR     LEF69
-@LEEB4:         JMP     VmOp_ReadTempMemAddr
+@Return:        JMP     VmOp_ReadTempMemAddr
 
-LEEB7:          LDA     PartyLifes
+VmHelper_PushGokuLife:
+                LDA     PartyLifes                      ;Party[0] : Goku
                 JMP     VmOp_PushByte
 
-LEEBD:          LDA     #$00
-                STA     $0354
+SetOperatingPartyGoku:
+                LDA     #$00
+                STA     OperatingParty
                 RTS
 
-LEEC3:          LDA     $0354
+LEEC3:          LDA     OperatingParty
                 JMP     VmOp_PushByte
 
-LEEC9:          LDA     $0355
+LEEC9:          LDA     HelperParty
                 JMP     VmOp_PushByte
 
 LEECF:          JSR     VmHelper_PushConst_0000
@@ -17310,23 +17342,23 @@ LEEDE:          LDA     #$03
                 LDY     #$C8
                 JMP     VmOp_PushRegister
 
-LEEE5:          LDA     $0355
-                BEQ     @LEEEE
+LEEE5:          LDA     HelperParty
+                BEQ     @PushFalse
                 CMP     #$06
-                BCC     @LEEF1
-@LEEEE:         JMP     VmHelper_PushConst_0000
+                BCC     @PushTrue
+@PushFalse:     JMP     VmHelper_PushConst_0000         ;0 or >= 6
 
-@LEEF1:         JMP     VmHelper_PushConst_0001
+@PushTrue:      JMP     VmHelper_PushConst_0001         ;0 < HelperParty < 6
 
 LEEF4:          LDA     PartyLifes
                 BEQ     @LEEFA
                 RTS
 
-@LEEFA:         JSR     LEE5C
+@LEEFA:         JSR     VmProc_PushAlivePartyCount
                 JSR     VmOp_ExitFalse
-                JSR     LEE5C
+                JSR     VmProc_PushAlivePartyCount
                 JSR     VmHelper_PushConst_0001
-                JSR     VmOp_Compare_Equal
+                JSR     VmOp_Compare_Equal              ;C = 1 >= alive
                 JSR     LEEE5
                 JSR     VmOp_And
                 JSR     VmOp_ExitTrue
@@ -17359,7 +17391,7 @@ LEF48:          JSR     VmOp_PopRegister
 
 LEF4F:          LDA     $03E3
                 JSR     VmOp_PushByte
-                LDY     $0355
+                LDY     HelperParty
                 CPY     #$06
                 BCS     @LEF61
                 LDA     PartyLifes,y
@@ -17369,13 +17401,13 @@ LEF4F:          LDA     $03E3
                 JMP     VmOp_Or
 
 LEF69:          LDA     $045D
-                BNE     @LEFA3
+                BNE     @Return
                 LDA     $0480
                 ORA     $0481
                 BNE     @LEFA4
                 JSR     LEF4F
                 JSR     VmOp_ExitTrue
-                JSR     LEE5C
+                JSR     VmProc_PushAlivePartyCount
                 JSR     VmHelper_PushConst_0002
                 JSR     VmOp_Compare_BGeatherThanOrEqual
                 JSR     VmOp_ExitFalse
@@ -17389,12 +17421,12 @@ LEF69:          LDA     $045D
                 STY     $03E3
                 JSR     VmHelper_ReadTempAddressWord_04
                 JSR     LEF48
-@LEFA3:         RTS
+@Return:        RTS
 
 @LEFA4:         LDA     $0480
                 BEQ     @LEFCE
                 LDA     PartyIn_Chohakkai
-                BNE     @LEFA3
+                BNE     @Return
                 INC     PartyIn_Chohakkai
                 JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_WriteTempAddressWord_04
@@ -17408,7 +17440,7 @@ LEF69:          LDA     $045D
                 JMP     LEF48
 
 @LEFCE:         LDA     PartyIn_Sagojo
-                BNE     @LEFA3
+                BNE     @Return
                 INC     PartyIn_Sagojo
                 JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_WriteTempAddressWord_04
@@ -17515,10 +17547,10 @@ RST:            SEI
                 STA     $39
                 JMP     LF0E2
 
-LF0CD:          LDA     #$00
+WaitNmiFinish:  LDA     #$00
                 STA     $56
-@LF0D1:         LDA     $56
-                BEQ     @LF0D1
+@WaitFrame:     LDA     $56
+                BEQ     @WaitFrame
                 JSR     SetDisplayScreenPosition
                 LDA     #$00
                 STA     $56
@@ -17548,19 +17580,19 @@ LF0E2:          JSR     @LF14A
                 LDA     #$0D
                 STA     RleExpandIndex
                 JSR     LAF9A
-                JSR     LB775
+                JSR     InitializeSounddriver
                 JSR     LE537
                 LDA     #$00
                 STA     $0484
-                JSR     LB72C
+                JSR     SongRequest_03
 @LF122:         JSR     @LF13F
-                JSR     LB77D
+                JSR     PlaySubSequence
                 JSR     LBA24
                 JSR     LE9E8
-                LDA     LFFF4
+                LDA     LFFF4                           ;Set bank #0
                 STA     LFFF4
                 BCC     @LF122
-                JSR     LB769
+                JSR     SongRequest_00
                 JSR     LBA3D
                 JMP     LF0E2
 
@@ -17627,20 +17659,24 @@ LF160:          LDY     #$00
                 .byte   $09
                 .byte   "CVTYL"
 
-LF1D0:          JMP     LF1DF
+JumpSongRequest:
+                JMP     Sound_SongRequest
 
-LF1D3:          JMP     LF398
+JumpPlaySubSequence:
+                JMP     Sound_PlaySubSequence
 
 JumpDisableApuChannel:
-                JMP     ApuDisable
+                JMP     Sound_ApuDisable
 
 JumpEnableApuChannel:
-                JMP     ApuEnable
+                JMP     Sound_ApuEnable
 
-LF1DC:          JMP     LF367
+JumpInitializeSounddriver:
+                JMP     Sound_InitializeSounddriver
 
-; Argument: A = Process index
-LF1DF:          CMP     #$17
+; Argument: A = Song number
+Sound_SongRequest:
+                CMP     #$17
                 BCS     @Return                         ;if overflow song number, return
                 ASL     A
                 TAX
@@ -17651,225 +17687,252 @@ LF1DF:          CMP     #$17
 @Return:        RTS                                     ;Jump to process routine / Return caller
 
 SounddriverProcessPointerTable:
-                .word   TF21C-1
-                .word   TF21F-1
-                .word   TF238-1
-                .word   TF25C-1
-                .word   TF28B-1
-                .word   TF2BA-1
-                .word   TF2D3-1
-                .word   TF2DE-1
-                .word   TF2DF-1
-                .word   TF2E0-1
-                .word   TF2EB-1
-                .word   TF2F6-1
-                .word   TF2F7-1
-                .word   TF302-1
-                .word   TF30D-1
-                .word   TF318-1
-                .word   TF323-1
-                .word   TF324-1
-                .word   TF32F-1
-                .word   TF330-1
-                .word   TF33B-1
-                .word   TF351-1
-                .word   TF361-1
+                .word   SoundPlay_Mute-1
+                .word   SoundPlay_Battle-1
+                .word   SoundPlay_Field-1
+                .word   SoundPlay_Title-1
+                .word   SoundPlay_Ending-1
+                .word   SoundPlay_Shrine-1
+                .word   SoundPlay_SE_Damage-1
+                .word   SoundPlay_SE_02-1
+                .word   SoundPlay_SE_03-1
+                .word   SoundPlay_SE_Kill-1
+                .word   SoundPlay_SE_Jump-1
+                .word   SoundPlay_SE_06-1
+                .word   SoundPlay_SE_07-1
+                .word   SoundPlay_SE_08-1
+                .word   SoundPlay_SE_GetItem-1
+                .word   SoundPlay_SE_10-1
+                .word   SoundPlay_SE_11-1
+                .word   SoundPlay_SE_Attack-1
+                .word   SoundPlay_SE_13-1
+                .word   SoundPlay_SE_14-1
+                .word   SoundPlay_SE_15-1               ;Stop noise channel
+                .word   SoundPlay_SE_16-1
+                .word   SoundPlay_SE_17-1
 
-TF21C:          JMP     LF367
+SoundPlay_Mute: JMP     Sound_InitializeSounddriver
 
-TF21F:          JSR     LF367
-                LDA     #$87
-                STA     $11
-                LDA     #$F5
-                STA     $12
+SoundPlay_Battle:
+                JSR     Sound_InitializeSounddriver
+                LDA     #<Music_01_Main_Sq1
+                STA     Sound_Sq1_MainSequencePointer
+                LDA     #>Music_01_Main_Sq1
+                STA     Sound_Sq1_MainSequencePointer+1
                 LDA     #$A1
-                STA     $21
+                STA     Sound_Tri_MainSequencePointer
                 LDA     #$F5
-                STA     $22
-                JSR     LF47C
-                JMP     LF48A
+                STA     Sound_Tri_MainSequencePointer+1
+                JSR     Sound_PlayMainSequence_Sq1
+                JMP     Sound_PlayMainSequence_Tri
 
-TF238:          JSR     LF367
+SoundPlay_Field:
+                JSR     Sound_InitializeSounddriver
                 LDA     #$54
-                STA     $11
+                STA     Sound_Sq1_MainSequencePointer
                 LDA     #$F7
-                STA     $12
+                STA     Sound_Sq1_MainSequencePointer+1
                 LDA     #$EF
-                STA     $19
+                STA     Sound_Sq2_MainSequencePointer
                 LDA     #$F7
-                STA     $1A
+                STA     Sound_Sq2_MainSequencePointer+1
                 LDA     #$A4
-                STA     $21
+                STA     Sound_Tri_MainSequencePointer
                 LDA     #$F7
-                STA     $22
-                JSR     LF47C
-                JSR     LF483
-                JMP     LF48A
+                STA     Sound_Tri_MainSequencePointer+1
+                JSR     Sound_PlayMainSequence_Sq1
+                JSR     Sound_PlayMainSequence_Sq2
+                JMP     Sound_PlayMainSequence_Tri
 
-TF25C:          JSR     LF367
+SoundPlay_Title:
+                JSR     Sound_InitializeSounddriver
                 LDA     #$A1
-                STA     $11
+                STA     Sound_Sq1_MainSequencePointer
                 LDA     #$FE
-                STA     $12
+                STA     Sound_Sq1_MainSequencePointer+1
                 LDA     #$C2
-                STA     $19
+                STA     Sound_Sq2_MainSequencePointer
                 LDA     #$FE
-                STA     $1A
+                STA     Sound_Sq2_MainSequencePointer+1
                 LDA     #$D4
-                STA     $21
+                STA     Sound_Tri_MainSequencePointer
                 LDA     #$FE
-                STA     $22
+                STA     Sound_Tri_MainSequencePointer+1
                 LDA     #$04
-                STA     $29
+                STA     Sound_Noi_MainSequencePointer
                 LDA     #$FF
-                STA     $2A
-                JSR     LF47C
-                JSR     LF483
-                JSR     LF48A
-                JMP     LF491
+                STA     Sound_Noi_MainSequencePointer+1
+                JSR     Sound_PlayMainSequence_Sq1
+                JSR     Sound_PlayMainSequence_Sq2
+                JSR     Sound_PlayMainSequence_Tri
+                JMP     Sound_PlayMainSequence_Noi
 
-TF28B:          JSR     LF367
+SoundPlay_Ending:
+                JSR     Sound_InitializeSounddriver
                 LDA     #$05
-                STA     $11
+                STA     Sound_Sq1_MainSequencePointer
                 LDA     #$FD
-                STA     $12
+                STA     Sound_Sq1_MainSequencePointer+1
                 LDA     #$13
-                STA     $19
+                STA     Sound_Sq2_MainSequencePointer
                 LDA     #$FD
-                STA     $1A
+                STA     Sound_Sq2_MainSequencePointer+1
                 LDA     #$42
-                STA     $21
+                STA     Sound_Tri_MainSequencePointer
                 LDA     #$FD
-                STA     $22
+                STA     Sound_Tri_MainSequencePointer+1
                 LDA     #$71
-                STA     $29
+                STA     Sound_Noi_MainSequencePointer
                 LDA     #$FD
-                STA     $2A
-                JSR     LF47C
-                JSR     LF483
-                JSR     LF48A
-                JMP     LF491
+                STA     Sound_Noi_MainSequencePointer+1
+                JSR     Sound_PlayMainSequence_Sq1
+                JSR     Sound_PlayMainSequence_Sq2
+                JSR     Sound_PlayMainSequence_Tri
+                JMP     Sound_PlayMainSequence_Noi
 
-TF2BA:          JSR     LF367
+SoundPlay_Shrine:
+                JSR     Sound_InitializeSounddriver
                 LDA     #$D1
-                STA     $11
+                STA     Sound_Sq1_MainSequencePointer
                 LDA     #$FA
-                STA     $12
+                STA     Sound_Sq1_MainSequencePointer+1
                 LDA     #$FF
-                STA     $21
+                STA     Sound_Tri_MainSequencePointer
                 LDA     #$FA
-                STA     $22
-                JSR     LF47C
-                JMP     LF48A
+                STA     Sound_Tri_MainSequencePointer+1
+                JSR     Sound_PlayMainSequence_Sq1
+                JMP     Sound_PlayMainSequence_Tri
 
-TF2D3:          LDA     #$F2
-                STA     $29
+SoundPlay_SE_Damage:
+                LDA     #$F2
+                STA     Sound_Noi_MainSequencePointer
                 LDA     #$F4
-                STA     $2A
-                JMP     LF491
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
 
-TF2DE:          RTS
-
-TF2DF:          RTS
-
-TF2E0:          LDA     #$44
-                STA     $29
-                LDA     #$F5
-                STA     $2A
-                JMP     LF491
-
-TF2EB:          LDA     #$E5
-                STA     $19
-                LDA     #$F4
-                STA     $1A
-                JMP     LF483
-
-TF2F6:          RTS
-
-TF2F7:          LDA     #$05
-                STA     $29
-                LDA     #$F5
-                STA     $2A
-                JMP     LF491
-
-TF302:          LDA     #$11
-                STA     $29
-                LDA     #$F5
-                STA     $2A
-                JMP     LF491
-
-TF30D:          LDA     #$1D
-                STA     $19
-                LDA     #$F5
-                STA     $1A
-                JMP     LF483
-
-TF318:          LDA     #$32
-                STA     $19
-                LDA     #$F5
-                STA     $1A
-                JMP     LF483
-
-TF323:          RTS
-
-TF324:          LDA     #$D9
-                STA     $29
-                LDA     #$F4
-                STA     $2A
-                JMP     LF491
-
-TF32F:          RTS
-
-TF330:          LDA     #$76
-                STA     $29
-                LDA     #$F5
-                STA     $2A
-                JMP     LF491
-
-TF33B:          LDA     #$00
-                LDX     #$28
-@LF33F:         STA     $00,x
-                INX
-                CPX     #$30
-                BNE     @LF33F
-                LDX     #$0C
-@LF348:         STA     SQ1_VOL,x
-                INX
-                CPX     #$10
-                BNE     @LF348
+SoundPlay_SE_02:
                 RTS
 
-TF351:          LDA     #$08
+SoundPlay_SE_03:
+                RTS
+
+SoundPlay_SE_Kill:
+                LDA     #$44
+                STA     Sound_Noi_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
+
+SoundPlay_SE_Jump:
+                LDA     #$E5
+                STA     Sound_Sq2_MainSequencePointer
+                LDA     #$F4
+                STA     Sound_Sq2_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Sq2
+
+SoundPlay_SE_06:
+                RTS
+
+SoundPlay_SE_07:
+                LDA     #$05
+                STA     Sound_Noi_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
+
+SoundPlay_SE_08:
+                LDA     #$11
+                STA     Sound_Noi_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
+
+SoundPlay_SE_GetItem:
+                LDA     #$1D
+                STA     Sound_Sq2_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Sq2_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Sq2
+
+SoundPlay_SE_10:
+                LDA     #$32
+                STA     Sound_Sq2_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Sq2_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Sq2
+
+SoundPlay_SE_11:
+                RTS
+
+SoundPlay_SE_Attack:
+                LDA     #$D9
+                STA     Sound_Noi_MainSequencePointer
+                LDA     #$F4
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
+
+SoundPlay_SE_13:
+                RTS
+
+SoundPlay_SE_14:
+                LDA     #$76
+                STA     Sound_Noi_MainSequencePointer
+                LDA     #$F5
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
+
+SoundPlay_SE_15:
+                LDA     #$00
+                LDX     #Sound_Noi
+@LoopMemoryClear:
+                STA     $00,x                           ;zero clear $28-$2F (Noise channel)
+                INX
+                CPX     #Sound_Noi+8
+                BNE     @LoopMemoryClear
+                LDX     #$0C
+@LoopApuClear:  STA     SQ1_VOL,x                       ;zero clear $400C-$400F (Noise channel)
+                INX
+                CPX     #$10
+                BNE     @LoopApuClear
+                RTS
+
+SoundPlay_SE_16:
+                LDA     #$08                            ;Play only noise channel
                 JSR     ApuChannesSet
                 LDA     #$6A
-                STA     $29
+                STA     Sound_Noi_MainSequencePointer
                 LDA     #$F5
-                STA     $2A
-                JMP     LF491
+                STA     Sound_Noi_MainSequencePointer+1
+                JMP     Sound_PlayMainSequence_Noi
 
-TF361:          JSR     TF33B
-                JMP     ApuEnable
+SoundPlay_SE_17:
+                JSR     SoundPlay_SE_15
+                JMP     Sound_ApuEnable
 
-LF367:          LDA     #$00
+Sound_InitializeSounddriver:
+                LDA     #$00
                 LDX     #$10
-@LF36B:         STA     $00,x
+@LoopMemory:    STA     $00,x
                 INX
                 CPX     #$30
-                BNE     @LF36B
+                BNE     @LoopMemory
                 LDX     #$00
-@LF374:         STA     SQ1_VOL,x
+@LoopRegister:  STA     SQ1_VOL,x
                 INX
                 CPX     #$14
-                BNE     @LF374
-ApuEnable:      LDA     #$0F
+                BNE     @LoopRegister
+Sound_ApuEnable:
+                LDA     #$0F
                 STA     SND_CHN
                 RTS
 
-ApuDisable:     LDA     #$00
+Sound_ApuDisable:
+                LDA     #$00
 ApuChannesSet:  STA     SND_CHN
                 RTS
 
-LF388:          .byte   $03
+Sound_WaitLengthTable:
+                .byte   $03
                 .byte   $01
                 .byte   $06
                 .byte   $02
@@ -17886,175 +17949,206 @@ LF388:          .byte   $03
                 .byte   $3C
                 .byte   $1E
 
-LF398:          NOP
-                LDA     $10                             ;Sq1
-                BEQ     @LF3A4
-                LDX     #$10
-                LDY     #$00
-                JSR     @LF3C6
-@LF3A4:         LDA     $18                             ;Sq2
-                BEQ     @LF3AF
-                LDX     #$18
-                LDY     #$04
-                JSR     @LF3C6
-@LF3AF:         LDA     $20                             ;Tri
-                BEQ     @LF3BA
-                LDX     #$20
-                LDY     #$08
-                JSR     @LF3C6
-@LF3BA:         LDA     $28                             ;Noi
+; $10 - Channels memory (8bytes * 4ch)
+; +$00 : ??    ; ???
+; +$01 : SS SS ; Main sequence pointer
+; +$03 : QQ QQ ; Sub sequence pointer
+; +$05 : LL    ; Tick length
+; +$06 : CC    ; Tick counter
+; +$07 : WW    ; Wait counter
+Sound_          .set    $00
+Sound_MainSequencePointer .set $01
+Sound_SubSequencePointer .set $03
+Sound_TickLength .set   $05
+Sound_TickCounter .set  $06
+Sound_WaitCounter .set  $07
+Sound_PlaySubSequence:
+                NOP
+@Sq1:           LDA     Sound_Sq1_                      ;Sq1
+                BEQ     @Sq2
+                LDX     #$10                            ;$10 + 8 * 0
+                LDY     #$00                            ;4 * 0
+                JSR     Sound_PlaySubSequenceChannel
+@Sq2:           LDA     Sound_Sq2_                      ;Sq2
+                BEQ     @Tri
+                LDX     #$18                            ;$10 + 8 * 1
+                LDY     #$04                            ;4 * 1
+                JSR     Sound_PlaySubSequenceChannel
+@Tri:           LDA     Sound_Tri_                      ;Tri
+                BEQ     @Noi
+                LDX     #$20                            ;$10 + 8 * 2
+                LDY     #$08                            ;4 * 2
+                JSR     Sound_PlaySubSequenceChannel
+@Noi:           LDA     Sound_Noi_                      ;Noi
                 BEQ     @Return
-                LDX     #$28
-                LDY     #$0C
-                JSR     @LF3C6
+                LDX     #$28                            ;$10 + 8 * 3
+                LDY     #$0C                            ;4 * 3
+                JSR     Sound_PlaySubSequenceChannel
 @Return:        RTS
 
-@LF3C6:         LDA     $06,x                           ;($06 + ($10 + Ch * 8))
-                BEQ     @LF401
-                DEC     $06,x
-                BNE     @LF400
-                LDA     $05,x
-                STA     $06,x
-                DEC     $07,x
-                BNE     @LF400
-@LF3D6:         LDA     ($03,x)
+Sound_PlaySubSequenceChannel:
+                LDA     Sound_TickCounter,x             ;($06 + ($10 + Ch * 8))
+                BEQ     @Update
+                DEC     Sound_TickCounter,x
+                BNE     @Return
+                LDA     Sound_TickLength,x              ;to zero
+                STA     Sound_TickCounter,x             ;Reload counter
+                DEC     Sound_WaitCounter,x
+                BNE     @Return                         ;Wait expired
+@ReadSequence:  LDA     (Sound_SubSequencePointer,x)    ;Read sequence : low freq
                 CMP     #$00
-                BEQ     @LF411
+                BEQ     @PlayMainSequence               ;Subsequence end
                 STA     SQ1_LO,y
-                LDA     #$08
-                CPY     #$0C
-                BEQ     @LF3EE
-                JSR     LF475
-                LDA     ($03,x)
-                AND     #$07
-                ORA     #$08
-@LF3EE:         STA     SQ1_HI,y
-                LDA     ($03,x)
-                LSR     A
+                LDA     #$08                            ;Noise length counter (L=1)
+                CPY     #$0C                            ;Noise
+                BEQ     @SkipReadHighFreq
+                JSR     IncrementSubSequencePointer
+                LDA     (Sound_SubSequencePointer,x)    ;Read sequence : high freq
+                AND     #$07                            ;%0000 1ttt
+                ORA     #$08                            ;PSG length counter (L=1)
+@SkipReadHighFreq:
+                STA     SQ1_HI,y
+                LDA     (Sound_SubSequencePointer,x)    ;Read sequence : length (reload)
+                LSR     A                               ;Get high nibble
                 LSR     A
                 LSR     A
                 LSR     A
                 TAY
-                LDA     LF388,y
-                STA     $07,x
-                JSR     LF475
-@LF400:         RTS
+                LDA     Sound_WaitLengthTable,y
+                STA     Sound_WaitCounter,x
+                JSR     IncrementSubSequencePointer
+@Return:        RTS
 
-@LF401:         LDA     $05,x
-                STA     $06,x
-                JMP     @LF3D6
+@Update:        LDA     Sound_TickLength,x              ;Reload counter
+                STA     Sound_TickCounter,x
+                JMP     @ReadSequence
 
-                .byte   $A1
-                .byte   $03
-                .byte   $29
-                .byte   $0F
-                .byte   $99
-                .byte   $02
-                .byte   $40
-                .byte   $A9
-                .byte   $08
-
-@LF411:         JSR     LF46E
-@LF414:         LDA     ($01,x)
+; Main sequence : ...
+;   00    : ?
+;   XX YY : Jump sub sequence address (low, high)
+                LDA     (Sound_SubSequencePointer,x)    ;(Maybe) unused code, write high freq raw value
+                AND     #$0F
+                STA     SQ1_LO,y
+                LDA     #$08
+@PlayMainSequence:
+                JSR     IncrementMainSequencePointer
+@ReadMainSequence:
+                LDA     (Sound_MainSequencePointer,x)
                 CMP     #$00
                 BEQ     @LF426
-                STA     $03,x
-                JSR     LF46E
-                LDA     ($01,x)
-                STA     $04,x
-                JMP     @LF3D6
+                STA     Sound_SubSequencePointer,x      ;Jump sub sequence address
+                JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                STA     Sound_SubSequencePointer+1,x
+                JMP     @ReadSequence                   ;Play jump destination sequence
 
-@LF426:         JSR     LF46E
-                LDA     ($01,x)
-                BEQ     LF462
+; Main sequence : 00 ...
+;   00          : Clear channel memory
+;   00 FE       : Set tick length
+;   00 FF XX YY : Jump main sequence address (low, high)
+@LF426:         JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                BEQ     ClearChannelData                ;Sequence : 00 00       ; Clear
                 CMP     #$FF
-                BEQ     @LF44F
+                BEQ     @JumpMain                       ;Sequence : 00 FF       ; Jump main sequence address
                 CMP     #$FE
-                BEQ     @LF443
-                STA     SQ1_VOL,y
-                JSR     LF46E
-                LDA     ($01,x)
+                BEQ     @SetTick                        ;Sequence : 00 FE       ; Set tick length
+                STA     SQ1_VOL,y                       ;Sequence : 00 ** XX YY ; Channel misc $4000, $4001
+                JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
                 STA     SQ1_SWEEP,y
-                JMP     @LF411
+                JMP     @PlayMainSequence
 
-@LF443:         JSR     LF46E
-                LDA     ($01,x)
-                STA     $05,x
-                STA     $06,x
-                JMP     @LF411
+; Main sequence : 00 FE ; Set tick length
+@SetTick:       JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                STA     Sound_TickLength,x
+                STA     Sound_TickCounter,x
+                JMP     @PlayMainSequence
 
-@LF44F:         JSR     LF46E
-                LDA     ($01,x)
+; Main sequence : 00 FF XX YY ; Jump main sequence address (low, high)
+@JumpMain:      JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
                 PHA
-                JSR     LF46E
-                LDA     ($01,x)
-                STA     $02,x
+                JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                STA     Sound_MainSequencePointer+1,x
                 PLA
-                STA     $01,x
-                JMP     @LF414
+                STA     Sound_MainSequencePointer,x
+                JMP     @ReadMainSequence
 
-LF462:          LDA     #$00
+; Sequence : 00 00 ; Clear channel memory
+ClearChannelData:
+                LDA     #$00
                 STA     SQ1_VOL,y
-                STA     $00,x
-                STA     $05,x
-                STA     $06,x
+                STA     Sound_,x
+                STA     Sound_TickLength,x
+                STA     Sound_TickCounter,x
                 RTS
 
-LF46E:          INC     $01,x
-                BNE     @LF474
-                INC     $02,x
-@LF474:         RTS
+IncrementMainSequencePointer:
+                INC     Sound_MainSequencePointer,x
+                BNE     @SkipHigh
+                INC     Sound_MainSequencePointer+1,x
+@SkipHigh:      RTS
 
-LF475:          INC     $03,x
-                BNE     @LF47B
-                INC     $04,x
-@LF47B:         RTS
+IncrementSubSequencePointer:
+                INC     Sound_SubSequencePointer,x
+                BNE     @SkipHigh
+                INC     Sound_SubSequencePointer+1,x
+@SkipHigh:      RTS
 
-LF47C:          LDX     #$10
-                LDY     #$00
-                JMP     LF498
+Sound_PlayMainSequence_Sq1:
+                LDX     #$10                            ;$10 + 8 * 0
+                LDY     #$00                            ;4 * 0
+                JMP     Sound_PlayMainSequence
 
-LF483:          LDX     #$18
-                LDY     #$04
-                JMP     LF498
+Sound_PlayMainSequence_Sq2:
+                LDX     #$18                            ;$10 + 8 * 1
+                LDY     #$04                            ;4 * 1
+                JMP     Sound_PlayMainSequence
 
-LF48A:          LDX     #$20
-                LDY     #$08
-                JMP     LF498
+Sound_PlayMainSequence_Tri:
+                LDX     #$20                            ;$10 + 8 * 2
+                LDY     #$08                            ;4 * 2
+                JMP     Sound_PlayMainSequence
 
-LF491:          LDX     #$28
-                LDY     #$0C
-                JMP     LF498
+Sound_PlayMainSequence_Noi:
+                LDX     #$28                            ;$10 + 8 * 3
+                LDY     #$0C                            ;4 * 3
+                JMP     Sound_PlayMainSequence
 
-LF498:          LDA     #$00
-                STA     $00,x
-@LF49C:         LDA     ($01,x)
+Sound_PlayMainSequence:
+                LDA     #$00
+                STA     Sound_,x
+@LF49C:         LDA     (Sound_MainSequencePointer,x)
                 CMP     #$00
                 BEQ     @LF4B0
-                STA     $03,x
-                JSR     LF46E
-                LDA     ($01,x)
-                STA     $04,x
-                LDA     #$FF
-                STA     $00,x
+                STA     Sound_SubSequencePointer,x      ;Set sub sequence pointer
+                JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                STA     Sound_SubSequencePointer+1,x
+                LDA     #$FF                            ;sub sequence address set flag?
+                STA     Sound_,x
                 RTS
 
-@LF4B0:         JSR     LF46E
-                LDA     ($01,x)
-                BEQ     LF462
+; Main sequence : 00 ...
+@LF4B0:         JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                BEQ     ClearChannelData
                 CMP     #$FE
                 BEQ     @LF4CC
                 STA     SQ1_VOL,y
-                JSR     LF46E
-                LDA     ($01,x)
+                JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
                 STA     SQ1_SWEEP,y
-                JSR     LF46E
+                JSR     IncrementMainSequencePointer
                 JMP     @LF49C
 
-@LF4CC:         JSR     LF46E
-                LDA     ($01,x)
-                STA     $05,x
-                JSR     LF46E
+@LF4CC:         JSR     IncrementMainSequencePointer
+                LDA     (Sound_MainSequencePointer,x)
+                STA     Sound_TickLength,x
+                JSR     IncrementMainSequencePointer
                 JMP     @LF49C
 
                 .byte   $00
@@ -18226,6 +18320,7 @@ LF498:          LDA     #$00
                 .byte   $00
                 .byte   "+,-.-,"
                 .byte   $00
+Music_01_Main_Sq1:
                 .byte   $00
                 .byte   $FE
                 .byte   $02

@@ -1,0 +1,362 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>ありがたくないおきょう</title>
+  <link rel="stylesheet" type="text/css" href="../code.css">
+  <link rel="shortcut icon" href="favicon.ico">
+  <style type="text/css">
+<!--
+
+	body{
+		margin			: 0px;
+		padding			: 0px;
+		color			: #FFFEFF;
+		background-color	: #002A88;
+	}
+	h1{
+		margin			: 8px;
+		padding			: 2px;
+	}
+	h2{
+		margin			: 8px 8px;
+		padding			: 2px;
+		border-bottom		: solid 1px #388700;
+	}
+	h3{
+		margin			: 8px 16px;
+		padding			: 2px;
+	}
+	h4{
+		margin			: 8px 24px;
+		padding			: 2px;
+	}
+	main{
+		margin			: 8px;
+		padding			: 2px;
+		color			: #BCBE00;
+		background-color	: #B71E7B;
+	}
+	section{
+		padding-top		: 8px;
+		background-image	: url("Images/Horizontal.png");
+		background-position	: top;
+		background-repeat	: repeat-x;
+	}
+	main section:first-child{
+		background-image	: none;
+	}
+	footer{
+		margin			: 64px auto;
+	}
+
+	p{
+		margin			: 8px 32px;
+	}
+	.center{
+		text-align		: center;
+	}
+	.small, .note{
+		font-size		: 80%;
+	}
+	.warning{
+		font-weight		: bold;
+	}
+
+	a{
+		color			: #EA9E22;
+	}
+
+	dl{
+		margin			: 2px 4px;
+	}
+	dt{
+		float			: left;
+		clear			: left;
+		width			: 128px;
+	}
+	dt, dd{
+		vertical-align		: middle;
+	}
+	dd:before{
+		content			: ": ";
+	}
+
+	img{
+		display			: block;
+		margin			: 8px auto;
+	}
+
+	pre{
+		margin			: 8px 48px;
+		border			: 1px solid rgba(255, 255, 255, 0.50);
+		background-color	: #FE6ECC;
+		padding			: 4px;
+	}
+	pre code{
+		color			: #000000;
+	}
+	p code{
+		color			: #F7D8A5;
+	}
+
+	.scrollCodeBox{
+		height			: 12em;
+		overflow-y		: scroll;
+	}
+
+	q{
+		display			: block;
+		margin			: 12px;
+		padding			: 4px;
+		padding-left		: 12px;
+		border-left		: 4px solid #F7D8A5;
+		background-color	: rgba(255, 255, 255, 0.15);
+		color			: #F7D8A5;
+	}
+	q:before, q:after{
+		content			: "";
+	}
+
+
+-->
+  </style>
+ </head>
+ <body>
+  <header>
+   <h1>ありがたくないおきょう</h1>
+  </header>
+  <main>
+
+   <section>
+    <h2>プログラム構成</h2>
+     <p>
+      配信中、<a href="https://ja.wikipedia.org/wiki/Forth">WikipediaのForthの記事</a>のURLだけ書かれたコメントをいただいたことがあるため関連を要調査。<br>
+      確かに命令体型が似ています。
+     </p>
+
+    <article>
+     <h3>スタックマシン</h3>
+     <p>
+      他言語にて作成されたのか、16bit幅のソフトウェアスタック操作による処理が数多く見受けられます。
+      $0600-$06FFがソフトウェアスタックとして使用されています。（$0600-$067F:下位, $0680-$06FF:上位）
+     </p>
+     <p>
+      ソフトウェアスタック操作サブルーチンを呼ぶことで、スタックに積まれた16bit値を1, 2個POPし、演算結果を1個PUSHします。<br>
+      スタックポインタとしてXレジスタを使用しており、随所にXレジスタの退避・復帰処理が存在します。
+     </p>
+
+     <h3>JSR地獄</h3>
+     <p>
+      ソフトウェアスタック操作やそれを用いた細切れのサブルーチン処理が多いため、JSR命令が大量に並ぶことも珍しくありません。
+      時々ネイティブ命令を吐いたり、最後のJSR命令をJMP命令に置き換える程度の最適化はあるようです。
+     </p>
+     <pre class="scrollCodeBox"><code class="small"><span class="comment">; Check the destination tile and invalidate the controller input</span>
+<span class="comment">; if it is a wall attribute.</span>
+<span class="comment">; Wall : 0, 1, 6, 7, 8, 9, 10, 11, 12, 16</span>
+<span class="comment">; Argument:</span>
+<span class="comment">;   Stack[0] = Y offset (base:6)</span>
+<span class="comment">;   Stack[1] = X offset (base:8)</span>
+VmProc_CheckFieldDestinationTile:
+B8E5 :	20 EA 96		JSR	VmHelper_SaveMemTemp_06				<span class="comment">;prologue</span>
+B8E8 :	20 E1 C0		JSR	VmProc_GetMemoryOffsetY_ChipY
+B8EB :	20 4E 97		JSR	VmOp_Add_AB					<span class="comment">;(Y + (6 + yArg)) % 15</span>
+B8EE :	20 C1 B8		JSR	VmProc_ModScreenTileYOffset
+B8F1 :	20 17 98		JSR	VmOp_Asl_04
+B8F4 :	20 AE 95		JSR	VmOp_Swap					<span class="comment">;save Y, calculate X</span>
+B8F7 :	20 A6 BC		JSR	VmHelper_PushFieldChipX
+B8FA :	20 4E 97		JSR	VmOp_Add_AB					<span class="comment">;(X + (8 + xArg)) % 16</span>
+B8FD :	20 D3 B8		JSR	VmProc_ModScreenTileXOffset
+B900 :	20 4E 97		JSR	VmOp_Add_AB					<span class="comment">;(Y &lt;&lt; 4) + X</span>
+B903 :	20 8D BC		JSR	VmHelper_PushConst_0500				<span class="comment">;$0500 = Map data (reg Y = 0)</span>
+B906 :	20 8D 95		JSR	VmOp_ReadOffsetByte				<span class="comment">;read map tile</span>
+B909 :	20 FE 96		JSR	VmHelper_WriteTempAddressWord_02
+B90C :	20 27 97		JSR	VmHelper_ReadTempAddressWord_02
+B90F :	20 49 98		JSR	VmHelper_PushConst_0000
+B912 :	20 C5 94		JSR	VmOp_Compare_Equal				<span class="comment">;if(  (tile ==  0) // sea</span>
+B915 :	20 27 97		JSR	VmHelper_ReadTempAddressWord_02
+B918 :	20 4D 98		JSR	VmHelper_PushConst_0001
+B91B :	20 C5 94		JSR	VmOp_Compare_Equal				<span class="comment">;  || (tile ==  1) // bushes</span>
+B91E :	20 2D 95		JSR	VmOp_Or
+B921 :	20 27 97		JSR	VmHelper_ReadTempAddressWord_02
+B924 :	20 89 98		JSR	VmHelper_PushConst_0010				<span class="comment">;  || (tile == 16) // door of time</span>
+B927 :	20 C5 94		JSR	VmOp_Compare_Equal
+B92A :	20 2D 95		JSR	VmOp_Or
+B92D :	20 27 97		JSR	VmHelper_ReadTempAddressWord_02
+B930 :	20 61 98		JSR	VmHelper_PushConst_0006
+B933 :	20 12 95		JSR	VmOp_Compare_BGeatherThanOrEqual		<span class="comment">;  || ((6 &lt;= tile) &amp;&amp; (tile &lt;= 12))</span>
+B936 :	20 27 97		JSR	VmHelper_ReadTempAddressWord_02
+B939 :	20 79 98		JSR	VmHelper_PushConst_000C
+B93C :	20 0B 95		JSR	VmOp_Compare_AGeatherThanOrEqual
+B93F :	20 19 95		JSR	VmOp_And
+B942 :	20 2D 95		JSR	VmOp_Or
+B945 :	20 C9 95		JSR	VmOp_CheckNotZero				<span class="comment">;){</span>
+B948 :	90 03			BCC	.Accept						<span class="comment">;  ClearJoypad();</span>
+B94A :	20 BB BA		JSR	ClearJoypad					<span class="comment">;}</span>
+B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilogue</span></code></pre>
+     <p>
+      JSR, RTS命令はそれぞれ6サイクルかかるため、サブルーチン呼び出し1セットにつき12サイクルを消費します。上記ルーチンは34個のJSR命令があるため408サイクル。<br>
+      1フレームにかけられるサイクル数は29780.5サイクルなので、これだけで1.4%の時間を消費してしまいます。
+     </p>
+
+     <h3>手続型メインループ</h3>
+     <p>
+      当然処理時間はネイティブ実装よりも圧倒的に劣るため、1フレームに処理できる内容はわずかになります。<br>
+      フィールド画面では32フレーム、戦闘画面では10フレームを1ループとして動作しており、その中で1フレームだけコントローラーを読んでいます。<br>
+      つまり、32フレームに一回しかコントローラー入力を受け付けないということになります。
+     </p>
+     <p>
+      エミュレータのラグフレームカウンタはコントローラ読み取りを元にしていることが多く、このゲームの場合ほぼ毎フレームカウンタが増えることになります。
+     </p>
+     <p>
+      32フレーム周期では、このフレームは移動先決定処理、次フレーム待機、目的座標へ1px移動、次フレーム待機、…といった流れになっています。<br>
+      フレームの待機時には、VBlankフラグ監視ルーチンに入るタイプで、サブルーチンをすべて抜けて無限ループに戻ることはありません。
+     </p>
+
+    </article>
+   </section>
+
+   <section>
+    <h2>ラグフレーム</h2>
+     <p>
+      フィールド上では定期的にラグフレームが発生していることが知られています。<br>
+      こんなゲームの解析を始めたきっかけ。
+     </p>
+     <img src="Images/Lagraph.png" alt="ラグフレーム可視化">
+    <article>
+     <h3>PPU VBlank flag</h3>
+     <p>
+      <a href="https://wiki.nesdev.com/w/index.php/PPU_rendering">スキャンライン=241, サイクル=1のタイミング</a>でVBlankフラグ（$2002 bit7）や、NMI信号のアサートがおこなわれます。<br>
+      VBlankフラグは$2002を読み取ると0クリアされるのですが、フラグが立つ瞬間に読み取りをしてしまうと、CPUがNMI信号を認識して<a href="https://wiki.nesdev.com/w/index.php/PPU_frame_timing#VBL_Flag_Timing">割り込みをかける前にネゲート</a>されてしまいます。
+     </p>
+     <pre><code><span class="comment">; Bug : 1/7 chance that NMI will not be executed</span>
+<span class="comment">; BIT abs(4), BVS rel(3) => 7 cycles</span>
+<span class="comment">; If the NMI is turned on in the 4th cycle of the BIT instruction,</span>
+<span class="comment">; it will be skipped.</span>
+	.org	$BBE0
+.WaitVBlankExit	BIT	PPUSTATUS			<span class="comment">; 4</span>
+		BVS	.WaitVBlankExit			<span class="comment">; 3/2 Wait *Sprite 0hit*, loop during VBlank</span>
+		JMP	SetDisplayScreenPosition
+</code></pre>
+     <p>
+      このゲームではなぜかVBlank終了時のスプライト0ヒットフラグが消えるのを待っているのですが、実質的には一緒です。
+     </p>
+
+     <p>
+      実際にリードアクセスが発生するのは、Absoluteアドレッシングの場合は4サイクル目となります。<br>
+      また、CPUはPPUの1/3の速度で動作しているため、PPU 3サイクル分、
+      しかし<a href="https://wiki.nesdev.com/w/index.php/CPU_pin_out_and_signal_description#Signal_description">M2クロックのhigh</a>がリードのため、1.875サイクル分のリードが発生することになります。
+     </p>
+     <!-- TODO : サイクルチャート画像 -->
+     <p>
+      ラグフレーム発生の期待値は、 32 [frame] * (2 / 21) [PPU cycle] = 3.048 程度になります。
+     </p>
+
+     <h3>エミュレータ上でのラグフレーム再現</h3>
+     <p>
+      FCEUXではOld PPU/New PPU共に、このVBlankフラグの再現ができていないようです。（2.3.0現在）<br>
+      よって、<a href="https://www.speedrun.com/ganso_saiyuki_super_monkey_daiboken">speedrun.com</a>上では実機とエミュでカテゴリが分かれています。
+      今後のFCEUX再現性向上や、他再現性の高いエミュが主流になるとカテゴリ統合されるかもしれません。<br>
+      <del>競技として面白いかは別として。</del>
+     </p>
+     <p>
+      なお、FCEUX New PPUはステータス領域でノイズがちらつくのでOld PPU推奨です。
+     </p>
+     <p>
+      テストROMを作って調べた結果のリスト<br>
+      多分TASVideosの<a href="http://tasvideos.org/EmulatorResources/NESAccuracyTests.html">NES Accuracy Tests</a>を見るのが一番手っ取り早いと思います。
+      <ul>
+       <li>[OK] Mesen</li>
+       <li>[OK] BizHawk (NesHawk)</li>
+       <li>[NG] BizHawk (QuickNes)</li>
+       <li>[OK] puNES</li>
+       <li>[OK] Nestopia UE</li>
+       <li>[NG] FCEUX (Old PPU)</li>
+       <li>[NG] FCEUX (New PPU)</li>
+       <li>[NG] VirtuaNES</li>
+      </ul>
+     </p>
+     <p>
+      なお、このゲームに限定してであればラグフレームが発生した場合 $BA1B が実行されるため、
+      ブレークポイント等を利用すれば時間計測をせずともラグフレームの発生有無を判別可能です。
+     </p>
+    </article>
+
+     <h3>結局</h3>
+     <p>
+      「人力で調整可能ですか？」 → 「1フレーム内で実行される命令サイクルを正確に計算できる人間なら可能です（無理）」
+     </p>
+     <p>
+      TASの場合、コントローラ入力でサイクルを頑張って調整することになりますが、
+      32フレームに1回しか介入できないため全てのラグフレームを回避することは難しく、ある程度の妥協が必要そうです。<br>
+      （セレクトポーズ中はかなり低減されますが…）
+     </p>
+   </section>
+
+   <section>
+    <h2>サウンドドライバ</h2>
+     <p>
+      あとで書く。
+     </p>
+     <p>
+      <ul>
+       <li>フレーム単位音長で、ハードウェアエンベロープのみ、APUレジスタに書く値ほぼそのまま</li>
+       <li>簡単なサブルーチン機能はある</li>
+       <li>BGM復帰機能は無いので、効果音を鳴らすシーンのBGMはそのチャンネルが使われていない</li>
+       <li>演奏開始アドレスの指定方法がゴミ</li>
+       <li>時々短周期ノイズ乗る（タイトル画面の曲とか）けど原因はまだ読んでない</li>
+      </ul>
+     </p>
+   </section>
+
+   <section>
+    <h2>インタビュー記事</h2>
+    <p>
+     <a href="https://www.beep-shop.com/column_entry/17433/">【リレーブログ（クリエーター編）第2回】”スーパーモンキー大冒険”ｔｋｓ様</a>
+    </p>
+    <article>
+     <h3>プログラマー O氏</h3>
+     <p>
+      <q>集まってきたのはまずプログラマーのＯさん。<br>彼はコモドールマニアで...（後略）</q>
+     </p>
+     <p>
+      コモドール64の6502開発環境や文化をファミコンに流用したのでしょうか。
+     </p>
+
+     <h3>デザイナー N氏</h3>
+     <p>
+      件のメッセージについては手垢が付くほどあちこちで触れられているのでもう興味ないです。
+     </p>
+
+     <h3>容量制限</h3>
+     <p>
+      <q>
+       なんせウリである数百画面にも及ぶ巨大マップ。あれだけでメモリ容量のほぼ総てを使い切ってしまって、考えていた他の仕様がほとんど入らなくなってしまったという。<br>
+       当時のファミコンのメモリは キャラクター 256Kbit、プログラム＆データ 256Kbit と非常にタイニーな環境で、
+       通常であれば圧縮であるとか、様々なテクニックを使って、容量を稼がなければいけないわけなのですが、当時の我々にはそういうスキルが足りてなかったのです。
+      </q>
+     </p>
+     <p>
+      6502ネイティブで書くともっと入りますよ^^<br>
+      <br>
+      …という冗談はさておき。<br>
+      ゲームロジック以外のシステム的な処理や静的な画面データの簡単なRLE圧縮等、一部はネイティブ実装されていたりするので、6502が全く書けない方ではなかったと推察されます。
+      開発ツール選定の時点で間違っていたわけです。<br>
+      時間も足りなかったのではないでしょうか。
+     </p>
+     <p>
+      CHRも（あの内容に対して）CHR 32KB(4バンク)は多い方だと思いますよ。メッセージ分差し引いてもかなり余ってるので。
+     </p>
+    </article>
+   </section>
+
+  </main>
+  <footer>
+   <p class="center" style="margin:16px; font-size:150%; line-height:8em;">
+    ひとびとに おしえを つたえましょう<br>
+    おしまい
+   </p>
+  </footer>
+
+ </body>
+</html>

@@ -142,6 +142,40 @@
 "Type":"ExternalAddr",
 "LabelAnno":"None"},
 
+"FieldTime":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"Low:$00-$1F, High:$00-$3F",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"FieldTime",
+"Value":980,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"HelperParty":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"HelperParty",
+"Value":853,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
 "OamBuffer":{
 "DataDescriptor":{
 "Length":256,
@@ -172,6 +206,23 @@
 "MultiMask":null,
 "Label":"OamDmaRequest",
 "Value":207,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"OperatingParty":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"OperatingParty",
+"Value":852,
 "Source":"Project",
 "Type":"ExternalAddr",
 "LabelAnno":"None"},
@@ -410,6 +461,482 @@
 "MultiMask":null,
 "Label":"ScreenY",
 "Value":89,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi":{
+"DataDescriptor":{
+"Length":8,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi",
+"Value":40,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi_":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_",
+"Value":40,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"Uncertain"},
+
+"Sound_Noi_MainSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_MainSequencePointer",
+"Value":41,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi_SubSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_SubSequencePointer",
+"Value":43,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi_TickCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_TickCounter",
+"Value":46,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi_TickLength":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_TickLength",
+"Value":45,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Noi_WaitCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Noi_WaitCounter",
+"Value":47,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1":{
+"DataDescriptor":{
+"Length":8,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1",
+"Value":16,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1_":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_",
+"Value":16,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"Uncertain"},
+
+"Sound_Sq1_MainSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_MainSequencePointer",
+"Value":17,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1_SubSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_SubSequencePointer",
+"Value":19,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1_TickCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_TickCounter",
+"Value":22,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1_TickLength":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_TickLength",
+"Value":21,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq1_WaitCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq1_WaitCounter",
+"Value":23,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2":{
+"DataDescriptor":{
+"Length":8,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2",
+"Value":24,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2_":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_",
+"Value":24,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"Uncertain"},
+
+"Sound_Sq2_MainSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_MainSequencePointer",
+"Value":25,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2_SubSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_SubSequencePointer",
+"Value":27,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2_TickCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_TickCounter",
+"Value":30,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2_TickLength":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_TickLength",
+"Value":29,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Sq2_WaitCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Sq2_WaitCounter",
+"Value":31,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri":{
+"DataDescriptor":{
+"Length":8,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri",
+"Value":32,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri_":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_",
+"Value":32,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"Uncertain"},
+
+"Sound_Tri_MainSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_MainSequencePointer",
+"Value":33,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri_SubSequencePointer":{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_SubSequencePointer",
+"Value":35,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri_TickCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_TickCounter",
+"Value":38,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri_TickLength":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_TickLength",
+"Value":37,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"Sound_Tri_WaitCounter":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_Tri_WaitCounter",
+"Value":39,
 "Source":"Project",
 "Type":"ExternalAddr",
 "LabelAnno":"None"},
@@ -904,6 +1431,21 @@
 {
 "Low":13986,
 "High":13986,
+"Hint":"Code"},
+
+{
+"Low":14087,
+"High":14087,
+"Hint":"Code"},
+
+{
+"Low":14098,
+"High":14098,
+"Hint":"Code"},
+
+{
+"Low":14185,
+"High":14185,
 "Hint":"Code"},
 
 {
@@ -1509,6 +2051,11 @@
 {
 "Low":29553,
 "High":29553,
+"Hint":"Code"},
+
+{
+"Low":29720,
+"High":29720,
 "Hint":"Code"}],
 "StatusFlagOverrides":{
 "5385":131072},
@@ -1519,7 +2066,7 @@
 "6":"Mapper=3, Mirror=Vertical",
 "5382":"always equal, maybe bug",
 "5385":"never jump",
-"5533":"Stack[1] = Mem[Stack[0] + stack[1]]",
+"5533":"Stack[1] = Mem[Stack[0] + Stack[1]]",
 "5536":"Stack[0] = Mem[Stack[0]]",
 "5613":"pop?",
 "5841":"[0] arg",
@@ -1592,7 +2139,6 @@
 "11804":"Execute sprite DMA",
 "11809":"Increment state counter (between $00 - $1F)",
 "11821":"Switch CHR bank (incorrect procedure...)",
-"11889":"if over VBlank, raise \"lag\" frame",
 "11976":"save software stack pointer",
 "11994":"1button, 1byte...",
 "12005":"restore software stack pointer",
@@ -1604,6 +2150,11 @@
 "12206":"Index \u003c #$20",
 "12214":"Nametable",
 "12217":"Attribute",
+"13370":"FieldTime_High++",
+"13453":"Increment field time",
+"13456":"FieldTime_Low++",
+"13462":"carry high byte",
+"13468":"0x20 \u003c= FieldTime_Low",
 "13863":"ASCII...",
 "14245":"Select",
 "14250":"Pausing",
@@ -1641,6 +2192,23 @@
 "14491":"[1C] Wait frame",
 "14503":"[1D] Wait frame",
 "14515":"[1E] Wait frame",
+"14545":"mod 15",
+"14563":"mod 16",
+"14581":"prologue",
+"14587":"(Y + (6 + yArg)) % 15",
+"14596":"save Y, calculate X",
+"14602":"(X + (8 + xArg)) % 16",
+"14608":"(Y \u003c\u003c 4) + X",
+"14611":"$0500 = Map data (reg Y = 0)",
+"14614":"read map tile",
+"14626":"if(  (tile ==  0) // sea",
+"14635":"  || (tile ==  1) // bushes",
+"14644":"  || (tile == 16) // door of time",
+"14659":"  || ((6 \u003c= tile) \u0026\u0026 (tile \u003c= 12))",
+"14677":"){",
+"14680":"  ClearJoypad();",
+"14682":"}",
+"14685":"epilogue",
 "14691":"not press : Exit",
 "14694":"8+0",
 "14697":"6-1",
@@ -1677,10 +2245,28 @@
 "16035":"    FieldChipX = #$0F;",
 "16041":"    FieldPageX--;",
 "16044":"}",
+"16047":"FieldChipY++;",
+"16062":"(0x0B \u003c FieldChipY)",
+"16065":"check page boundaries 11 -\u003e 12",
+"16068":"set page upper position",
+"16080":"increment pange",
+"16089":"check",
+"16095":"(0x0018 \u003e FieldPageY)",
+"16098":"page overrange",
+"16104":"update",
+"16116":"check Y=0x0000",
+"16137":"check page boundaries 0 -\u003e -1(overflow)",
+"16140":"set page bottom position",
+"16146":"decrement page",
+"16182":"push FieldX",
+"16188":"pop FiledX",
 "16224":"Show left nametable screen",
 "16227":"Show right nametable screen",
-"16592":"// arg = FieldPageY or ???",
-"16595":"Stack[0] = TC09B[FieldPageY] + arg",
+"16555":"field : mod 15, chip : mod 12",
+"16565":"=\u003e (12 * index) % 15",
+"16592":"// arg = FieldChipY or ???",
+"16595":"Stack[0] = MemoryOffset[FieldPageY] + arg",
+"16607":"return mod 15 (field memory height = 15)",
 "16610":"if(#$000F \u003c= Stack[0]){ Stack[0] -= #$000F; }",
 "16613":"  // #$000E \u003c Stack[0]",
 "16619":"  // Stack[0] -= #$000F",
@@ -1704,6 +2290,7 @@
 "17358":"7 times",
 "17377":"Left",
 "17386":"Right",
+"27254":"#12 or #13",
 "27628":"SrcPtr = Pointers[Index]",
 "27638":"DstPtr = #$0500",
 "27648":"Length",
@@ -1719,22 +2306,78 @@
 "27719":"Data",
 "27745":"High byte",
 "28252":"5 characters",
+"28268":"Y : Number of alive parties",
+"28270":"Goku",
+"28276":"Sanzo",
+"28282":"Horse",
+"28288":"Sagojo",
+"28294":"Chohakkai",
+"28316":"if(GokuLife == 0){ return; }",
+"28322":"Saturation",
+"28347":"BRA",
+"28359":"Party[0] : Goku",
+"28414":"0 or \u003e= 6",
+"28417":"0 \u003c HelperParty \u003c 6",
+"28438":"C = 1 \u003e= alive",
 "28762":"Disable display",
 "28779":"Wait VBlank at twice",
 "28791":"Memory is not clean...",
 "28796":"APU IRQ=Disable",
 "28806":"Skip stack",
 "28829":"Initialize stack pointer",
+"28990":"Set bank #0",
 "29091":"Junk data",
 "29093":"Uncompiled source",
 "29094":"PC:0x40E8, ROM:$C0D8 (Maybe)",
 "29169":"if overflow song number, return",
 "29181":"Jump to process routine / Return caller",
+"29222":"Stop noise channel",
+"29519":"zero clear $28-$2F (Noise channel)",
+"29528":"zero clear $400C-$400F (Noise channel)",
+"29537":"Play only noise channel",
 "29609":"Sq1",
+"29613":"$10 + 8 * 0",
+"29615":"4 * 0",
 "29620":"Sq2",
+"29624":"$10 + 8 * 1",
+"29626":"4 * 1",
 "29631":"Tri",
+"29635":"$10 + 8 * 2",
+"29637":"4 * 2",
 "29642":"Noi",
+"29646":"$10 + 8 * 3",
+"29648":"4 * 3",
 "29654":"($06 + ($10 + Ch * 8))",
+"29662":"to zero",
+"29664":"Reload counter",
+"29668":"Wait expired",
+"29670":"Read sequence : low freq",
+"29674":"Subsequence end",
+"29679":"Noise length counter (L=1)",
+"29681":"Noise",
+"29688":"Read sequence : high freq",
+"29690":"%0000 1ttt",
+"29692":"PSG length counter (L=1)",
+"29697":"Read sequence : length (reload)",
+"29699":"Get high nibble",
+"29713":"Reload counter",
+"29720":"(Maybe) unused code, write high freq raw value",
+"29738":"Jump sub sequence address",
+"29747":"Play jump destination sequence",
+"29755":"Sequence : 00 00       ; Clear",
+"29759":"Sequence : 00 FF       ; Jump main sequence address",
+"29763":"Sequence : 00 FE       ; Set tick length",
+"29765":"Sequence : 00 ** XX YY ; Channel misc $4000, $4001",
+"29836":"$10 + 8 * 0",
+"29838":"4 * 0",
+"29843":"$10 + 8 * 1",
+"29845":"4 * 1",
+"29850":"$10 + 8 * 2",
+"29852":"4 * 2",
+"29857":"$10 + 8 * 3",
+"29859":"4 * 3",
+"29874":"Set sub sequence pointer",
+"29883":"sub sequence address set flag?",
 "32782":"unused"},
 
 "LongComments":{
@@ -1877,19 +2520,67 @@
 "BackgroundColor":0},
 
 "16592":{
-"Text":"Argument: [0] ??? (FieldChipY or ???)\r\nReturn: [0] ???\r\n",
+"Text":"Argument: [0] Chip Y position\r\nReturn: [0] MemoryOffset Y (high nibble)\r\n",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
 "29167":{
-"Text":"Argument: A = Process index",
+"Text":"Argument: A = Song number",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
 
 "15344":{
 "Text":"Bug : 1/7 chance that NMI will not be executed\r\nBIT abs(4), BVS rel(3) =\u003e 7 cycles\r\nIf the NMI is turned on in the 4th cycle of the BIT instruction,\r\nit will be skipped.",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29608":{
+"Text":"$10 - Channels memory (8bytes * 4ch)\r\n+$00 : ??    ; ???\r\n+$01 : SS SS ; Main sequence pointer\r\n+$03 : QQ QQ ; Sub sequence pointer\r\n+$05 : LL    ; Tick length\r\n+$06 : CC    ; Tick counter\r\n+$07 : WW    ; Wait counter",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29720":{
+"Text":"Main sequence : ...\r\n  00    : ?\r\n  XX YY : Jump sub sequence address (low, high)",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29750":{
+"Text":"Main sequence : 00 ...\r\n  00          : Clear channel memory\r\n  00 FE       : Set tick length\r\n  00 FF XX YY : Jump main sequence address (low, high)",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29791":{
+"Text":"Main sequence : 00 FF XX YY ; Jump main sequence address (low, high)",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29779":{
+"Text":"Main sequence : 00 FE ; Set tick length",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29810":{
+"Text":"Sequence : 00 00 ; Clear channel memory",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"29888":{
+"Text":"Main sequence : 00 ...",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":0},
+
+"14581":{
+"Text":"Check the destination tile and invalidate the controller input\r\nif it is a wall attribute.\r\nWall : 0, 1, 6, 7, 8, 9, 10, 11, 12, 16\r\nArgument:\r\n  Stack[0] = Y offset (base:6)\r\n  Stack[1] = X offset (base:8)",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0}},
@@ -1931,6 +2622,12 @@
 "MaxWidth":80,
 "BackgroundColor":-5383962},
 
+"14326":{
+"Text":"Bug : Restricting movement by disabling the controller in the tile check is reset because the controller is reloaded when pause is restored",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-18751},
+
 "15344":{
 "Text":"Bug : 1/7 chance that NMI will not be executed",
 "BoxMode":false,
@@ -1942,6 +2639,12 @@
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
+
+"26304":{
+"Text":"Fight Main Loop",
+"BoxMode":false,
+"MaxWidth":80,
+"BackgroundColor":-5383962},
 
 "26731":{
 "Text":"Text transfer routine?",
@@ -1955,8 +2658,8 @@
 "MaxWidth":80,
 "BackgroundColor":-7278960},
 
-"29608":{
-"Text":"(Maybe) Sound driver play?",
+"29152":{
+"Text":"Sound driver",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
@@ -3775,60 +4478,60 @@
 "LabelAnno":"None"},
 
 "29231":{
-"Label":"TF21F",
+"Label":"SoundPlay_Battle",
 "Value":61983,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29586":{
-"Label":"ApuDisable",
+"Label":"Sound_ApuDisable",
 "Value":62338,
 "Source":"User",
-"Type":"NonUniqueLocalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"},
 
 "29580":{
-"Label":"ApuEnable",
+"Label":"Sound_ApuEnable",
 "Value":62332,
 "Source":"User",
-"Type":"NonUniqueLocalAddr",
+"Type":"GlobalAddr",
 "LabelAnno":"None"},
 
 "29422":{
-"Label":"TF2DE",
+"Label":"SoundPlay_SE_02",
 "Value":62174,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29423":{
-"Label":"TF2DF",
+"Label":"SoundPlay_SE_03",
 "Value":62175,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29446":{
-"Label":"TF2F6",
+"Label":"SoundPlay_SE_06",
 "Value":62198,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29491":{
-"Label":"TF323",
+"Label":"SoundPlay_SE_11",
 "Value":62243,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29503":{
-"Label":"TF32F",
+"Label":"SoundPlay_SE_13",
 "Value":62255,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "15999":{
 "Label":"VmProc_MoveFieldLeftChip",
@@ -3845,123 +4548,123 @@
 "LabelAnno":"None"},
 
 "29228":{
-"Label":"TF21C",
+"Label":"SoundPlay_Mute",
 "Value":61980,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
 "29256":{
-"Label":"TF238",
+"Label":"SoundPlay_Field",
 "Value":62008,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29292":{
-"Label":"TF25C",
+"Label":"SoundPlay_Title",
 "Value":62044,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29339":{
-"Label":"TF28B",
+"Label":"SoundPlay_Ending",
 "Value":62091,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29386":{
-"Label":"TF2BA",
+"Label":"SoundPlay_Shrine",
 "Value":62138,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29411":{
-"Label":"TF2D3",
+"Label":"SoundPlay_SE_Damage",
 "Value":62163,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29424":{
-"Label":"TF2E0",
+"Label":"SoundPlay_SE_Kill",
 "Value":62176,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29435":{
-"Label":"TF2EB",
+"Label":"SoundPlay_SE_Jump",
 "Value":62187,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29447":{
-"Label":"TF2F7",
+"Label":"SoundPlay_SE_07",
 "Value":62199,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29458":{
-"Label":"TF302",
+"Label":"SoundPlay_SE_08",
 "Value":62210,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29469":{
-"Label":"TF30D",
+"Label":"SoundPlay_SE_GetItem",
 "Value":62221,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29480":{
-"Label":"TF318",
+"Label":"SoundPlay_SE_10",
 "Value":62232,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29492":{
-"Label":"TF324",
+"Label":"SoundPlay_SE_Attack",
 "Value":62244,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29504":{
-"Label":"TF330",
+"Label":"SoundPlay_SE_14",
 "Value":62256,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29515":{
-"Label":"TF33B",
+"Label":"SoundPlay_SE_15",
 "Value":62267,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29537":{
-"Label":"TF351",
+"Label":"SoundPlay_SE_16",
 "Value":62289,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29553":{
-"Label":"TF361",
+"Label":"SoundPlay_SE_17",
 "Value":62305,
 "Source":"User",
 "Type":"GlobalAddr",
-"LabelAnno":"Generated"},
+"LabelAnno":"None"},
 
 "29588":{
 "Label":"ApuChannesSet",
@@ -3985,7 +4688,7 @@
 "LabelAnno":"None"},
 
 "16555":{
-"Label":"TC09B",
+"Label":"FieldPageY_MemoryOffset",
 "Value":49307,
 "Source":"User",
 "Type":"GlobalAddr",
@@ -4743,6 +5446,692 @@
 "14909":{
 "Label":"SetZeroSprite",
 "Value":47661,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28897":{
+"Label":"WaitFrame",
+"Value":61649,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"26304":{
+"Label":"Fight_MainLoop",
+"Value":59056,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28893":{
+"Label":"WaitNmiFinish",
+"Value":61645,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"12777":{
+"Label":"VmHelper_LoadFieldTime_Low",
+"Value":45529,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"12783":{
+"Label":"VmHelper_WriteFieldTime_Low",
+"Value":45535,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"12976":{
+"Label":"VmHelper_LoadFieldTime_High",
+"Value":45728,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"12982":{
+"Label":"VmHelper_WriteFieldTime_High",
+"Value":45734,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"5797":{
+"Label":"VmSecond_CopySecondStack_Reload",
+"Value":38549,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"5799":{
+"Label":"VmSecond_CopySecondStack",
+"Value":38551,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"5813":{
+"Label":"VmSecond_PopSecondStack",
+"Value":38565,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16592":{
+"Label":"VmProc_GetMemoryOffsetY",
+"Value":49344,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16625":{
+"Label":"VmProc_GetMemoryOffsetY_ChipY",
+"Value":49377,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14545":{
+"Label":"VmProc_ModScreenTileYOffset",
+"Value":47297,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29712":{
+"Label":"Return",
+"Value":62464,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29592":{
+"Label":"Sound_WaitLengthTable",
+"Value":62344,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29713":{
+"Label":"Update",
+"Value":62465,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29835":{
+"Label":"SkipHigh",
+"Value":62587,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29828":{
+"Label":"SkipHigh",
+"Value":62580,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29822":{
+"Label":"IncrementMainSequencePointer",
+"Value":62574,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29829":{
+"Label":"IncrementSubSequencePointer",
+"Value":62581,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29810":{
+"Label":"ClearChannelData",
+"Value":62562,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29694":{
+"Label":"SkipReadHighFreq",
+"Value":62446,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29620":{
+"Label":"Sq2",
+"Value":62372,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29609":{
+"Label":"Sq1",
+"Value":62361,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29631":{
+"Label":"Tri",
+"Value":62383,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29642":{
+"Label":"Noi",
+"Value":62394,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29654":{
+"Label":"Sound_PlaySubSequenceChannel",
+"Value":62406,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29563":{
+"Label":"LoopMemory",
+"Value":62315,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29572":{
+"Label":"LoopRegister",
+"Value":62324,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29559":{
+"Label":"Sound_InitializeSounddriver",
+"Value":62311,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29864":{
+"Label":"Sound_PlayMainSequence",
+"Value":62616,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29608":{
+"Label":"Sound_PlaySubSequence",
+"Value":62360,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29155":{
+"Label":"JumpPlaySubSequence",
+"Value":61907,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29164":{
+"Label":"JumpInitializeSounddriver",
+"Value":61916,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29167":{
+"Label":"Sound_SongRequest",
+"Value":61919,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29152":{
+"Label":"JumpSongRequest",
+"Value":61904,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29836":{
+"Label":"Sound_PlayMainSequence_Sq1",
+"Value":62588,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29843":{
+"Label":"Sound_PlayMainSequence_Sq2",
+"Value":62595,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29850":{
+"Label":"Sound_PlayMainSequence_Tri",
+"Value":62602,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29857":{
+"Label":"Sound_PlayMainSequence_Noi",
+"Value":62609,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14201":{
+"Label":"SongRequest_00",
+"Value":46953,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14203":{
+"Label":"SongRequest",
+"Value":46955,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14133":{
+"Label":"SongRequest_01",
+"Value":46885,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14140":{
+"Label":"SongRequest_03",
+"Value":46892,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14147":{
+"Label":"SongRequest_04",
+"Value":46899,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14154":{
+"Label":"SongRequest_05",
+"Value":46906,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14161":{
+"Label":"SongRequest_06",
+"Value":46913,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14165":{
+"Label":"SongRequest_09",
+"Value":46917,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14169":{
+"Label":"SongRequest_0A",
+"Value":46921,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14173":{
+"Label":"SongRequest_0E",
+"Value":46925,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14177":{
+"Label":"SongRequest_0F",
+"Value":46929,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14181":{
+"Label":"SongRequest_11",
+"Value":46933,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14185":{
+"Label":"SongRequest_12",
+"Value":46937,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14189":{
+"Label":"SongRequest_13",
+"Value":46941,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14193":{
+"Label":"SongRequest_15",
+"Value":46945,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14197":{
+"Label":"SongRequest_16",
+"Value":46949,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14221":{
+"Label":"PlaySubSequence",
+"Value":46973,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14213":{
+"Label":"InitializeSounddriver",
+"Value":46965,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29670":{
+"Label":"ReadSequence",
+"Value":62422,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29729":{
+"Label":"PlayMainSequence",
+"Value":62481,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29732":{
+"Label":"ReadMainSequence",
+"Value":62484,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29779":{
+"Label":"SetTick",
+"Value":62531,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29791":{
+"Label":"JumpMain",
+"Value":62543,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"30103":{
+"Label":"Music_01_Main_Sq1",
+"Value":62855,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"29519":{
+"Label":"LoopMemoryClear",
+"Value":62271,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"29528":{
+"Label":"LoopApuClear",
+"Value":62280,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28359":{
+"Label":"VmHelper_PushGokuLife",
+"Value":61111,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28329":{
+"Label":"Return",
+"Value":61081,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28304":{
+"Label":"VmHelper_PushOperatingPartyLife",
+"Value":61056,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28365":{
+"Label":"SetOperatingPartyGoku",
+"Value":61117,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28313":{
+"Label":"VmProc_NormalizeOperatingParty",
+"Value":61065,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28348":{
+"Label":"OperatingPartyAlive",
+"Value":61100,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28356":{
+"Label":"Return",
+"Value":61108,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28595":{
+"Label":"Return",
+"Value":61347,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28276":{
+"Label":"CheckSanzo",
+"Value":61028,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28282":{
+"Label":"CheckHorse",
+"Value":61034,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28288":{
+"Label":"CheckSagojo",
+"Value":61040,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28294":{
+"Label":"CheckChohakkai",
+"Value":61046,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28300":{
+"Label":"Return",
+"Value":61052,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28268":{
+"Label":"VmProc_PushAlivePartyCount",
+"Value":61020,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"28417":{
+"Label":"PushTrue",
+"Value":61169,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"28414":{
+"Label":"PushFalse",
+"Value":61166,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"14563":{
+"Label":"VmProc_ModScreenTileXOffset",
+"Value":47315,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14685":{
+"Label":"Accept",
+"Value":47437,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"14581":{
+"Label":"VmProc_CheckFieldDestinationTile",
+"Value":47333,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14688":{
+"Label":"VmProc_CheckFieldTile_Up",
+"Value":47440,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14703":{
+"Label":"VmProc_CheckFieldTile_Down",
+"Value":47455,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14718":{
+"Label":"VmProc_CheckFieldTile_Right",
+"Value":47470,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14733":{
+"Label":"VmProc_CheckFieldTile_Left",
+"Value":47485,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"14748":{
+"Label":"VmProc_CheckFieldTile",
+"Value":47500,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16107":{
+"Label":"VmProc_SetDstField_Up",
+"Value":48859,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16266":{
+"Label":"VmProc_CheckDstField_Up",
+"Value":49018,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16089":{
+"Label":"VmProc_SetDstField_Down",
+"Value":48841,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16047":{
+"Label":"VmProc_SetDstField_Down_Main",
+"Value":48799,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16296":{
+"Label":"VmProc_CheckDstField_Down",
+"Value":49048,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16176":{
+"Label":"VmProc_SetDstField_Right",
+"Value":48928,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16248":{
+"Label":"VmProc_SetDstField_Left",
+"Value":49000,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"16164":{
+"Label":"VmProc_SetDstField_Right_Inc",
+"Value":48916,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"}},
@@ -5913,7 +7302,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TC09B",
+"Label":"FieldPageY_MemoryOffset",
 "Part":"High"}},
 
 "16587":{
@@ -5921,7 +7310,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TC09B",
+"Label":"FieldPageY_MemoryOffset",
 "Part":"Low"}},
 
 "17183":{
@@ -6421,7 +7810,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF21C",
+"Label":"SoundPlay_Mute",
 "Part":"Low"}},
 
 "29184":{
@@ -6429,7 +7818,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF21F",
+"Label":"SoundPlay_Battle",
 "Part":"Low"}},
 
 "29186":{
@@ -6437,7 +7826,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF238",
+"Label":"SoundPlay_Field",
 "Part":"Low"}},
 
 "29188":{
@@ -6445,7 +7834,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF25C",
+"Label":"SoundPlay_Title",
 "Part":"Low"}},
 
 "29190":{
@@ -6453,7 +7842,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF28B",
+"Label":"SoundPlay_Ending",
 "Part":"Low"}},
 
 "29192":{
@@ -6461,7 +7850,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2BA",
+"Label":"SoundPlay_Shrine",
 "Part":"Low"}},
 
 "29194":{
@@ -6469,7 +7858,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2D3",
+"Label":"SoundPlay_SE_Damage",
 "Part":"Low"}},
 
 "29196":{
@@ -6477,7 +7866,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2DE",
+"Label":"SoundPlay_SE_02",
 "Part":"Low"}},
 
 "29198":{
@@ -6485,7 +7874,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2DF",
+"Label":"SoundPlay_SE_03",
 "Part":"Low"}},
 
 "29200":{
@@ -6493,7 +7882,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2E0",
+"Label":"SoundPlay_SE_Kill",
 "Part":"Low"}},
 
 "29202":{
@@ -6501,7 +7890,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2EB",
+"Label":"SoundPlay_SE_Jump",
 "Part":"Low"}},
 
 "29204":{
@@ -6509,7 +7898,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2F6",
+"Label":"SoundPlay_SE_06",
 "Part":"Low"}},
 
 "29206":{
@@ -6517,7 +7906,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF2F7",
+"Label":"SoundPlay_SE_07",
 "Part":"Low"}},
 
 "29208":{
@@ -6525,7 +7914,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF302",
+"Label":"SoundPlay_SE_08",
 "Part":"Low"}},
 
 "29210":{
@@ -6533,7 +7922,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF30D",
+"Label":"SoundPlay_SE_GetItem",
 "Part":"Low"}},
 
 "29212":{
@@ -6541,7 +7930,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF318",
+"Label":"SoundPlay_SE_10",
 "Part":"Low"}},
 
 "29214":{
@@ -6549,7 +7938,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF323",
+"Label":"SoundPlay_SE_11",
 "Part":"Low"}},
 
 "29216":{
@@ -6557,7 +7946,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF324",
+"Label":"SoundPlay_SE_Attack",
 "Part":"Low"}},
 
 "29218":{
@@ -6565,7 +7954,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF32F",
+"Label":"SoundPlay_SE_13",
 "Part":"Low"}},
 
 "29220":{
@@ -6573,7 +7962,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF330",
+"Label":"SoundPlay_SE_14",
 "Part":"Low"}},
 
 "29222":{
@@ -6581,7 +7970,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF33B",
+"Label":"SoundPlay_SE_15",
 "Part":"Low"}},
 
 "29224":{
@@ -6589,7 +7978,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF351",
+"Label":"SoundPlay_SE_16",
 "Part":"Low"}},
 
 "29226":{
@@ -6597,7 +7986,39 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"TF361",
+"Label":"SoundPlay_SE_17",
+"Part":"Low"}},
+
+"29234":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"Music_01_Main_Sq1",
+"Part":"Low"}},
+
+"29238":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"Music_01_Main_Sq1",
+"Part":"High"}},
+
+"29517":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"Sound_Noi",
+"Part":"Low"}},
+
+"29522":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"Sound_Noi",
 "Part":"Low"}},
 
 "32778":{
@@ -6704,6 +8125,110 @@
 "MultiMask":null,
 "Label":"DstPtr",
 "Value":197,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"None"}],
+"ClearPrevious":false},
+
+"29608":{
+"Variables":[{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_",
+"Value":0,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"Uncertain"},
+
+{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_MainSequencePointer",
+"Value":1,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+{
+"DataDescriptor":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_SubSequencePointer",
+"Value":3,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_TickLength",
+"Value":5,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_TickCounter",
+"Value":6,
+"Source":"Variable",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":true,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Sound_WaitCounter",
+"Value":7,
 "Source":"Variable",
 "Type":"ExternalAddr",
 "LabelAnno":"None"}],

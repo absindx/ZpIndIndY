@@ -1,0 +1,17 @@
+@charset "UTF-8";
+
+code .keyword{
+	color			: #0000ff;
+}
+code .string, code .quote{
+	color			: #800000;
+}
+code .comment{
+	color			: #008000;
+}
+
+code, kbd{
+	font-family		: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+

@@ -1,4 +1,5 @@
 @charset "UTF-8";
+@import url("code.css");
 
 body{
 	margin			: 0px;
@@ -67,20 +68,6 @@ pre{
 	margin			: 8px 32px;
 	padding			: 2px 4px;
 	border			: 1px solid RGBA(0, 0, 0, 0.25);
-}
-
-code .keyword{
-	color			: #0000ff;
-}
-code .string, code .quote{
-	color			: #800000;
-}
-code .comment{
-	color			: #008000;
-}
-
-code, kbd{
-	font-family		: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
 
 table{
