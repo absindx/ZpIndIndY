@@ -13,16 +13,29 @@ Sound_Noi       =       $28
 Sound_Noi_      =       $28
 Sound_Noi_MainSequencePointer = $29
 VmMem_Pointer   =       $32
-VmMem_Temp      =       $34
+VmMem_StackFramePointer = $34
 VmMem_SecondStack =     $36
+VmMem_IndirectJump =    $3A                             ;Dynamic code : JMP $xxxx (4C xx xx)
 ProcessStateCounter =   $3D
 ProcessedStateCounter = $3F
 PpuControlBuffer =      $41                             ;$41=Base nametable, $42=Base nametable, $43=Increment direction, $44=SP Address, $45=BG Address, $46=Sprite size, $47=PPU master/slave, $48=NMI enable
+PpuCtrlBuffer_Bit0_BaseNametable = $41
+PpuCtrlBuffer_Bit1_BaseNametable = $42
+PpuCtrlBuffer_Bit2_AddrDirection = $43
+PpuCtrlBuffer_Bit4_BGAddress = $45
+PpuCtrlBuffer_Bit5_SpriteSize = $46
+PpuCtrlBuffer_Bit7_NmiEnable = $48
 PpuMaskBuffer   =       $49                             ;$49=Greyscale, $4A=BG left, $4B=SP left, $4C=BG enable, $4D=SP enable, $4E=Emphasize R, $4F=Emphasize G, $50=Emphasize B
+PpuMaskBuffer_Bit1_ShowBGLeft = $4A
+PpuMaskBuffer_Bit2_ShowSPLeft = $4B
+PpuMaskBuffer_Bit3_ShowBG = $4C
+PpuMaskBuffer_Bit4_ShowSP = $4D
 ScreenX         =       $57
 ScreenY         =       $59
 FieldPageY      =       $BC
 FieldPageX      =       $BE
+DrawTextPointer =       $C0
+DrawTextRequest =       $C2
 RleExpandIndex  =       $C9
 ChrBankRequest  =       $CA
 OamDmaRequest   =       $CF
@@ -33,16 +46,33 @@ FieldPartyDirection =   $DA                             ;0=Right, 1=Left
 OamBuffer       =       $0200
 PaletteBuffer   =       $0300
 PadBuffer_Now   =       $0320                           ;ABsS^v<>
+PadBuffer_Now_A =       $0320
+PadBuffer_Now_B =       $0321
+PadBuffer_Now_Start =   $0323
+PadBuffer_Now_Up =      $0324
+PadBuffer_Now_Down =    $0325
+PadBuffer_Now_Left =    $0326
+PadBuffer_Now_Right =   $0327
 PadBuffer_Prev  =       $0328                           ;ABsS^v<>
 PadBuffer_Trigger =     $0330                           ;ABsS^v<>
+PadBuffer_Trigger_A =   $0330
+PadBuffer_Trigger_B =   $0331
+PadBuffer_Trigger_Select = $0332
+PadBuffer_Trigger_Start = $0333
 OperatingParty  =       $0354                           ;0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai
 HelperParty     =       $0355                           ;0=Goku, 1=Sanzo, 2=Horse, 3=Sagojo, 4=Chohakkai
 PartyLifes      =       $03C8                           ;Goku, Sanzo, Horse, Sagojo, Chohakkai
 FieldTime       =       $03D4                           ;Low:$00-$1F, High:$00-$3F
+ContinuePasswordInput = $0459                           ;Used by continued field Y page
+ContinuePasswordPressA = $045A
 PartyIn_Chohakkai =     $047E
 PartyIn_Sagojo  =       $047F
 VmStack_Low     =       $0600
 VmStack_High    =       $0680
+VmSubStackA_Low =       $0780
+VmSubStackA_High =      $07A0
+VmSubStackB_Low =       $07C0
+VmSubStackB_High =      $07E0
 PPUCTRL         =       $2000                           ;W VPHB SINN  various
 PPUMASK         =       $2001                           ;W BGRs bMmG  various
 PPUSTATUS       =       $2002                           ;R VSO- ----  various; read resets $2005/2006
@@ -76,68 +106,38 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
 ;*******************************************************************************
 ;                .segment "SEG001"
                 .org    $8000
-                .byte   $00
+                .word   $8000
+                .word   $4000
+                .word   $2000
+                .word   $1000
+                .word   $0800
+                .word   $0400
+                .word   $0200
+                .word   $0100
+                .word   $0080
+                .word   $0040
+                .word   $0020
+                .word   $0010
+                .word   $0008
+                .word   $0004
+                .word   $0002
+                .word   $0001
+T8020:          .word   $0001
+                .word   $0005
+                .word   $0080
+                .word   $00C0
+                .word   $00F0
+                .word   $00F0
+                .word   $00FC
+                .word   $80FF
+                .word   $00FF
+                .word   $00FE
+                .word   $00F0
+                .word   $00F8
+                .word   $00F0
+                .word   $00E0
                 .byte   $80
-                .byte   $00
-                .byte   $40
-                .byte   $00
-                .byte   $20
-                .byte   $00
-                .byte   $10
-                .byte   $00
-                .byte   $08
-                .byte   $00
-                .byte   $04
-                .byte   $00
-                .byte   $02
-                .byte   $00
-                .byte   $01
-                .byte   $80
-                .byte   $00
-                .byte   $40
-                .byte   $00
-                .byte   $20
-                .byte   $00
-                .byte   $10
-                .byte   $00
-                .byte   $08
-                .byte   $00
-                .byte   $04
-                .byte   $00
-                .byte   $02
-                .byte   $00
-                .byte   $01
-                .byte   $00
-                .byte   $01
-                .byte   $00
-                .byte   $05
-                .byte   $00
-                .byte   $80
-                .byte   $00
-                .byte   $C0
-                .byte   $00
-                .byte   $F0
-                .byte   $00
-                .byte   $F0
-                .byte   $00
-                .byte   $FC
-                .byte   $00
-                .byte   $FF
-                .byte   $80
-                .byte   $FF
-                .byte   $00
-                .byte   $FE
-                .byte   $00
-                .byte   $F0
-                .byte   $00
-                .byte   $F8
-                .byte   $00
-                .byte   $F0
-                .byte   $00
-                .byte   $E0
-                .byte   $00
-                .byte   $80
-                .byte   $01
+T803D:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $C1
@@ -164,7 +164,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $06
                 .byte   $00
-                .byte   $01
+T8058:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -191,7 +191,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $01
+T8073:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -218,7 +218,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $03
                 .byte   $FF
                 .byte   $03
-                .byte   $01
+T808E:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -245,7 +245,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $01
                 .byte   $00
-                .byte   $01
+T80A9:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FC
@@ -272,7 +272,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $C0
                 .byte   $00
                 .byte   $80
-                .byte   $01
+T80C4:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $80
@@ -299,16 +299,20 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $C0
                 .byte   $00
                 .byte   $80
-                .byte   $01
+T80DF:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .res    15,$FF
-                .byte   $CF,$FE,$CF,$FC,$87
+                .byte   $CF
+                .byte   $FE
+                .byte   $CF
+                .byte   $FC
+                .byte   $87
                 .byte   $3C
                 .byte   $03
                 .byte   $3C
                 .byte   $00
-                .byte   $01
+T80FA:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .res    13,$FF
@@ -323,7 +327,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $0F
                 .byte   $F8
                 .byte   $1F
-                .byte   $01
+T8115:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $F0
@@ -350,7 +354,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $01
+T8130:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $01
@@ -377,7 +381,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $07
                 .byte   $FF
                 .byte   $07
-                .byte   $01
+T814B:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -402,7 +406,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $F0
                 .byte   $00
                 .byte   $C0
-                .byte   $01
+T8164:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -429,7 +433,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $C0
                 .byte   $78
                 .byte   $80
-                .byte   $01
+T817F:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -456,7 +460,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $80
                 .byte   $FF
-                .byte   $01
+T819A:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $80
@@ -483,7 +487,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $80
                 .byte   $FF
-                .byte   $01
+T81B5:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -510,7 +514,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $F8
                 .byte   $00
                 .byte   $FE
-                .byte   $01
+T81D0:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -532,7 +536,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $FC
                 .byte   $FF
-                .byte   $01
+T81EB:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -540,12 +544,12 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $18
                 .byte   $FC
                 .byte   $78
-.macro          HiAscii Arg
-                .repeat .strlen(Arg), I
-                .byte   .strat(Arg, I) | $80
-                .endrep
-.endmacro
-                HiAscii "`x@pap"
+                .byte   $E0
+                .byte   $F8
+                .byte   $C0
+                .byte   $F0
+                .byte   $E1
+                .byte   $F0
                 .byte   $FF
                 .byte   $E0
                 .byte   $FF
@@ -559,7 +563,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $C0
                 .byte   $FF
-                .byte   $01
+T8206:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -586,7 +590,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $FE
                 .byte   $FF
-                .byte   $01
+T8221:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -613,7 +617,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $80
                 .byte   $7F
                 .byte   $00
-                .byte   $01
+T823C:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $01
@@ -640,7 +644,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $1F
                 .byte   $00
-                .byte   $01
+T8257:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $3F
@@ -658,7 +662,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $80
                 .byte   $03
                 .res    10,$00
-                .byte   $01
+T8272:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -678,7 +682,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $7F
                 .res    8,$FF
-                .byte   $01
+T828D:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $00
@@ -705,7 +709,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $01
+T82A8:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .res    7,$00
@@ -726,7 +730,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $E0
                 .byte   $00
                 .byte   $80
-                .byte   $01
+T82C3:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -753,7 +757,7 @@ JOY2            =       $4017                           ;joystick 2 data (R) and
                 .byte   $00
                 .byte   $FF
                 .byte   $01
-                .byte   $01
+T82DE:          .byte   $01
                 .byte   $00
                 .byte   $05
                 .byte   $FF
@@ -862,11 +866,11 @@ L835F:          .byte   $00
                 .byte   $03
                 .byte   $02
                 .byte   $02
+T8370:          .byte   $00
                 .byte   $00
-                .byte   $00
-                .byte   $00
+T8372:          .byte   $00
                 .byte   $05
-L8374:          .byte   $08
+                .byte   $08
                 .byte   $05
                 .byte   $10
                 .byte   $FF
@@ -920,7 +924,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T83AA:          .byte   $03
                 .byte   $05
                 .byte   $04
                 .byte   $00
@@ -947,13 +951,13 @@ L838F:          .byte   $08
                 .byte   $7B
                 .byte   $DE
                 .byte   $7B
-                .byte   $03
+T83C5:          .byte   $03
                 .byte   $05
                 .byte   $0D
                 .res    12,$00
                 .byte   $80
                 .res    11,$00
-                .byte   $03
+T83E0:          .byte   $03
                 .byte   $05
                 .byte   $0E
                 .res    8,$00
@@ -968,13 +972,13 @@ L838F:          .byte   $08
                 .byte   $40
                 .byte   $01
                 .res    6,$00
-                .byte   $03
+T83FB:          .byte   $03
                 .byte   $05
                 .byte   $0F
                 .res    12,$00
                 .byte   $80
                 .res    11,$00
-                .byte   $06
+T8416:          .byte   $06
                 .byte   $0A
                 .byte   $00
                 .byte   $F0
@@ -1001,7 +1005,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $F0
                 .byte   $1F
-                .byte   $06
+T8431:          .byte   $06
                 .byte   $05
                 .res    5,$00
                 .byte   $7F
@@ -1024,7 +1028,7 @@ L838F:          .byte   $08
                 .byte   $1F
                 .byte   $F0
                 .byte   $1F
-                .byte   $06
+T844C:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $F0
@@ -1044,7 +1048,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $E0
                 .res    8,$00
-                .byte   $05
+T8467:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .res    12,$FF
@@ -1060,7 +1064,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $00
                 .byte   $F8
-                .byte   $05
+T8482:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .res    12,$FF
@@ -1071,7 +1075,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $06
                 .res    6,$00
-                .byte   $01
+T849D:          .byte   $01
                 .byte   $05
                 .byte   $01
                 .byte   $00
@@ -1098,7 +1102,7 @@ L838F:          .byte   $08
                 .byte   $80
                 .byte   $00
                 .byte   $01
-                .byte   $05
+T84B8:          .byte   $05
                 .byte   $05
                 .byte   $06
                 .byte   $40
@@ -1125,7 +1129,7 @@ L838F:          .byte   $08
                 .byte   $08
                 .byte   $04
                 .byte   $00
-                .byte   $05
+T84D3:          .byte   $05
                 .byte   $05
                 .byte   $09
                 .byte   $00
@@ -1152,7 +1156,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $08
                 .byte   $20
-                .byte   $05
+T84EE:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .res    12,$FF
@@ -1168,7 +1172,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $7F
                 .byte   $00
-                .byte   $05
+T8509:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $03
@@ -1195,7 +1199,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $FF
                 .byte   $FF
-                .byte   $05
+T8524:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -1218,7 +1222,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FE
                 .res    5,$FF
-                .byte   $05
+T853F:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $FF
@@ -1245,7 +1249,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $FF
                 .byte   $00
-                .byte   $00
+T855A:          .byte   $00
                 .byte   $03
                 .byte   $08
                 .byte   $00
@@ -1272,7 +1276,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $02
                 .byte   $C4
-                .byte   $02
+T8575:          .byte   $02
                 .byte   $03
                 .byte   $0B
                 .byte   $01
@@ -1299,7 +1303,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $02
+T8590:          .byte   $02
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -1326,7 +1330,7 @@ L838F:          .byte   $08
                 .byte   $C0
                 .byte   $00
                 .byte   $80
-                .byte   $06
+T85AB:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $FC
@@ -1350,7 +1354,7 @@ L838F:          .byte   $08
                 .byte   "88`x"
                 .byte   $00
                 .byte   $3C
-                .byte   $07
+T85C6:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .res    12,$00
@@ -1366,7 +1370,7 @@ L838F:          .byte   $08
                 .byte   $FE
                 .byte   $00
                 .byte   $F8
-                .byte   $04
+T85E1:          .byte   $04
                 .byte   $05
                 .byte   $0A
                 .byte   $FF
@@ -1379,7 +1383,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $07
                 .res    15,$00
-                .byte   $07
+T85FC:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .res    9,$FF
@@ -1398,12 +1402,17 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $01
                 .byte   $00
-                .byte   $06
+T8617:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $00
                 .byte   $80
                 .byte   $00
+.macro          HiAscii Arg
+                .repeat .strlen(Arg), I
+                .byte   .strat(Arg, I) | $80
+                .endrep
+.endmacro
                 HiAscii "d@v`"
                 .byte   $FF
                 .byte   $F8
@@ -1422,7 +1431,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $F0
                 .byte   $FF
-                .byte   $06
+T8632:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .res    8,$00
@@ -1437,7 +1446,7 @@ L838F:          .byte   $08
                 .byte   $C3
                 .byte   $FF
                 HiAscii "`xpp`a"
-                .byte   $05
+T864D:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .res    9,$00
@@ -1456,7 +1465,7 @@ L838F:          .byte   $08
                 .byte   $07
                 .byte   $FF
                 .byte   $01
-                .byte   $08
+T8668:          .byte   $08
                 .byte   $05
                 .byte   $07
                 .byte   $B8
@@ -1480,13 +1489,13 @@ L838F:          .byte   $08
                 .byte   $88
                 .byte   $22
                 .byte   $18
-                .byte   $03
+T8683:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .res    18,$00
                 .byte   $E0
                 .res    5,$FF
-                .byte   $03
+T869E:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .res    5,$FF
@@ -1509,7 +1518,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T86B9:          .byte   $03
                 .byte   $05
                 .byte   $0A
                 .byte   $01
@@ -1536,7 +1545,7 @@ L838F:          .byte   $08
                 .byte   $FE
                 .byte   $87
                 .byte   $FF
-                .byte   $07
+T86D4:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $E0
@@ -1556,7 +1565,7 @@ L838F:          .byte   $08
                 .byte   $63
                 HiAscii "xcqccsGs"
                 .byte   $8F
-                .byte   $06
+T86EF:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $FF
@@ -1567,7 +1576,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $F8,$C1,$F0,$E0,$E0,$F1,$E1,$F1,$C7,$F1,$C7,$E1,$C7,$E3,$87,$C7
                 .byte   $CF,$C7
-                .byte   $07
+T870A:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $E0
@@ -1594,7 +1603,7 @@ L838F:          .byte   $08
                 .byte   $31
                 .byte   $E0
                 .byte   $33
-                .byte   $08
+T8725:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $F0
@@ -1621,7 +1630,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $02
+T8740:          .byte   $02
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -1648,7 +1657,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T875B:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $01
@@ -1675,7 +1684,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $02
+T8776:          .byte   $02
                 .byte   $05
                 .byte   $0A
                 .byte   $F0
@@ -1694,7 +1703,7 @@ L838F:          .byte   $08
                 .byte   $7E
                 .byte   $07
                 .byte   $7F
-                .byte   $07
+T8791:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $87
@@ -1721,7 +1730,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $3F
                 .byte   $FE
-                .byte   $07
+T87AC:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $F3
@@ -1744,7 +1753,7 @@ L838F:          .byte   $08
                 HiAscii "xpp@a"
                 .byte   $83
                 .byte   $C3
-                .byte   $04
+T87C7:          .byte   $04
                 .byte   $05
                 .byte   $0A
                 .byte   $C7,$CF,$87,$CF
@@ -1763,7 +1772,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $C7
                 .byte   $C3
-                .byte   $06
+T87E2:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $F0
@@ -1790,7 +1799,7 @@ L838F:          .byte   $08
                 .byte   $30
                 .byte   $FF
                 .byte   $31
-                .byte   $03
+T87FD:          .byte   $03
                 .byte   $05
                 .byte   $0A
                 .byte   $FC
@@ -1817,7 +1826,7 @@ L838F:          .byte   $08
                 .byte   $07
                 .byte   $F0
                 .byte   $00
-                .byte   $01
+T8818:          .byte   $01
                 .byte   $05
                 .byte   $0A
                 .byte   $FF
@@ -1844,7 +1853,7 @@ L838F:          .byte   $08
                 .byte   $7E
                 .byte   $3C
                 .byte   $FC
-                .byte   $07
+T8833:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -1871,7 +1880,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $FC
                 .byte   $7F
-                .byte   $07
+T884E:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $3F
@@ -1898,7 +1907,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $F0
                 .byte   $07
-                .byte   $05
+T8869:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $83
@@ -1921,7 +1930,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $07
                 .byte   $FC
-                .byte   $06
+T8884:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $71
@@ -1944,7 +1953,7 @@ L838F:          .byte   $08
                 .byte   $1F
                 .byte   $C1
                 .byte   $FF
-                .byte   $09
+T889F:          .byte   $09
                 .byte   $05
                 .byte   $0A
                 .byte   $7F
@@ -1971,7 +1980,7 @@ L838F:          .byte   $08
                 .byte   $F0
                 .byte   $00
                 .byte   $C0
-                .byte   $04
+T88BA:          .byte   $04
                 .byte   $05
                 .byte   $00
                 .byte   $C0
@@ -1989,7 +1998,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $F0
                 .res    10,$00
-                .byte   $05
+T88D5:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $3E
@@ -2012,7 +2021,7 @@ L838F:          .byte   $08
                 .byte   $7C
                 .byte   $00
                 .byte   $FE
-                .byte   $06
+T88F0:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $01
@@ -2039,7 +2048,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $F8
                 .byte   $07
-                .byte   $06
+T890B:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -2066,7 +2075,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $0C
                 .byte   $00
-                .byte   $09
+T8926:          .byte   $09
                 .byte   $05
                 .byte   $0A
                 .byte   $F0
@@ -2093,7 +2102,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $E3
                 .byte   $03
-                .byte   $08
+T8941:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $1F
@@ -2120,7 +2129,7 @@ L838F:          .byte   $08
                 .byte   $FC
                 .byte   $00
                 .byte   $F8
-                .byte   $06
+T895C:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $E3
@@ -2144,7 +2153,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $FC
                 .byte   $01
-                .byte   $01
+T8977:          .byte   $01
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -2194,7 +2203,7 @@ L838F:          .byte   $08
                 .byte   $07
                 .byte   $7F
                 .byte   $00
-                .byte   $04
+T89AD:          .byte   $04
                 .byte   $05
                 .byte   $0A
                 .byte   $FC
@@ -2221,7 +2230,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $38
                 .byte   $F0
-                .byte   $05
+T89C8:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .res    7,$00
@@ -2242,7 +2251,7 @@ L838F:          .byte   $08
                 .byte   $3F
                 .byte   $FF
                 .byte   $0F
-                .byte   $06
+T89E3:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $00
@@ -2269,7 +2278,7 @@ L838F:          .byte   $08
                 .byte   $07
                 .byte   $80
                 .byte   $03
-                .byte   $06
+T89FE:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $F8
@@ -2284,7 +2293,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $E0
                 .res    8,$00
-                .byte   $06
+T8A19:          .byte   $06
                 .byte   $05
                 .res    5,$00
                 .byte   $01
@@ -2307,7 +2316,7 @@ L838F:          .byte   $08
                 .byte   $1F
                 .byte   $80
                 .byte   $07
-                .byte   $06
+T8A34:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $FF
@@ -2334,7 +2343,7 @@ L838F:          .byte   $08
                 .byte   $3E
                 .byte   $7F
                 .byte   $1C
-                .byte   $07
+T8A4F:          .byte   $07
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -2356,7 +2365,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $00
                 .byte   $C0
-                .byte   $06
+T8A6A:          .byte   $06
                 .byte   $05
                 .byte   $0A
                 .byte   $7F
@@ -2380,7 +2389,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $09
+T8A85:          .byte   $09
                 .byte   $05
                 .byte   $0A
                 .byte   $3F
@@ -2404,7 +2413,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $00
                 .byte   $7F
-                .byte   $04
+T8AA0:          .byte   $04
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -2431,7 +2440,7 @@ L838F:          .byte   $08
                 .byte   $1F
                 .byte   $80
                 .byte   $07
-                .byte   $08
+T8ABB:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $01
@@ -2451,7 +2460,7 @@ L838F:          .byte   $08
                 .byte   $38
                 .byte   $C0
                 .res    8,$00
-                .byte   $08
+T8AD6:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $00
@@ -2478,7 +2487,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $70
                 .byte   $00
-                .byte   $08
+T8AF1:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $1F
@@ -2505,7 +2514,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $08
+T8B0C:          .byte   $08
                 .byte   $05
                 .byte   $0A
                 .byte   $1E
@@ -2532,7 +2541,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $F0
                 .byte   $7F
-                .byte   $08
+T8B27:          .byte   $08
                 .byte   $05
                 .byte   $00
                 .byte   $F0
@@ -2559,7 +2568,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $0F
                 .byte   $00
-                .byte   $06
+T8B42:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $00
@@ -2586,7 +2595,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $C0
                 .byte   $01
-                .byte   $06
+T8B5D:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $00
@@ -2613,7 +2622,7 @@ L838F:          .byte   $08
                 .byte   $07
                 .byte   $C0
                 .byte   $01
-                .byte   $06
+T8B78:          .byte   $06
                 .byte   $05
                 .byte   $00
                 .byte   $3E
@@ -2640,7 +2649,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $0F
                 .byte   $00
-                .byte   $05
+T8B93:          .byte   $05
                 .byte   $05
                 .byte   $0A
                 .byte   $E0
@@ -2667,7 +2676,7 @@ L838F:          .byte   $08
                 .byte   $0E
                 .byte   $7F
                 .byte   $1C
-                .byte   $03
+T8BAE:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .res    12,$FF
@@ -2678,7 +2687,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $08
                 .res    6,$00
-                .byte   $03
+T8BC9:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .res    12,$FF
@@ -2694,7 +2703,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T8BE4:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    12,$FF
@@ -2704,7 +2713,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $F8
                 .res    7,$FF
-                .byte   $03
+T8BFF:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    12,$FF
@@ -2715,7 +2724,7 @@ L838F:          .byte   $08
                 .byte   $1C
                 .byte   $F8
                 .res    6,$FF
-                .byte   $03
+T8C1A:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    12,$FF
@@ -2731,11 +2740,11 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $C7
                 .byte   $FF
-                .byte   $00
+T8C35:          .byte   $00
                 .byte   $0B
-                .byte   $00
+T8C37:          .byte   $00
                 .byte   $0C
-                .byte   $03
+T8C39:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .res    6,$00
@@ -2757,7 +2766,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8C54:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -2775,7 +2784,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $38
                 .res    10,$00
-                .byte   $03
+T8C6F:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -2802,7 +2811,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $F8
                 .byte   $00
-                .byte   $03
+T8C8A:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $01
@@ -2829,7 +2838,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $FF
                 .byte   $03
-                .byte   $03
+T8CA5:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $FF
@@ -2856,7 +2865,7 @@ L838F:          .byte   $08
                 .byte   $80
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T8CC0:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $FF
@@ -2879,7 +2888,7 @@ L838F:          .byte   $08
                 HiAscii "P%W5W"
                 .byte   $81
                 .byte   $C7
-                .byte   $03
+T8CDB:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .res    5,$FF
@@ -2902,7 +2911,7 @@ L838F:          .byte   $08
                 .byte   $EB
                 .byte   $FD
                 .byte   $EB
-                .byte   $03
+T8CF6:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $FF
@@ -2929,7 +2938,7 @@ L838F:          .byte   $08
                 .byte   $08
                 .byte   $B6
                 .byte   $EB
-                .byte   $03
+T8D11:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $C7
@@ -2948,7 +2957,7 @@ L838F:          .byte   $08
                 .byte   $BE
                 .byte   $FF
                 HiAscii ">~0|7|7~0"
-                .byte   $03
+T8D2C:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -2975,7 +2984,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T8D47:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $00
@@ -3002,7 +3011,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8D62:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .res    12,$FF
@@ -3011,7 +3020,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $18
                 .res    8,$00
-                .byte   $03
+T8D7D:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 HiAscii "=W<Q"
@@ -3027,7 +3036,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8D98:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $01
@@ -3051,7 +3060,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8DB3:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 HiAscii "6h6n6"
@@ -3067,7 +3076,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8DCE:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3085,7 +3094,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FE
                 .byte   $FF
-                .byte   $03
+T8DE9:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $7F
@@ -3112,7 +3121,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $3F
                 .byte   $00
-                .byte   $03
+T8E04:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .res    12,$FF
@@ -3128,7 +3137,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $07
                 .byte   $FF
-                .byte   $03
+T8E1F:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FF
@@ -3141,7 +3150,7 @@ L838F:          .byte   $08
                 .byte   $16
                 .byte   $30
                 .res    15,$00
-                .byte   $03
+T8E3A:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3163,7 +3172,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $7F
                 .res    6,$FF
-                .byte   $03
+T8E55:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $FF
@@ -3190,7 +3199,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T8E70:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $7F
@@ -3217,7 +3226,7 @@ L838F:          .byte   $08
                 .byte   $FC
                 .byte   $3F
                 .byte   $F8
-                .byte   $03
+T8E8B:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $83
@@ -3244,7 +3253,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $CF
                 .byte   $FF
-                .byte   $03
+T8EA6:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $00
@@ -3271,7 +3280,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $3F
                 .byte   $00
-                .byte   $03
+T8EC1:          .byte   $03
                 .byte   $03
                 .byte   $0B
                 .byte   $FF
@@ -3298,7 +3307,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $C0
                 .byte   $FF
-                .byte   $03
+T8EDC:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3308,7 +3317,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $1C
                 .res    18,$00
-                .byte   $03
+T8EF7:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $3F
@@ -3335,7 +3344,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $01
                 .byte   $00
-                .byte   $03
+T8F12:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $1F
@@ -3358,7 +3367,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $01
                 .res    5,$00
-                .byte   $03
+T8F2D:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3377,7 +3386,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $C0
                 .res    9,$FF
-                .byte   $03
+T8F48:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3404,7 +3413,7 @@ L838F:          .byte   $08
                 .byte   $C0
                 .byte   $00
                 .byte   $80
-                .byte   $03
+T8F63:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $CF
@@ -3425,7 +3434,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FE
                 .res    7,$FF
-                .byte   $03
+T8F7E:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -3452,7 +3461,7 @@ L838F:          .byte   $08
                 .byte   $C3
                 .byte   $FF
                 .byte   $C1
-                .byte   $03
+T8F99:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    5,$FF
@@ -3475,7 +3484,7 @@ L838F:          .byte   $08
                 .byte   $F0
                 .byte   $01
                 .byte   $C0
-                .byte   $03
+T8FB4:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -3491,7 +3500,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $01
                 .res    12,$00
-                .byte   $03
+T8FCF:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $7E
@@ -3518,7 +3527,7 @@ L838F:          .byte   $08
                 .byte   $7C
                 .byte   $00
                 .byte   $F8
-                .byte   $03
+T8FEA:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FF
@@ -3545,7 +3554,7 @@ L838F:          .byte   $08
                 .byte   $CF
                 .byte   $FF
                 .byte   $C7
-                .byte   $03
+T9005:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -3572,7 +3581,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $00
                 .byte   $F0
-                .byte   $03
+T9020:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $F0
@@ -3599,7 +3608,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $FF
                 .byte   $3F
-                .byte   $03
+T903B:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    10,$00
@@ -3610,7 +3619,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $E7
                 .res    8,$FF
-                .byte   $03
+T9056:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    15,$00
@@ -3619,7 +3628,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FE
                 .res    5,$FF
-                .byte   $03
+T9071:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $01
@@ -3646,7 +3655,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T908C:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $0F
@@ -3669,7 +3678,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $0E
                 .byte   $0F
-                .byte   $03
+T90A7:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $01
@@ -3696,7 +3705,7 @@ L838F:          .byte   $08
                 .byte   $1F
                 .byte   $1F
                 .byte   $1F
-                .byte   $03
+T90C2:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $01
@@ -3714,10 +3723,23 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $1F
                 .res    10,$FF
-                .byte   $03
+T90DD:          .byte   $03
                 .byte   $05
                 .byte   $0C
-                .res    14,$FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
+                .byte   $FF
                 .byte   $F0
                 .byte   $FF
                 .byte   $C0
@@ -3728,7 +3750,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $80
                 .byte   $FF
-                .byte   $03
+T90F8:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -3755,7 +3777,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $80
                 .byte   $7F
-                .byte   $03
+T9113:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -3772,7 +3794,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FC
                 .res    11,$FF
-                .byte   $03
+T912E:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $0C
@@ -3799,7 +3821,7 @@ L838F:          .byte   $08
                 .byte   $C0
                 .byte   $00
                 .byte   $80
-                .byte   $03
+T9149:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $1F
@@ -3822,7 +3844,7 @@ L838F:          .byte   $08
                 .byte   $F1
                 .byte   $FF
                 .byte   $F0
-                .byte   $03
+T9164:          .byte   $03
                 .byte   $05
                 .res    6,$00
                 .byte   $C0
@@ -3844,7 +3866,7 @@ L838F:          .byte   $08
                 .byte   $0F
                 .byte   $F8
                 .byte   $0F
-                .byte   $03
+T917F:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FE
@@ -3867,7 +3889,7 @@ L838F:          .byte   $08
                 .byte   $F0
                 .byte   $80
                 .res    5,$FF
-                .byte   $03
+T919A:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $C0
@@ -3894,7 +3916,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $C7
                 .byte   $FF
-                .byte   $03
+T91B5:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $01
@@ -3921,7 +3943,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $01
                 .byte   $00
-                .byte   $03
+T91D0:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FF
@@ -3941,7 +3963,7 @@ L838F:          .byte   $08
                 .byte   $03
                 .byte   $80
                 .byte   $01
-                .byte   $03
+T91EB:          .byte   $03
                 .byte   $05
                 .byte   $00
                 .byte   $F8
@@ -3958,7 +3980,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $1F
                 .res    11,$00
-                .byte   $03
+T9206:          .byte   $03
                 .byte   $05
                 .res    6,$00
                 .byte   $F0
@@ -3980,7 +4002,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $FC
                 .byte   $00
-                .byte   $03
+T9221:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $C7
@@ -4007,7 +4029,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $FF
                 .byte   $F1
-                .byte   $03
+T923C:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $7F
@@ -4029,7 +4051,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $7F
                 .res    6,$FF
-                .byte   $03
+T9257:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FC
@@ -4042,7 +4064,7 @@ L838F:          .byte   $08
                 .byte   $F0
                 .byte   $00
                 .res    15,$FF
-                .byte   $03
+T9272:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -4069,7 +4091,7 @@ L838F:          .byte   $08
                 .byte   $C1
                 .byte   $FF
                 .byte   $E1
-                .byte   $03
+T928D:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -4096,7 +4118,7 @@ L838F:          .byte   $08
                 .byte   $3F
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T92A8:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $03
@@ -4123,14 +4145,14 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $F0
                 .byte   $03
-                .byte   $03
+T92C3:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    10,$00
                 .byte   $F0
                 .byte   $0F
                 .res    12,$FF
-                .byte   $03
+T92DE:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    18,$00
@@ -4140,7 +4162,7 @@ L838F:          .byte   $08
                 .byte   $F8
                 .byte   $0F
                 .byte   $FC
-                .byte   $03
+T92F9:          .byte   $03
                 .byte   $00
                 .byte   $0C
                 .res    7,$FF
@@ -4161,7 +4183,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $FF
                 .byte   $00
-                .byte   $03
+T9314:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $00
@@ -4188,7 +4210,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $00
                 .byte   $FF
-                .byte   $03
+T932F:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $FF
@@ -4215,7 +4237,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $07
                 .byte   $00
-                .byte   $03
+T934A:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $F8
@@ -4242,7 +4264,7 @@ L838F:          .byte   $08
                 .byte   $FC
                 .byte   $00
                 .byte   $60
-                .byte   $03
+T9365:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $0F
@@ -4269,7 +4291,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $00
                 .byte   $FF
-                .byte   $03
+T9380:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $00
@@ -4291,7 +4313,7 @@ L838F:          .byte   $08
                 .byte   $7C
                 .byte   $7F
                 .byte   $38
-                .byte   $03
+T939B:          .byte   $03
                 .byte   $05
                 .byte   $02
                 .byte   $00
@@ -4318,7 +4340,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $00
                 .byte   $00
-                .byte   $03
+T93B6:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $01
@@ -4345,7 +4367,7 @@ L838F:          .byte   $08
                 .byte   $7F
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T93D1:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $FF
@@ -4360,7 +4382,7 @@ L838F:          .byte   $08
                 .byte   $00
                 .byte   $01
                 .res    13,$00
-                .byte   $03
+T93EC:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $00
@@ -4387,7 +4409,7 @@ L838F:          .byte   $08
                 .byte   $01
                 .byte   $FF
                 .byte   $00
-                .byte   $03
+T9407:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .res    15,$00
@@ -4400,7 +4422,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $FF
                 .byte   $FF
-                .byte   $03
+T9422:          .byte   $03
                 .byte   $05
                 .byte   $0C
                 .byte   $03
@@ -4427,7 +4449,7 @@ L838F:          .byte   $08
                 .byte   $F0
                 .byte   $7F
                 .byte   $C0
-                .byte   $03
+T943D:          .byte   $03
                 .byte   $05
                 .byte   $00
                 .byte   $00
@@ -4454,7 +4476,7 @@ L838F:          .byte   $08
                 .byte   $FC
                 .byte   $00
                 .byte   $FE
-                .byte   $03
+T9458:          .byte   $03
                 .byte   $05
                 .byte   $0B
                 .byte   $00
@@ -4471,7 +4493,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $F8
                 .res    11,$FF
-                .byte   $03
+T9473:          .byte   $03
                 .byte   $05
                 .byte   $00
                 .byte   $00
@@ -4489,7 +4511,7 @@ L838F:          .byte   $08
                 .byte   $FF
                 .byte   $01
                 .res    10,$00
-                .byte   $03
+T948E:          .byte   $03
                 .byte   $00
                 .byte   $0C
                 .res    8,$00
@@ -4695,14 +4717,14 @@ ContinueCaller: RTS
 
                 DEC     VmMem_SecondStack
                 LDY     VmMem_SecondStack
-                LDA     $0780,y
+                LDA     VmSubStackA_Low,y
                 ADC     #$01
-                STA     $07C0,y
+                STA     VmSubStackB_Low,y
                 RTS
 
                 LDY     VmMem_SecondStack
-                LDA     $0780,y
-                CMP     $07C0,y
+                LDA     VmSubStackA_Low,y
+                CMP     VmSubStackB_Low,y
                 BEQ     L9631
                 CLC
                 RTS
@@ -4710,23 +4732,23 @@ ContinueCaller: RTS
 L9601:          DEC     VmMem_SecondStack
                 LDY     VmMem_SecondStack
                 LDA     VmStack_Low,x
-                STA     $0780,y
+                STA     VmSubStackA_Low,y
                 LDA     VmStack_High,x
-                STA     $07A0,y
+                STA     VmSubStackA_High,y
                 INX
                 LDA     VmStack_Low,x
-                STA     $07C0,y
+                STA     VmSubStackB_Low,y
                 LDA     VmStack_High,x
-                STA     $07E0,y
+                STA     VmSubStackB_High,y
                 INX
                 RTS
 
 L9620:          LDY     VmMem_SecondStack
                 SEC
-                LDA     $0780,y
-                SBC     $07C0,y
-                LDA     $07A0,y
-                SBC     $07E0,y
+                LDA     VmSubStackA_Low,y
+                SBC     VmSubStackB_Low,y
+                LDA     VmSubStackA_High,y
+                SBC     VmSubStackB_High,y
                 BCC     L9635
 L9631:          INC     VmMem_SecondStack
                 SEC
@@ -4736,9 +4758,9 @@ L9635:          TXA
                 PHA
                 TYA
                 TAX
-                INC     $0780,x
+                INC     VmSubStackA_Low,x
                 BNE     @L9641
-                INC     $07A0,x
+                INC     VmSubStackA_High,x
 @L9641:         PLA
                 TAX
                 CLC
@@ -4746,23 +4768,23 @@ L9635:          TXA
 
 L9645:          LDY     VmMem_SecondStack
                 SEC
-                LDA     $0780,y
-                SBC     $07C0,y
-                LDA     $07A0,y
-                SBC     $07E0,y
+                LDA     VmSubStackA_Low,y
+                SBC     VmSubStackB_Low,y
+                LDA     VmSubStackA_High,y
+                SBC     VmSubStackB_High,y
                 PHP
                 CLC
                 LDA     VmStack_Low,x
-                ADC     $0780,y
-                STA     $0780,y
+                ADC     VmSubStackA_Low,y
+                STA     VmSubStackA_Low,y
                 LDA     VmStack_High,x
-                ADC     $07A0,y
-                STA     $07A0,y
+                ADC     VmSubStackA_High,y
+                STA     VmSubStackA_High,y
                 SEC
-                LDA     $0780,y
-                SBC     $07C0,y
-                LDA     $07A0,y
-                SBC     $07E0,y
+                LDA     VmSubStackA_Low,y
+                SBC     VmSubStackB_Low,y
+                LDA     VmSubStackA_High,y
+                SBC     VmSubStackB_High,y
                 PHP
                 PLA
                 STA     VmMem_Pointer
@@ -4777,19 +4799,19 @@ L9645:          LDY     VmMem_SecondStack
                 RTS
 
                 LDY     VmMem_SecondStack
-                LDA     $07C0,y
-                STA     $0780,y
-                LDA     $07E0,y
-                STA     $07A0,y
+                LDA     VmSubStackB_Low,y
+                STA     VmSubStackA_Low,y
+                LDA     VmSubStackB_High,y
+                STA     VmSubStackA_High,y
                 RTS
 
 VmSecond_CopySecondStack_Reload:
                 LDY     VmMem_SecondStack
 VmSecond_CopySecondStack:
                 DEX
-                LDA     $0780,y
+                LDA     VmSubStackA_Low,y
                 STA     VmStack_Low,x
-                LDA     $07A0,y
+                LDA     VmSubStackA_High,y
                 STA     VmStack_High,x
                 RTS
 
@@ -4804,59 +4826,61 @@ VmOp_PopRegister:
                 INX
                 RTS
 
-VmOp_ReadTempMemAddr:
-                JSR     VmOp_PushMemory
+VmOp_DestroyStackFrame:
+                JSR     VmOp_PushStackFramePointer
                 JSR     VmOp_ReadAddressWord
-VmOp_PopMemory: JSR     VmOp_PopRegister
-                STY     VmMem_Temp
-                STA     VmMem_Temp+1
+VmOp_PopStackFramePointer:
+                JSR     VmOp_PopRegister
+                STY     VmMem_StackFramePointer
+                STA     VmMem_StackFramePointer+1
                 RTS
 
 ; [VmMem_Temp - (A + 2)] = [VmMem_Temp]
-; Argument: A = Offset
+; Argument: A = Variables length
 ; Example:
 ;   VmMem_Temp = #$0780, A = #$06
 ;   => VmMem_Temp = $0778, $0778 = #$0780
-VmHelper_SaveMemTemp:
+; [PrevStackTop], [Var1], [Var2], ...
+VmHelper_CreateStackFrame:
                 JSR     VmOp_PushByte                   ;[0] arg
                 JSR     VmOp_AddConst_02                ;[0] arg + #2
                 JSR     VmOp_Duplicate                  ;[0] arg + #2, [1] arg + #2
-                JSR     VmOp_PushMemory                 ;[0] VmMem_Temp, [1] arg + #2, [2] arg + #2
+                JSR     VmOp_PushStackFramePointer      ;[0] VmMem_Temp, [1] arg + #2, [2] arg + #2
                 JSR     VmOp_Swap                       ;[0] arg + #2, [1] VmMem_Temp, [2] arg + #2
                 JSR     VmOp_Sub_BA                     ;[0] VmMem_Temp - (arg + #2), [1] arg + #2
-                JSR     VmOp_PopMemory                  ;Update VmMem_Temp
-                JSR     VmOp_PushMemory                 ;[0] VmMem_Temp - (arg + #2), [1] arg + #2
+                JSR     VmOp_PopStackFramePointer       ;Update VmMem_Temp
+                JSR     VmOp_PushStackFramePointer      ;[0] VmMem_Temp - (arg + #2), [1] arg + #2
                 JSR     VmOp_Add_AB                     ;[0] VmMem_Temp
-                JSR     VmOp_PushMemory                 ;[0] VmMem_Temp - (arg + #2), [1] VmMem_Temp
+                JSR     VmOp_PushStackFramePointer      ;[0] VmMem_Temp - (arg + #2), [1] VmMem_Temp
                 JMP     VmOp_WriteWord
 
-VmHelper_SaveMemTemp_02:
+VmHelper_CreateStackFrame_02:
                 LDA     #$02
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_04:
+VmHelper_CreateStackFrame_04:
                 LDA     #$04
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_06:
+VmHelper_CreateStackFrame_06:
                 LDA     #$06
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_08:
+VmHelper_CreateStackFrame_08:
                 LDA     #$08
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_0A:
+VmHelper_CreateStackFrame_0A:
                 LDA     #$0A
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_0C:
+VmHelper_CreateStackFrame_0C:
                 LDA     #$0C
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
-VmHelper_SaveMemTemp_0E:
+VmHelper_CreateStackFrame_0E:
                 LDA     #$0E
-                BNE     VmHelper_SaveMemTemp
+                BNE     VmHelper_CreateStackFrame
 
 VmHelper_WriteTempAddressWord_02:
                 LDY     #$02
@@ -4887,12 +4911,13 @@ VmHelper_WriteTempAddressWord_0E:
                 BNE     VmOp_WriteTempAddressWord       ;No need
 
 ; Argument: Y=Offset
+; Implementation of local variables?
 VmOp_WriteTempAddressWord:
                 LDA     VmStack_Low,x
-                STA     (VmMem_Temp),y
+                STA     (VmMem_StackFramePointer),y
                 INY
                 LDA     VmStack_High,x
-                STA     (VmMem_Temp),y
+                STA     (VmMem_StackFramePointer),y
                 INX
                 RTS
 
@@ -4925,10 +4950,10 @@ VmHelper_ReadTempAddressWord_0E:
 ; Argument: Y=Offset
 VmOp_ReadTempAddressWord:
                 DEX
-                LDA     (VmMem_Temp),y
+                LDA     (VmMem_StackFramePointer),y
                 STA     VmStack_Low,x
                 INY
-                LDA     (VmMem_Temp),y
+                LDA     (VmMem_StackFramePointer),y
                 STA     VmStack_High,x
                 RTS
 
@@ -4980,15 +5005,16 @@ VmOp_Sub_BA:    SEC
                 STA     VmStack_High,x
                 RTS
 
+; Jump to Stack[0]
 VmOp_IndirectJump:
                 LDA     #$4C                            ;#$4C = JMP
-                STA     $3A
+                STA     VmMem_IndirectJump
                 LDA     VmStack_Low,x
-                STA     $3B
+                STA     VmMem_IndirectJump+1
                 LDA     VmStack_High,x
-                STA     $3C
+                STA     VmMem_IndirectJump+2
                 INX
-                JMP     $003A                           ;Same as : JMP ($003B)
+                JMP     VmMem_IndirectJump              ;Same as : JMP ($003B)
 
 L97C5:          JSR     VmHelper_PushConst_0000
                 JSR     VmOp_Swap
@@ -5360,9 +5386,9 @@ VmHelper_PushConst_2BC0:
                 LDY     #$C0
                 BNE     VmOp_PushRegister
 
-VmOp_PushMemory:
-                LDY     VmMem_Temp
-                LDA     VmMem_Temp+1
+VmOp_PushStackFramePointer:
+                LDY     VmMem_StackFramePointer
+                LDA     VmMem_StackFramePointer+1
 ; High = A, Low = Y
 VmOp_PushRegister:
                 DEX
@@ -5371,1582 +5397,806 @@ VmOp_PushRegister:
                 STA     VmStack_Low,x
                 RTS
 
-                .byte   $DD
-                .byte   $90
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $C9
-                .byte   $8B
-                .byte   $E4
-                .byte   $8B
-                .byte   $FF
-                .byte   $8B
-                .byte   $FF
-                .byte   $8B
-                .byte   $FF
-                .byte   $8B
-                .byte   $1A
-                .byte   $8C
-                .byte   $35
-                .byte   $8C
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $16
-                .byte   $84
-                .byte   $82
-                .byte   $84
-                .byte   $67
-                .byte   $84
-                .byte   $82
-                .byte   $84
-                .byte   $82
-                .byte   $84
-                .byte   $82
-                .byte   $84
-                .byte   $82
-                .byte   $84
-                .byte   $EE
-                .byte   $84
-                .byte   $14
-                .byte   $93
-                .byte   $C5
-                .byte   $83
-                .byte   $39
-                .byte   $8C
-                .byte   $54
-                .byte   $8C
-                .byte   $54
-                .byte   $8C
-                .byte   $6F
-                .byte   $8C
-                .byte   $C5
-                .byte   $83
-                .byte   $8A
-                .byte   $8C
-                .byte   $A5
-                .byte   $8C
-                .byte   $C0
-                .byte   $8C
-                .byte   $DB
-                .byte   $8C
-                .byte   $F6
-                .byte   $8C
-                .byte   $11
-                .byte   $8D
-                .byte   $2C
-                .byte   $8D
-                .byte   $47
-                .byte   $8D
-                .byte   $C5
-                .byte   $83
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $C5
-                .byte   $83
-                .byte   $5A
-                .byte   $85
-                .byte   $D3
-                .byte   $84
-                .byte   $31
-                .byte   $84
-                .byte   $4C
-                .byte   $84
-                .byte   $09
-                .byte   $85
-                .byte   $24
-                .byte   $85
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $3F
-                .byte   $85
-                .byte   $13
-                .byte   $91
-                .byte   $FB
-                .byte   $83
-                .byte   $37
-                .byte   $8C
-                .byte   $8A
-                .byte   $8C
-                .byte   $A5
-                .byte   $8C
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $5A
-                .byte   $85
-                .byte   $7D
-                .byte   $8D
-                .byte   $98
-                .byte   $8D,$B3,$8D,$CE,$8D,$C5
-                .byte   $83
-                .byte   $E9
-                .byte   $8D
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $75
-                .byte   $85
-                .byte   $90
-                .byte   $85
-                .byte   $D3
-                .byte   $84
-                .byte   $AB
-                .byte   $85
-                .byte   $C6
-                .byte   $85
-                .byte   $E1
-                .byte   $85
-                .byte   $FC
-                .byte   $85
-                .byte   $17
-                .byte   $86
-                .byte   $A9
-                .byte   $80
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $3F
-                .byte   $85
-                .byte   $04
-                .byte   $8E
-                .byte   $AE
-                .byte   $8B
-                .byte   $1F
-                .byte   $8E
-                .byte   $3A
-                .byte   $8E
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $62
-                .byte   $8D
-                .byte   $62
-                .byte   $8D
-                .byte   $55
-                .byte   $8E
-                .byte   $70
-                .byte   $8E
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $83
-                .byte   $86
-                .byte   $75
-                .byte   $85
-                .byte   $90
-                .byte   $85
-                .byte   $32
-                .byte   $86
-                .byte   $4D
-                .byte   $86
-                .byte   $FC
-                .byte   $85
-                .byte   $17
-                .byte   $86
-                .byte   $D3
-                .byte   $84
-                .byte   $E0
-                .byte   $83
-                .byte   $A9
-                .byte   $80
-                .byte   $3C
-                .byte   $82
-                .byte   $A9
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8B
-                .byte   $8E
-                .byte   $A6
-                .byte   $8E
-                .byte   $A6
-                .byte   $8E
-                .byte   $C1
-                .byte   $8E
-                .byte   $5A
-                .byte   $85
-                .byte   $5A
-                .byte   $85
-                .byte   $C5
-                .byte   $83
-                .byte   $75
-                .byte   $85
-                .byte   $35
-                .byte   $8C
-                .byte   $48
-                .byte   $8F
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $AE
-                .byte   $8B
-                .byte   $DC
-                .byte   $8E
-                .byte   $F7
-                .byte   $8E
-                .byte   $83
-                .byte   $86
-                .byte   $83
-                .byte   $86
-                .byte   $5A
-                .byte   $85
-                .byte   $C5
-                .byte   $83
-                .byte   $9E
-                .byte   $86
-                .byte   $B9
-                .byte   $86
-                .byte   $D4
-                .byte   $86
-                .byte   $EF
-                .byte   $86
-                .byte   $0A
-                .byte   $87
-                .byte   $25
-                .byte   $87
-                .byte   $B8
-                .byte   $84
-                .byte   $06
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $57
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8B
-                .byte   $8E
-                .byte   $12
-                .byte   $8F
-                .byte   $2D
-                .byte   $8F
-                .byte   $FF
-                .byte   $8B
-                .byte   $FF
-                .byte   $8B
-                .byte   $DB
-                .byte   $00
-                .byte   $75
-                .byte   $85
-                .byte   $35
-                .byte   $8C
-                .byte   $48
-                .byte   $8F
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $40
-                .byte   $87
-                .byte   $5B
-                .byte   $87
-                .byte   $90
-                .byte   $85
-                .byte   $76
-                .byte   $87
-                .byte   $91
-                .byte   $87,$AC,$87,$C7,$87,$E2,$87,$FD,$87,$B8
-                .byte   $84
-                .byte   $FB
-                .byte   $83
-                .byte   $21
-                .byte   $82
-                .byte   $72
-                .byte   $82
-                .byte   $A8
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $63
-                .byte   $8F
-                .byte   $7E
-                .byte   $8F
-                .byte   $2C
-                .byte   $8D
-                .byte   $35
-                .byte   $8C
-                .byte   $99
-                .byte   $8F
-                .byte   $35
-                .byte   $8C
-                .byte   $48
-                .byte   $8F
-                .byte   $B4
-                .byte   $8F
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $CF
-                .byte   $8F
-                .byte   $D3
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $18
-                .byte   $88
-                .byte   $B8
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $33
-                .byte   $88
-                .byte   $4E
-                .byte   $88
-                .byte   $69
-                .byte   $88
-                .byte   $84
-                .byte   $88
-                .byte   $9F
-                .byte   $88
-                .byte   $C5
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $31
-                .byte   $84
-                .byte   $BA
-                .byte   $88
-                .byte   $7F
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $04
-                .byte   $8E
-                .byte   $EA
-                .byte   $8F
-                .byte   $05
-                .byte   $90
-                .byte   $20
-                .byte   $90
-                .byte   $3B
-                .byte   $90
-                .byte   $56
-                .byte   $90
-                .byte   $71
-                .byte   $90
-                .byte   $48
-                .byte   $8F
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $A7
-                .byte   $90
-                .byte   $C2
-                .byte   $90
-                .byte   $DD
-                .byte   $90
-                .byte   $2E
-                .byte   $91
-                .byte   $54
-                .byte   $8C
-                .byte   $F8
-                .byte   $90
-                .byte   $D5
-                .byte   $88
-                .byte   $E0
-                .byte   $83
-                .byte   $F0
-                .byte   $88
-                .byte   $0B
-                .byte   $89
-                .byte   $26
-                .byte   $89
-                .byte   $41
-                .byte   $89
-                .byte   $5C
-                .byte   $89
-                .byte   $E0
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $31
-                .byte   $84
-                .byte   $4C
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $C4
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $13
-                .byte   $91
-                .byte   $EA
-                .byte   $8F
-                .byte   $2E
-                .byte   $91
-                .byte   $54
-                .byte   $8C
-                .byte   $54
-                .byte   $8C
-                .byte   $54
-                .byte   $8C
-                .byte   $2E
-                .byte   $91
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $C5
-                .byte   $83
-                .byte   $49
-                .byte   $91
-                .byte   $37
-                .byte   $8C
-                .byte   $64
-                .byte   $91
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $37
-                .byte   $8C
-                .byte   $77
-                .byte   $89
-                .byte   $25
-                .byte   $87
-                .byte   $AD
-                .byte   $89
-                .byte   $C8
-                .byte   $89
-                .byte   $25
-                .byte   $87
-                .byte   $E3
-                .byte   $89
-                .byte   $FE
-                .byte   $89
-                .byte   $19
-                .byte   $8A
-                .byte   $FE
-                .byte   $89
-                .byte   $4C
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $8D
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $37
-                .byte   $8C
-                .byte   $7F
-                .byte   $91
-                .byte   $9A
-                .byte   $91
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $B5
-                .byte   $91
-                .byte   $D0
-                .byte   $91
-                .byte   $DD
-                .byte   $90
-                .byte   $EB
-                .byte   $91
-                .byte   $06
-                .byte   $92
-                .byte   $C5
-                .byte   $83
-                .byte   $DB
-                .byte   $00
-                .byte   $9D
-                .byte   $84
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $C5
-                .byte   $83
-                .byte   $18
-                .byte   $88
-                .byte   $34
-                .byte   $8A
-                .byte   $4F
-                .byte   $8A
-                .byte   $6A
-                .byte   $8A
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $B5
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $21
-                .byte   $92
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $8C
-                .byte   $90
-                .byte   $B5
-                .byte   $91
-                .byte   $C5
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $EB
-                .byte   $91
-                .byte   $06
-                .byte   $92
-                .byte   $37
-                .byte   $8C
-                .byte   $9D
-                .byte   $84
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $D5
-                .byte   $88
-                .byte   $85
-                .byte   $8A
-                .byte   $D3
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $FB
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $31
-                .byte   $84
-                .byte   $FE
-                .byte   $89
-                .byte   $D0
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $DD
-                .byte   $90
-                .byte   $37
-                .byte   $8C
-                .byte   $57
-                .byte   $92
-                .byte   $72
-                .byte   $92
-                .byte   $8D
-                .byte   $92
-                .byte   $C5
-                .byte   $83
-                .byte   $8C
-                .byte   $90
-                .byte   $C5
-                .byte   $83
-                .byte   $72
-                .byte   $83
-                .byte   $A8
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $DE
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $EB
-                .byte   $91
-                .byte   $F9
-                .byte   $92
-                .byte   $9D
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $A0,$8A,$BB,$8A,$D6,$8A,$F1,$8A
-                .byte   $0C
-                .byte   $8B
-                .byte   $31
-                .byte   $84
-                .byte   $19
-                .byte   $8A
-                .byte   $FE
-                .byte   $89
-                .byte   $FE
-                .byte   $89
-                .byte   $4C
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $7F
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $2F
-                .byte   $93
-                .byte   $37
-                .byte   $8C
-                .byte   $57
-                .byte   $92
-                .byte   $72
-                .byte   $92
-                .byte   $8D
-                .byte   $92
-                .byte   $8D
-                .byte   $92
-                .byte   $8C
-                .byte   $90
-                .byte   $72
-                .byte   $83
-                .byte   $4A
-                .byte   $93
-                .byte   $35
-                .byte   $8C
-                .byte   $35
-                .byte   $8C
-                .byte   $65
-                .byte   $93
-                .byte   $35
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $3D
-                .byte   $94
-                .byte   $9D
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $FB
-                .byte   $83
-                .byte   $31
-                .byte   $84
-                .byte   $FE
-                .byte   $89
-                .byte   $FE
-                .byte   $89
-                .byte   $4C
-                .byte   $84
-                .byte   $AA
-                .byte   $83
-                .byte   $FB
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $9D
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $EB
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $65
-                .byte   $93
-                .byte   $80
-                .byte   $93
-                .byte   $1F
-                .byte   $8E
-                .byte   $2F
-                .byte   $93
-                .byte   $57
-                .byte   $92
-                .byte   $07
-                .byte   $94
-                .byte   $9B
-                .byte   $93
-                .byte   $8C
-                .byte   $90
-                .byte   $72
-                .byte   $83
-                .byte   $B6
-                .byte   $93
-                .byte   $48
-                .byte   $8F
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $3D
-                .byte   $94
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $31
-                .byte   $84
-                .byte   $19
-                .byte   $8A
-                .byte   $27
-                .byte   $8B
-                .byte   $9D
-                .byte   $84
-                .byte   $AA
-                .byte   $83
-                .byte   $42
-                .byte   $8B
-                .byte   $C5
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $5D
-                .byte   $8B
-                .byte   $AA
-                .byte   $83
-                .byte   $18
-                .byte   $88
-                .byte   $9A
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $D1
-                .byte   $93
-                .byte   $EC
-                .byte   $93
-                .byte   $07
-                .byte   $94
-                .byte   $2F
-                .byte   $93
-                .byte   $37
-                .byte   $8C
-                .byte   $22
-                .byte   $94
-                .byte   $37
-                .byte   $8C
-                .byte   $13
-                .byte   $91
-                .byte   $D3
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $B6
-                .byte   $93
-                .byte   $D3
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $3D
-                .byte   $94
-                .byte   $E0
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $AB
-                .byte   $85
-                .byte   $FB
-                .byte   $83
-                .byte   $78
-                .byte   $8B
-                .byte   $9D
-                .byte   $84
-                .byte   $93
-                .byte   $8B
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $C6
-                .byte   $85
-                .byte   $9F
-                .byte   $88
-                .byte   $C4
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $2C
-                .byte   $8D
-                .byte   $58
-                .byte   $94
-                .byte   $07
-                .byte   $94
-                .byte   $3C
-                .byte   $92
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $13
-                .byte   $91
-                .byte   $68
-                .byte   $86
-                .byte   $37
-                .byte   $8C
-                .byte   $13
-                .byte   $91
-                .byte   $07
-                .byte   $94
-                .byte   $B6
-                .byte   $93
-                .byte   $73
-                .byte   $94
-                .byte   $FE
-                .byte   $89
-                .byte   $FE
-                .byte   $89
-                .byte   $BA
-                .byte   $88
-                .byte   $C5
-                .byte   $83
-                .byte   $78
-                .byte   $8B
-                .byte   $F0
-                .byte   $88
-                .byte   $6A
-                .byte   $8A
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $F1
-                .byte   $8A
-                .byte   $0C
-                .byte   $8B
-                .byte   $C5
-                .byte   $83
-                .byte   $7F
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $9D
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $1F
-                .byte   $8E
-                .byte   $1F
-                .byte   $8E
-                .byte   $2F
-                .byte   $93
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $68
-                .byte   $86
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $DD
-                .byte   $90
-                .byte   $1F
-                .byte   $8E
-                .byte   $18
-                .byte   $88
-                .byte   $0C
-                .byte   $8B
-                .byte   $E1
-                .byte   $85
-                .byte   $D5
-                .byte   $88
-                .byte   $32
-                .byte   $86
-                .byte   $78
-                .byte   $8B
-                .byte   $E2
-                .byte   $87
-                .byte   $4D
-                .byte   $86
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $AA
-                .byte   $83
-                .byte   $B8
-                .byte   $84
-                .byte   $9A
-                .byte   $81
-                .byte   $30
-                .byte   $81
-                .byte   $8D
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $8E
-                .byte   $94
-                .byte   $06
-                .byte   $92
-                .byte   $9D
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $9D
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $9D
-                .byte   $84
-                .byte   $2F
-                .byte   $93
-                .byte   $37
-                .byte   $8C
-                .byte   $37
-                .byte   $8C
-                .byte   $68
-                .byte   $86
-                .byte   $1F
-                .byte   $8E
-                .byte   $1F
-                .byte   $8E
-                .byte   $9D
-                .byte   $84
-                .byte   $33
-                .byte   $88
-                .byte   $4E
-                .byte   $88
-                .byte   $69
-                .byte   $88
-                .byte   $BB
-                .byte   $8A
-                .byte   $E1
-                .byte   $85
-                .byte   $D4
-                .byte   $86
-                .byte   $78
-                .byte   $8B
-                .byte   $AD
-                .byte   $89
-                .byte   $34
-                .byte   $8A
-                .byte   $4F
-                .byte   $8A
-                .byte   $AA
-                .byte   $83
-                .byte   $09
-                .byte   $85
-                .byte   $24
-                .byte   $85
-                .byte   $FB
-                .byte   $83
-                .byte   $C4
-                .byte   $80
-                .byte   $C3
-                .byte   $82
-                .byte   $DE
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $EB
-                .byte   $91
-                .byte   $FE
-                .byte   $89
-                .byte   $FE
-                .byte   $89
-                .byte   $19
-                .byte   $8A
-                .byte   $FE
-                .byte   $89
-                .byte   $06
-                .byte   $92
-                .byte   $9D
-                .byte   $84
-                .byte   $2F
-                .byte   $93
-                .byte   $DD
-                .byte   $90
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $76
-                .byte   $87
-                .byte   $EF
-                .byte   $86
-                .byte   $E2,$87,$FD,$87
-                .byte   $25
-                .byte   $87
-                .byte   $0A
-                .byte   $87
-                .byte   $78
-                .byte   $8B
-                .byte   $FB
-                .byte   $83
-                .byte   $85
-                .byte   $8A
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $E1
-                .byte   $85
-                .byte   $FC
-                .byte   $85
-                .byte   $A9
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $C3
-                .byte   $82
-                .byte   $0C
-                .byte   $8B
-                .byte   $20
-                .byte   $80
-                .byte   $14
-                .byte   $93
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $78
-                .byte   $8B
-                .byte   $FB
-                .byte   $83
-                .byte   $A9
-                .byte   $80
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $91
-                .byte   $87
-                .byte   $AC
-                .byte   $87
-                .byte   $6A
-                .byte   $8A
-                .byte   $C8
-                .byte   $89
-                .byte   $4D
-                .byte   $86
-                .byte   $E2
-                .byte   $87
-                .byte   $78
-                .byte   $8B
-                .byte   $B8
-                .byte   $84
-                .byte   $B8
-                .byte   $84
-                .byte   $C5
-                .byte   $83
-                .byte   $64
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8E
-                .byte   $80
-                .byte   $4B
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $A9
-                .byte   $80
-                .byte   $3D
-                .byte   $80
-                .byte   $58
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $73
-                .byte   $80
-                .byte   $E3
-                .byte   $89
-                .byte   $64
-                .byte   $91
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $C5
-                .byte   $83
-                .byte   $9F
-                .byte   $88
-                .byte   $D3
-                .byte   $84
-                .byte   $D3
-                .byte   $84
-                .byte   $FC
-                .byte   $85
-                .byte   $B9
-                .byte   $86
-                .byte   $78
-                .byte   $8B
-                .byte   $DF
-                .byte   $80
-                .byte   $FA
-                .byte   $80
-                .byte   $DF
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $68
-                .byte   $86
-                .byte   $E0
-                .byte   $83
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $20
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8E
-                .byte   $80
-                .byte   $68
-                .byte   $86
-                .byte   $EB
-                .byte   $91
-                .byte   $06
-                .byte   $92
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $FC
-                .byte   $85
-                .byte   $C4
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $15
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $A9
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $73
-                .byte   $80
-                .byte   $68
-                .byte   $86
-                .byte   $EB
-                .byte   $91
-                .byte   $FE
-                .byte   $89
-                .byte   $06
-                .byte   $92
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $A9
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $30
-                .byte   $81
-                .byte   $8D
-                .byte   $82
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $14
-                .byte   $93
-                .byte   $68
-                .byte   $86
-                .byte   $A9
-                .byte   $80
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8E
-                .byte   $80
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $78
-                .byte   $8B
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $68
-                .byte   $86
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $8E
-                .byte   $80
-                .byte   $4B
-                .byte   $81
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $13
-                .byte   $91
-                .byte   $C3
-                .byte   $92
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $37
-                .byte   $8C
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $C3
-                .byte   $92
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
-                .byte   $70
-                .byte   $83
+                .word   T90DD
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BC9
+                .word   T8BE4
+                .word   T8BFF
+                .word   T8BFF
+                .word   T8BFF
+                .word   T8C1A
+                .word   T8C35
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T8416
+                .word   T8482
+                .word   T8467
+                .word   T8482
+                .word   T8482
+                .word   T8482
+                .word   T8482
+                .word   T84EE
+                .word   T9314
+                .word   T83C5
+                .word   T8C39
+                .word   T8C54
+                .word   T8C54
+                .word   T8C6F
+                .word   T83C5
+                .word   T8C8A
+                .word   T8CA5
+                .word   T8CC0
+                .word   T8CDB
+                .word   T8CF6
+                .word   T8D11
+                .word   T8D2C
+                .word   T8D47
+                .word   T83C5
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T83C5
+                .word   T855A
+                .word   T84D3
+                .word   T8431
+                .word   T844C
+                .word   T8509
+                .word   T8524
+                .word   T84B8
+                .word   T84B8
+                .word   T84B8
+                .word   T83C5
+                .word   T853F
+                .word   T9113
+                .word   T83FB
+                .word   T8C37
+                .word   T8C8A
+                .word   T8CA5
+                .word   T8D62
+                .word   T8D62
+                .word   T8D62
+                .word   T855A
+                .word   T8D7D
+                .word   T8D98
+                .word   T8DB3
+                .word   T8DCE
+                .word   T83C5
+                .word   T8DE9
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T8575
+                .word   T8590
+                .word   T84D3
+                .word   T85AB
+                .word   T85C6
+                .word   T85E1
+                .word   T85FC
+                .word   T8617
+                .word   T80A9
+                .word   T84B8
+                .word   T84B8
+                .word   T853F
+                .word   T8E04
+                .word   T8BAE
+                .word   T8E1F
+                .word   T8E3A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T8D62
+                .word   T8D62
+                .word   T8E55
+                .word   T8E70
+                .word   T855A
+                .word   T855A
+                .word   T855A
+                .word   T8683
+                .word   T8575
+                .word   T8590
+                .word   T8632
+                .word   T864D
+                .word   T85FC
+                .word   T8617
+                .word   T84D3
+                .word   T83E0
+                .word   T80A9
+                .word   T823C
+                .word   T80A9
+                .word   T8370
+                .word   T8370
+                .word   T8E8B
+                .word   T8EA6
+                .word   T8EA6
+                .word   T8EC1
+                .word   T855A
+                .word   T855A
+                .word   T83C5
+                .word   T8575
+                .word   T8C35
+                .word   T8F48
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8BAE
+                .word   T8EDC
+                .word   T8EF7
+                .word   T8683
+                .word   T8683
+                .word   T855A
+                .word   T83C5
+                .word   T869E
+                .word   T86B9
+                .word   T86D4
+                .word   T86EF
+                .word   T870A
+                .word   T8725
+                .word   T84B8
+                .word   T8206
+                .word   T8370
+                .word   T8257
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8E8B
+                .word   T8F12
+                .word   T8F2D
+                .word   T8BFF
+                .word   T8BFF
+                .word   $00DB
+                .word   T8575
+                .word   T8C35
+                .word   T8F48
+                .word   T84D3
+                .word   T84D3
+                .word   T84D3
+                .word   T83C5
+                .word   T84D3
+                .word   T84D3
+                .word   T84D3
+                .word   T8740
+                .word   T875B
+                .word   T8590
+                .word   T8776
+                .word   T8791
+                .word   T87AC
+                .word   T87C7
+                .word   T87E2
+                .word   T87FD
+                .word   T84B8
+                .word   T83FB
+                .word   T8221
+                .word   T8272
+                .word   T82A8
+                .word   T8370
+                .word   T8370
+                .word   T8F63
+                .word   T8F7E
+                .word   T8D2C
+                .word   T8C35
+                .word   T8F99
+                .word   T8C35
+                .word   T8F48
+                .word   T8FB4
+                .word   T84D3
+                .word   T84D3
+                .word   T84D3
+                .word   T8FCF
+                .word   T84D3
+                .word   T83C5
+                .word   T84D3
+                .word   T84D3
+                .word   T8818
+                .word   T84B8
+                .word   T83C5
+                .word   T8833
+                .word   T884E
+                .word   T8869
+                .word   T8884
+                .word   T889F
+                .word   T83C5
+                .word   T84B8
+                .word   T8431
+                .word   T88BA
+                .word   T817F
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8E04
+                .word   T8FEA
+                .word   T9005
+                .word   T9020
+                .word   T903B
+                .word   T9056
+                .word   T9071
+                .word   T8F48
+                .word   T84D3
+                .word   T84D3
+                .word   T90A7
+                .word   T90C2
+                .word   T90DD
+                .word   T912E
+                .word   T8C54
+                .word   T90F8
+                .word   T88D5
+                .word   T83E0
+                .word   T88F0
+                .word   T890B
+                .word   T8926
+                .word   T8941
+                .word   T895C
+                .word   T83E0
+                .word   T84B8
+                .word   T8431
+                .word   T844C
+                .word   T84B8
+                .word   T80C4
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9113
+                .word   T8FEA
+                .word   T912E
+                .word   T8C54
+                .word   T8C54
+                .word   T8C54
+                .word   T912E
+                .word   T908C
+                .word   T908C
+                .word   T83C5
+                .word   T9149
+                .word   T8C37
+                .word   T9164
+                .word   T84B8
+                .word   T84B8
+                .word   T8C37
+                .word   T8977
+                .word   T8725
+                .word   T89AD
+                .word   T89C8
+                .word   T8725
+                .word   T89E3
+                .word   T89FE
+                .word   T8A19
+                .word   T89FE
+                .word   T844C
+                .word   T83C5
+                .word   T84B8
+                .word   T828D
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8C37
+                .word   T917F
+                .word   T919A
+                .word   T84D3
+                .word   T84D3
+                .word   T84D3
+                .word   T908C
+                .word   T908C
+                .word   T908C
+                .word   T91B5
+                .word   T91D0
+                .word   T90DD
+                .word   T91EB
+                .word   T9206
+                .word   T83C5
+                .word   $00DB
+                .word   T849D
+                .word   T83AA
+                .word   T83AA
+                .word   T83C5
+                .word   T8818
+                .word   T8A34
+                .word   T8A4F
+                .word   T8A6A
+                .word   T84B8
+                .word   T84B8
+                .word   T84B8
+                .word   T84B8
+                .word   T83C5
+                .word   T81B5
+                .word   T8370
+                .word   T8370
+                .word   T8C37
+                .word   T8C37
+                .word   T9221
+                .word   T84D3
+                .word   T84D3
+                .word   T908C
+                .word   T908C
+                .word   T908C
+                .word   T908C
+                .word   T91B5
+                .word   T83C5
+                .word   T84B8
+                .word   T84B8
+                .word   T91EB
+                .word   T9206
+                .word   T8C37
+                .word   T849D
+                .word   T83AA
+                .word   T83AA
+                .word   T83AA
+                .word   T88D5
+                .word   T8A85
+                .word   T84D3
+                .word   T849D
+                .word   T84B8
+                .word   T83FB
+                .word   T84B8
+                .word   T8431
+                .word   T89FE
+                .word   T81D0
+                .word   T8370
+                .word   T8370
+                .word   T90DD
+                .word   T8C37
+                .word   T9257
+                .word   T9272
+                .word   T928D
+                .word   T83C5
+                .word   T908C
+                .word   T83C5
+                .word   T8372
+                .word   T92A8
+                .word   T92C3
+                .word   T92C3
+                .word   T92DE
+                .word   T92C3
+                .word   T91EB
+                .word   T92F9
+                .word   T849D
+                .word   T849D
+                .word   T8AA0
+                .word   T8ABB
+                .word   T8AD6
+                .word   T8AF1
+                .word   T8B0C
+                .word   T8431
+                .word   T8A19
+                .word   T89FE
+                .word   T89FE
+                .word   T844C
+                .word   T83C5
+                .word   T817F
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T932F
+                .word   T8C37
+                .word   T9257
+                .word   T9272
+                .word   T928D
+                .word   T928D
+                .word   T908C
+                .word   T8372
+                .word   T934A
+                .word   T8C35
+                .word   T8C35
+                .word   T9365
+                .word   T8C35
+                .word   T8C37
+                .word   T943D
+                .word   T849D
+                .word   T849D
+                .word   T83C5
+                .word   T83FB
+                .word   T8431
+                .word   T89FE
+                .word   T89FE
+                .word   T844C
+                .word   T83AA
+                .word   T83FB
+                .word   T83AA
+                .word   T849D
+                .word   T849D
+                .word   T81EB
+                .word   T8370
+                .word   T8370
+                .word   T9365
+                .word   T9380
+                .word   T8E1F
+                .word   T932F
+                .word   T9257
+                .word   T9407
+                .word   T939B
+                .word   T908C
+                .word   T8372
+                .word   T93B6
+                .word   T8F48
+                .word   T84D3
+                .word   T84D3
+                .word   T849D
+                .word   T84B8
+                .word   T943D
+                .word   T84B8
+                .word   T84B8
+                .word   T8431
+                .word   T8A19
+                .word   T8B27
+                .word   T849D
+                .word   T83AA
+                .word   T8B42
+                .word   T83C5
+                .word   T83AA
+                .word   T8B5D
+                .word   T83AA
+                .word   T8818
+                .word   T819A
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T93D1
+                .word   T93EC
+                .word   T9407
+                .word   T932F
+                .word   T8C37
+                .word   T9422
+                .word   T8C37
+                .word   T9113
+                .word   T84D3
+                .word   T83C5
+                .word   T93B6
+                .word   T84D3
+                .word   T83C5
+                .word   T84B8
+                .word   T943D
+                .word   T83E0
+                .word   T84B8
+                .word   T85AB
+                .word   T83FB
+                .word   T8B78
+                .word   T849D
+                .word   T8B93
+                .word   T83AA
+                .word   T83AA
+                .word   T83AA
+                .word   T83AA
+                .word   T85C6
+                .word   T889F
+                .word   T80C4
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T84D3
+                .word   T84D3
+                .word   T8D2C
+                .word   T9458
+                .word   T9407
+                .word   T923C
+                .word   T8C37
+                .word   T8C37
+                .word   T9113
+                .word   T8668
+                .word   T8C37
+                .word   T9113
+                .word   T9407
+                .word   T93B6
+                .word   T9473
+                .word   T89FE
+                .word   T89FE
+                .word   T88BA
+                .word   T83C5
+                .word   T8B78
+                .word   T88F0
+                .word   T8A6A
+                .word   T83AA
+                .word   T83AA
+                .word   T8AF1
+                .word   T8B0C
+                .word   T83C5
+                .word   T817F
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T849D
+                .word   T84D3
+                .word   T84D3
+                .word   T8E1F
+                .word   T8E1F
+                .word   T932F
+                .word   T8C37
+                .word   T8C37
+                .word   T8C37
+                .word   T8668
+                .word   T8C37
+                .word   T8C37
+                .word   T90DD
+                .word   T8E1F
+                .word   T8818
+                .word   T8B0C
+                .word   T85E1
+                .word   T88D5
+                .word   T8632
+                .word   T8B78
+                .word   T87E2
+                .word   T864D
+                .word   T83AA
+                .word   T83AA
+                .word   T83AA
+                .word   T83AA
+                .word   T84B8
+                .word   T819A
+                .word   T8130
+                .word   T828D
+                .word   T8370
+                .word   T948E
+                .word   T9206
+                .word   T849D
+                .word   T849D
+                .word   T849D
+                .word   T83C5
+                .word   T849D
+                .word   T932F
+                .word   T8C37
+                .word   T8C37
+                .word   T8668
+                .word   T8E1F
+                .word   T8E1F
+                .word   T849D
+                .word   T8833
+                .word   T884E
+                .word   T8869
+                .word   T8ABB
+                .word   T85E1
+                .word   T86D4
+                .word   T8B78
+                .word   T89AD
+                .word   T8A34
+                .word   T8A4F
+                .word   T83AA
+                .word   T8509
+                .word   T8524
+                .word   T83FB
+                .word   T80C4
+                .word   T82C3
+                .word   T82DE
+                .word   T8370
+                .word   T9314
+                .word   T91EB
+                .word   T89FE
+                .word   T89FE
+                .word   T8A19
+                .word   T89FE
+                .word   T9206
+                .word   T849D
+                .word   T932F
+                .word   T90DD
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8776
+                .word   T86EF
+                .word   T87E2
+                .word   T87FD
+                .word   T8725
+                .word   T870A
+                .word   T8B78
+                .word   T83FB
+                .word   T8A85
+                .word   T84B8
+                .word   T84B8
+                .word   T85E1
+                .word   T85FC
+                .word   T80A9
+                .word   T8370
+                .word   T82C3
+                .word   T8B0C
+                .word   T8020
+                .word   T9314
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8B78
+                .word   T83FB
+                .word   T80A9
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8791
+                .word   T87AC
+                .word   T8A6A
+                .word   T89C8
+                .word   T864D
+                .word   T87E2
+                .word   T8B78
+                .word   T84B8
+                .word   T84B8
+                .word   T83C5
+                .word   T8164
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T808E
+                .word   T814B
+                .word   T8370
+                .word   T9314
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T80A9
+                .word   T803D
+                .word   T8058
+                .word   T8370
+                .word   T8073
+                .word   T89E3
+                .word   T9164
+                .word   T8668
+                .word   T8668
+                .word   T83C5
+                .word   T889F
+                .word   T84D3
+                .word   T84D3
+                .word   T85FC
+                .word   T86B9
+                .word   T8B78
+                .word   T80DF
+                .word   T80FA
+                .word   T80DF
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T8668
+                .word   T83E0
+                .word   T8668
+                .word   T8668
+                .word   T8020
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T808E
+                .word   T8668
+                .word   T91EB
+                .word   T9206
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T85FC
+                .word   T80C4
+                .word   T8370
+                .word   T8115
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T8668
+                .word   T8668
+                .word   T80A9
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8073
+                .word   T8668
+                .word   T91EB
+                .word   T89FE
+                .word   T9206
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T80A9
+                .word   T8370
+                .word   T8130
+                .word   T828D
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9314
+                .word   T8668
+                .word   T80A9
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T808E
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8B78
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8668
+                .word   T8370
+                .word   T8370
+                .word   T808E
+                .word   T814B
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T9113
+                .word   T92C3
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T92C3
+                .word   T92C3
+                .word   T92C3
+                .word   T8C37
+                .word   T92C3
+                .word   T92C3
+                .word   T92C3
+                .word   T92C3
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
+                .word   T8370
 MixedRlePointerTable:
                 .word   $0300
                 .word   TA4A7
@@ -8339,66 +7589,66 @@ TA899:          .byte   $30,$00                         ;Attribute = All #$AA(#2
                 .byte   $30
                 .byte   $3C
                 .byte   $2B
-TAA3C:          .byte   $22,$3A,$3A,$4A,$20,$36,$45,$5D,$41,$4E,$33,$20,$43,$5E,$3D,$23 ;「ここは かなんちほう です」
+TextData_01:    .byte   $22,$3A,$3A,$4A,$20,$36,$45,$5D,$41,$4E,$33,$20,$43,$5E,$3D,$23 ;「ここは かなんちほう です」
                 .byte   $2A
-TAA4D:          .byte   $22,$3A,$3A,$4A,$20,$3A,$5E,$4B,$5E,$3B,$4A,$5E,$38,$20,$43,$5E ;「ここは ごびさばく です」
+TextData_02:    .byte   $22,$3A,$3A,$4A,$20,$3A,$5E,$4B,$5E,$3B,$4A,$5E,$38,$20,$43,$5E ;「ここは ごびさばく です」
                 .byte   $3D,$23,$2A
-TAA60:          .byte   $22,$3A,$3A,$4A,$20,$40,$38,$57,$4F,$36,$5D,$3B,$4A,$5E,$38,$20 ;「ここは たくらまかんさばく です」
+TextData_03:    .byte   $22,$3A,$3A,$4A,$20,$40,$38,$57,$4F,$36,$5D,$3B,$4A,$5E,$38,$20 ;「ここは たくらまかんさばく です」
                 .byte   $43,$5E,$3D,$23,$2A
-TAA75:          .byte   $41,$2E,$33,$31,$5D,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょうあんの みやこだ！
-TAA83:          .byte   $57,$38,$56,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;らくようの みやこだ！
-TAA90:          .byte   $41,$2E,$33,$3C,$2D,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょうしゅうの みやこだ！
-TAA9F:          .byte   $41,$2E,$5D,$42,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょんつうの みやこだ！
-TAAAD:          .byte   $22,$45,$36,$4F,$26,$20,$31,$42,$52,$45,$3B,$32,$23,$2A ;「なかまを あつめなさい」
-TAABB:          .byte   $22,$37,$40,$4D,$20,$3D,$3D,$52,$23,$2A ;「きたへ すすめ」
-TAAC5:          .byte   $22,$44,$37,$49,$20,$53,$5D,$26,$20,$44,$35,$5A,$23,$2A ;「ときの もんを とおれ」
-TAAD3:          .byte   $22,$56,$59,$4A,$20,$37,$39,$5D,$40,$5E,$23,$2A ;「よるは きけんだ」
-TAADF:          .byte   $22,$46,$3C,$46,$20,$36,$34,$5D,$3B,$5E,$5D,$36,$5E,$20,$31,$58 ;「にしに かえんざんが あります」
+TextData_04:    .byte   $41,$2E,$33,$31,$5D,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょうあんの みやこだ！
+TextData_05:    .byte   $57,$38,$56,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;らくようの みやこだ！
+TextData_06:    .byte   $41,$2E,$33,$3C,$2D,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょうしゅうの みやこだ！
+TextData_07:    .byte   $41,$2E,$5D,$42,$33,$49,$20,$50,$54,$3A,$40,$5E,$21,$2A ;ちょんつうの みやこだ！
+TextData_08:    .byte   $22,$45,$36,$4F,$26,$20,$31,$42,$52,$45,$3B,$32,$23,$2A ;「なかまを あつめなさい」
+TextData_09:    .byte   $22,$37,$40,$4D,$20,$3D,$3D,$52,$23,$2A ;「きたへ すすめ」
+TextData_0A:    .byte   $22,$44,$37,$49,$20,$53,$5D,$26,$20,$44,$35,$5A,$23,$2A ;「ときの もんを とおれ」
+TextData_0B:    .byte   $22,$56,$59,$4A,$20,$37,$39,$5D,$40,$5E,$23,$2A ;「よるは きけんだ」
+TextData_0C:    .byte   $22,$46,$3C,$46,$20,$36,$34,$5D,$3B,$5E,$5D,$36,$5E,$20,$31,$58 ;「にしに かえんざんが あります」
                 .byte   $4F,$3D,$23,$2A
-TAAF3:          .byte   $22,$43,$5D,$3C,$5E,$38,$4A,$20,$36,$34,$5D,$3B,$5E,$5D,$49,$20 ;「てんじくは かえんざんの むこう」
+TextData_0D:    .byte   $22,$43,$5D,$3C,$5E,$38,$4A,$20,$36,$34,$5D,$3B,$5E,$5D,$49,$20 ;「てんじくは かえんざんの むこう」
                 .byte   $51,$3A,$33,$23,$2A
-TAB08:          .byte   $22,$57,$3E,$42,$3C,$5E,$2E,$26,$20,$40,$35,$3E,$4A,$5E,$36,$34 ;「らせつじょを たおせば かえんざんの・・」
+TextData_0E:    .byte   $22,$57,$3E,$42,$3C,$5E,$2E,$26,$20,$40,$35,$3E,$4A,$5E,$36,$34 ;「らせつじょを たおせば かえんざんの・・」
                 .byte   $5D,$3B,$5E,$5D,$49,$25,$25,$23,$2A
-TAB21:          .byte   $22,$37,$5D,$36,$38,$4A,$20,$3B,$4A,$5E,$38,$49,$20,$4A,$43,$46 ;「きんかくは さばくの はてにいる」
+TextData_0F:    .byte   $22,$37,$5D,$36,$38,$4A,$20,$3B,$4A,$5E,$38,$49,$20,$4A,$43,$46 ;「きんかくは さばくの はてにいる」
                 .byte   $32,$59,$23,$2A
-TAB35:          .byte   $22,$4C,$3C,$41,$2E,$33,$20,$4E,$33,$35,$33,$26,$20,$3B,$36,$5E ;「ふしちょう ほうおうを さがせ」
+TextData_10:    .byte   $22,$4C,$3C,$41,$2E,$33,$20,$4E,$33,$35,$33,$26,$20,$3B,$36,$5E ;「ふしちょう ほうおうを さがせ」
                 .byte   $3E,$23,$2A
-TAB48:          .byte   $37,$5D,$36,$38,$40,$5E,$32,$35,$33,$20,$22,$37,$5E,$5D,$36,$38 ;きんかくだいおう 「ぎんかくのかたき！」
+TextData_11:    .byte   $37,$5D,$36,$38,$40,$5E,$32,$35,$33,$20,$22,$37,$5E,$5D,$36,$38 ;きんかくだいおう 「ぎんかくのかたき！」
                 .byte   $49,$36,$40,$37,$21,$23,$2A
-TAB5F:          .byte   $37,$5E,$5D,$36,$38,$40,$5E,$32,$35,$33,$20,$22,$3A,$3A,$4A,$44 ;ぎんかくだいおう 「ここはとおさんぞ！」
+TextData_12:    .byte   $37,$5E,$5D,$36,$38,$40,$5E,$32,$35,$33,$20,$22,$3A,$3A,$4A,$44 ;ぎんかくだいおう 「ここはとおさんぞ！」
                 .byte   $35,$3B,$5D,$3F,$5E,$21,$23,$2A
-TAB77:          .byte   $22,$5C,$40,$3C,$36,$5E,$20,$57,$3E,$42,$3C,$5E,$2E,$40,$5E,$21 ;「わたしが らせつじょだ！」
+TextData_13:    .byte   $22,$5C,$40,$3C,$36,$5E,$20,$57,$3E,$42,$3C,$5E,$2E,$40,$5E,$21 ;「わたしが らせつじょだ！」
                 .byte   $23,$2A
-TAB89:          .byte   $22,$43,$5D,$3C,$5E,$38,$4A,$53,$33,$3D,$38,$5E,$43,$5E,$3D,$23 ;「てんじくはもうすぐです」
+TextData_14:    .byte   $22,$43,$5D,$3C,$5E,$38,$4A,$53,$33,$3D,$38,$5E,$43,$5E,$3D,$23 ;「てんじくはもうすぐです」
                 .byte   $2A
-TAB9A:          .byte   $45,$36,$5E,$32,$40,$4B,$5E,$36,$5E,$20,$4A,$3C,$5E,$4F,$59,$25 ;「ながいたびが はじまる・・」
+TextData_15:    .byte   $45,$36,$5E,$32,$40,$4B,$5E,$36,$5E,$20,$4A,$3C,$5E,$4F,$59,$25 ;「ながいたびが はじまる・・」
                 .byte   $25,$2A
-TABAC:          .byte   $3A,$5D,$3E,$32,$4F,$35,$33,$20,$22,$56,$38,$3A,$3A,$4F,$43,$5E ;こんせいまおう 「よくここまできたな・・」
+TextData_16:    .byte   $3A,$5D,$3E,$32,$4F,$35,$33,$20,$22,$56,$38,$3A,$3A,$4F,$43,$5E ;こんせいまおう 「よくここまできたな・・」
                 .byte   $37,$40,$45,$25,$25,$23,$2A
-TABC3:          .byte   $3A,$5E,$38,$33,$32,$2F,$3A,$33,$49,$2A ;ごくういっこうの
-TABCD:          .byte   $45,$36,$5E,$32,$20,$45,$36,$5E,$32,$20,$40,$4B,$5E,$4A,$20,$35 ;ながい ながい たびは おわり
+TextData_17:    .byte   $3A,$5E,$38,$33,$32,$2F,$3A,$33,$49,$2A ;ごくういっこうの
+TextData_18:    .byte   $45,$36,$5E,$32,$20,$45,$36,$5E,$32,$20,$40,$4B,$5E,$4A,$20,$35 ;ながい ながい たびは おわり
                 .byte   $5C,$58,$2A
-TABE0:          .byte   $3A,$5A,$36,$57,$41,$2D,$33,$3A,$5E,$38,$49,$20,$5A,$37,$3C,$36 ;これからちゅうごくの れきしが はじまる
+TextData_19:    .byte   $3A,$5A,$36,$57,$41,$2D,$33,$3A,$5E,$38,$49,$20,$5A,$37,$3C,$36 ;これからちゅうごくの れきしが はじまる
                 .byte   $5E,$20,$4A,$3C,$5E,$4F,$59,$2A
-TABF8:          .byte   $35,$3C,$2C,$36,$3B,$4F,$56,$58,$2A ;おしゃかさまより
-TAC01:          .byte   $31,$58,$36,$5E,$40,$32,$35,$37,$2E,$33,$26,$20,$32,$40,$40,$5E ;ありがたいおきょうを いただいて
+TextData_1A:    .byte   $35,$3C,$2C,$36,$3B,$4F,$56,$58,$2A ;おしゃかさまより
+TextData_1B:    .byte   $31,$58,$36,$5E,$40,$32,$35,$37,$2E,$33,$26,$20,$32,$40,$40,$5E ;ありがたいおきょうを いただいて
                 .byte   $32,$43,$2A
-TAC14:          .byte   $4B,$44,$4B,$5E,$44,$46,$20,$35,$3C,$34,$26,$20,$42,$40,$34,$4F ;ひとびとに おしえを つたえましょう
+TextData_1C:    .byte   $4B,$44,$4B,$5E,$44,$46,$20,$35,$3C,$34,$26,$20,$42,$40,$34,$4F ;ひとびとに おしえを つたえましょう
                 .byte   $3C,$2E,$33,$2A
-TAC28:          .byte   $31,$31,$20,$3C,$5D,$3C,$5E,$2C,$2F,$40,$21,$2A ;ああ しんじゃった！
-TAC34:          .byte   $35,$3C,$4F,$32,$2A             ;おしまい
-TAC39:          .byte   $4A,$2F,$36,$32,$20,$22,$40,$5E,$5A,$36,$20,$40,$3D,$39,$43,$21 ;はっかい 「だれか たすけて！」
+TextData_1D:    .byte   $31,$31,$20,$3C,$5D,$3C,$5E,$2C,$2F,$40,$21,$2A ;ああ しんじゃった！
+TextData_1E:    .byte   $35,$3C,$4F,$32,$2A             ;おしまい
+TextData_1F:    .byte   $4A,$2F,$36,$32,$20,$22,$40,$5E,$5A,$36,$20,$40,$3D,$39,$43,$21 ;はっかい 「だれか たすけて！」
                 .byte   $23,$2A
-TAC4B:          .byte   $22,$3B,$4A,$5E,$38,$49,$20,$32,$58,$38,$5E,$41,$4A,$20,$4E,$38 ;「さばくの いりぐちは ほくせい」
+TextData_21:    .byte   $22,$3B,$4A,$5E,$38,$49,$20,$32,$58,$38,$5E,$41,$4A,$20,$4E,$38 ;「さばくの いりぐちは ほくせい」
                 .byte   $3E,$32,$23,$2A
-TAC5F:          .byte   $22,$36,$5E,$5D,$4A,$5E,$2F,$43,$38,$40,$5E,$3B,$32,$48,$23,$2A ;「がんばってくださいね」
-TAC6F:          .byte   $3B,$3A,$5E,$3C,$5E,$2E,$33,$20,$22,$35,$44,$53,$3C,$4F,$3D,$21 ;さごじょう 「おともします！」
+TextData_22:    .byte   $22,$36,$5E,$5D,$4A,$5E,$2F,$43,$38,$40,$5E,$3B,$32,$48,$23,$2A ;「がんばってくださいね」
+TextData_24:    .byte   $3B,$3A,$5E,$3C,$5E,$2E,$33,$20,$22,$35,$44,$53,$3C,$4F,$3D,$21 ;さごじょう 「おともします！」
                 .byte   $23,$2A
-TAC81:          .byte   $22,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB AB」
-TAC89:          .byte   $22,$C1,$C2,$20,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB AB AB」
-TAC94:          .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$20,$C1,$C2,$23,$2A ;「AB A A AB」
-TACA0:          .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$23,$2A ;「AB A A」
-TACA9:          .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB A AB AB」
+TextData_25:    .byte   $22,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB AB」
+TextData_26:    .byte   $22,$C1,$C2,$20,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB AB AB」
+TextData_27:    .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$20,$C1,$C2,$23,$2A ;「AB A A AB」
+TextData_28:    .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$23,$2A ;「AB A A」
+TextData_29:    .byte   $22,$C1,$C2,$20,$C1,$20,$C1,$C2,$20,$C1,$C2,$23,$2A ;「AB A AB AB」
 
 LACB6:          LDA     #$20                            ;$60 = $2000
                 STA     $61
@@ -8423,7 +7673,7 @@ LACB6:          LDA     #$20                            ;$60 = $2000
 @LACDE:         RTS
 
 LACDF:          JSR     LACB6
-                LDA     PpuControlBuffer+2
+                LDA     PpuCtrlBuffer_Bit2_AddrDirection
                 BNE     @LAD12
                 LDA     $55
                 ROR     A
@@ -8534,7 +7784,7 @@ LAD80:          LDA     $53
                 RTS
 
 TransferPalette:
-                LDA     PpuControlBuffer+2
+                LDA     PpuCtrlBuffer_Bit2_AddrDirection
                 ORA     $D3
                 BNE     @Return
                 LDA     PPUSTATUS                       ;Clear VBlank flag
@@ -8607,7 +7857,7 @@ NMI:            PHA                                     ;Prologue
 @LAE3C:         JSR     LACDF
                 LDA     #$00
                 STA     $52
-                STA     PpuControlBuffer+2
+                STA     PpuCtrlBuffer_Bit2_AddrDirection
 @LAE45:         JSR     LAD80
                 LDA     $03FE
                 BNE     @LAE58
@@ -8672,21 +7922,21 @@ NMI:            PHA                                     ;Prologue
                 BNE     @LAE98
                 RTS
 
-ReadJoypad:     TXA                                     ;save software stack pointer
+ReadJoypad:     TXA                                     ;Save software stack pointer
                 PHA
-                LDA     #$01
+                LDA     #$01                            ;Latch the pad status
                 STA     JOY1
                 LDA     #$00
                 STA     JOY1
                 TAX
-@Loop:          LDA     JOY1
+@Loop:          LDA     JOY1                            ;Read buttons status
                 AND     #$03
                 STA     PadBuffer_Now,x                 ;1button, 1byte...
                 INX
                 CPX     #$08
                 BNE     @Loop
                 JSR     @CheckButtons
-                PLA                                     ;restore software stack pointer
+                PLA                                     ;Restore software stack pointer
                 TAX
                 RTS
 
@@ -8698,32 +7948,34 @@ ReadJoypad:     TXA                                     ;save software stack poi
                 RTS
 
 @CheckButton:   LDA     PadBuffer_Prev,x
-                BNE     @LAEF6
+                BNE     @NotTrigger
                 LDA     PadBuffer_Now,x
-                BEQ     @LAEF6
-                STA     PadBuffer_Prev,x
+                BEQ     @NotTrigger
+                STA     PadBuffer_Prev,x                ;Copy to previous input
                 LDA     #$01
                 STA     PadBuffer_Trigger,x
                 RTS
 
-@LAEF6:         LDA     #$00
+@NotTrigger:    LDA     #$00
                 STA     PadBuffer_Trigger,x
                 LDA     PadBuffer_Now,x
                 STA     PadBuffer_Prev,x
                 RTS
 
-LAF02:          LDY     #$07
+ClearPpuControlBuffer:
+                LDY     #$07
                 LDA     #$00
-@LAF06:         STA     PpuControlBuffer,y
+@Loop:          STA     PpuControlBuffer,y
                 DEY
-                BPL     @LAF06
+                BPL     @Loop
                 RTS
 
-LAF0D:          LDY     #$07
+ClearPpuMaskBuffer:
+                LDY     #$07
                 LDA     #$00
-@LAF11:         STA     PpuMaskBuffer,y
+@Loop:          STA     PpuMaskBuffer,y
                 DEY
-                BPL     @LAF11
+                BPL     @Loop
                 RTS
 
 ; Read from $41-$48 each bytes
@@ -8775,11 +8027,11 @@ SetDisplayScreenPosition:
                 LDA     ScreenX
                 STA     PPUSCROLL
                 LDA     ScreenX+1
-                STA     PpuControlBuffer                ;Base nametable
+                STA     PpuCtrlBuffer_Bit0_BaseNametable ;Base nametable
                 LDA     ScreenY
                 STA     PPUSCROLL
                 LDA     ScreenY+1
-                STA     PpuControlBuffer+1              ;Base nametable
+                STA     PpuCtrlBuffer_Bit1_BaseNametable ;Base nametable
                 JMP     SetPpuControl
 
 VmHelper_PushConst_0405:
@@ -8810,11 +8062,11 @@ LAF9A:          LDA     RleExpandIndex
                 BCC     @Expand                         ;Index < #$20
 @Reset:         LDA     #$00
                 STA     RleExpandIndex
-                BEQ     @LAFAC
+                BEQ     @SkipExpand
 
 @Expand:        JSR     ExpandMixedRleData              ;Nametable
                 JSR     ExpandRleData                   ;Attribute
-@LAFAC:         JSR     @LAFC7
+@SkipExpand:    JSR     @LAFC7
                 JSR     LAFE2
                 LDY     RleExpandIndex
                 LDA     LA01B,y
@@ -8896,13 +8148,13 @@ LB034:          LDA     #$BE
                 JSR     SetOamDmaRequest
                 JMP     LB034
 
-LB04F:          LDA     PpuControlBuffer
+LB04F:          LDA     PpuCtrlBuffer_Bit0_BaseNametable
                 PHA
                 LDA     $51
                 BEQ     @LB096
                 JSR     LB034
                 LDA     #$00
-                STA     PpuControlBuffer
+                STA     PpuCtrlBuffer_Bit0_BaseNametable
                 JSR     ReadPpuControl
                 TAY
                 LDA     #$00
@@ -8927,7 +8179,7 @@ LB04F:          LDA     PpuControlBuffer
 @LB091:         LDY     #$00
                 JSR     LEA45
 @LB096:         PLA
-                STA     PpuControlBuffer
+                STA     PpuCtrlBuffer_Bit0_BaseNametable
                 LDA     #$00
                 STA     $51
                 RTS
@@ -9171,11 +8423,8 @@ LB1EC:          JSR     VmOp_PopRegister
                 STY     PartyLifes-1
                 RTS
 
-                .byte   $A9
-                .byte   $68
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
+                LDA     #$68
+                JMP     VmOp_PushByte
 
 LB1F8:          LDA     #$02
                 LDY     #$E0
@@ -9366,7 +8615,7 @@ LB3A9:          JSR     LB1EC
 @LB3B5:         JSR     VmSecond_CopySecondStack_Reload
                 JSR     LB243
                 JSR     LB04F
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     L9620
                 BCC     @LB3B5
                 RTS
@@ -9535,7 +8784,7 @@ LB539:          LDA     #$03
                 LDY     #$00
                 JMP     VmOp_PushRegister
 
-LB540:          JSR     VmHelper_SaveMemTemp_06
+LB540:          JSR     VmHelper_CreateStackFrame_06
                 JSR     LB51B
                 LDA     $03FE
                 BEQ     @LB57C
@@ -9555,7 +8804,7 @@ LB540:          JSR     VmHelper_SaveMemTemp_06
                 JSR     VmHelper_PushConst_0004
                 JSR     L9645
                 BCC     @LB568
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 @LB57C:         JSR     VmOp_PopRegister
                 TYA
@@ -9567,7 +8816,7 @@ LB540:          JSR     VmHelper_SaveMemTemp_06
                 INY
                 CPY     #$20
                 BCC     @LB582
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LB590:          JSR     VmHelper_PushConst_0000
                 JSR     LB291
@@ -9608,7 +8857,7 @@ LB5E7:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmOp_Compare_Equal
                 JSR     VmOp_ExitFalse
 LB5F3:          LDY     #$20
-@LB5F5:         LDA     L8374,y
+@LB5F5:         LDA     T8372+2,y
                 STA     $00DB,y
                 DEY
                 BPL     @LB5F5
@@ -9693,12 +8942,12 @@ VmHelper_PushConst_8000:
 
 PpuControl_EnableDirection:
                 LDA     #$01
-                STA     PpuControlBuffer+2
+                STA     PpuCtrlBuffer_Bit2_AddrDirection
                 JMP     SetPpuControl
 
 PpuControl_DisableDirection:
                 LDA     #$00
-                STA     PpuControlBuffer+2
+                STA     PpuCtrlBuffer_Bit2_AddrDirection
                 JMP     SetPpuControl
 
 VmHelper_PushConst_0401:
@@ -9776,11 +9025,12 @@ LB6FC:          JSR     VmOp_PopRegister
                 JSR     VmOp_Add_AB
                 JMP     VmOp_ReadAddressWord
 
-LB71A:          LDY     #$04
+HideNormalSprites:
+                LDY     #$04
                 LDA     #$F0
-@LB71E:         STA     OamBuffer,y
+@ClearLoop:     STA     OamBuffer,y                     ;Set #$F0 to OAM $04-$FF
                 INY
-                BNE     @LB71E
+                BNE     @ClearLoop
                 RTS
 
 SongRequest_01: JSR     EnableApuChannel
@@ -9871,12 +9121,12 @@ EnableApuChannel:
                 TAX
 Return:         RTS
 
-CheckPause:     LDA     PadBuffer_Trigger+2             ;Select
+CheckPause:     LDA     PadBuffer_Trigger_Select        ;Select
                 BEQ     Return
                 JSR     DisableApuChannel               ;Pausing
 @CheckLoop:     JSR     VmProc_ProcessFieldFrame        ;Wait next frame
                 JSR     ReadJoypad
-                LDA     PadBuffer_Trigger+2
+                LDA     PadBuffer_Trigger_Select
                 BEQ     @CheckLoop
                 JMP     EnableApuChannel
 
@@ -10013,7 +9263,7 @@ VmProc_ModScreenTileXOffset:
 ;   Stack[0] = Y offset (base:6)
 ;   Stack[1] = X offset (base:8)
 VmProc_CheckFieldDestinationTile:
-                JSR     VmHelper_SaveMemTemp_06         ;prologue
+                JSR     VmHelper_CreateStackFrame_06    ;prologue
                 JSR     VmProc_GetMemoryOffsetY_ChipY
                 JSR     VmOp_Add_AB                     ;(Y + (6 + yArg)) % 15
                 JSR     VmProc_ModScreenTileYOffset
@@ -10048,7 +9298,7 @@ VmProc_CheckFieldDestinationTile:
                 JSR     VmOp_CheckNotZero               ;){
                 BCC     @Accept                         ;  ClearJoypad();
                 JSR     ClearJoypad                     ;}
-@Accept:        JMP     VmOp_ReadTempMemAddr            ;epilogue
+@Accept:        JMP     VmOp_DestroyStackFrame          ;epilogue
 
 VmProc_CheckFieldTile_Up:
                 JSR     VmHelper_PushPad_Up
@@ -10084,8 +9334,9 @@ VmProc_CheckFieldTile:
                 JSR     VmProc_CheckFieldTile_Right
                 JMP     VmProc_CheckFieldTile_Left
 
-LB998:          LDA     #$C3
-                LDY     #$EA
+PushMapEventProcessAddressList:
+                LDA     #>MapEventProcessAddressList
+                LDY     #<MapEventProcessAddressList
                 JMP     VmOp_PushRegister
 
 LB99F:          LDA     $03FC
@@ -10102,13 +9353,13 @@ LB9B2:          JSR     VmOp_PopRegister
                 STY     $03FD
                 RTS
 
-LB9B9:          JSR     VmHelper_PushFieldPageX
+LB9B9:          JSR     VmHelper_PushFieldPageX         ;Check event table out of range
                 JSR     VmHelper_PushConst_001F
-                JSR     VmOp_Compare_AGeatherThanOrEqual
+                JSR     VmOp_Compare_AGeatherThanOrEqual ;if(0x1F >= FieldPageX) return
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushFieldPageY
                 JSR     VmHelper_PushConst_0018
-                JSR     VmOp_Compare_AGeatherThanOrEqual
+                JSR     VmOp_Compare_AGeatherThanOrEqual ;if(0x18 >= FieldPageY) return
                 JSR     VmOp_ExitFalse
                 JSR     VmHelper_PushFieldPageX
                 JSR     LB99F
@@ -10127,7 +9378,7 @@ LB9B9:          JSR     VmHelper_PushFieldPageX
                 JSR     VmHelper_PushFieldPageX
                 JSR     VmOp_Asl_01
                 JSR     VmOp_Add_AB
-                JSR     LB998
+                JSR     PushMapEventProcessAddressList
                 JSR     VmOp_Add_AB
                 JSR     VmOp_ReadAddressWord
                 JMP     VmOp_IndirectJump
@@ -10146,9 +9397,9 @@ WaitProcessStateIncrement:
 @NextState:     STA     ProcessedStateCounter           ;Processed
                 RTS
 
-LBA24:          LDA     $3E
+WaitNmiRaised:  LDA     $3E
                 CMP     $40
-                BEQ     LBA24
+                BEQ     WaitNmiRaised
                 STA     $40
                 RTS
 
@@ -10229,7 +9480,7 @@ LBAC6:          JSR     LD5C4
                 JSR     VmOp_ExitFalse
                 JSR     ClearJoypad
                 LDA     #$01
-                STA     PadBuffer_Now+4
+                STA     PadBuffer_Now_Up
 Return1:        RTS
 
 LBAD5:          JSR     VmHelper_PushPositions
@@ -10242,24 +9493,24 @@ LBAD5:          JSR     VmHelper_PushPositions
                 JSR     VmHelper_PushConst_000C
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
-@LBAF0:         JSR     LBA24
+@LBAF0:         JSR     WaitNmiRaised
                 JSR     VmProc_CheckDstField_Up
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     LBF83
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 LDA     FieldPageX
                 STA     $04DC
                 JSR     LC0FF
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     LC11A
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     L9620
                 BCC     @LBAF0
                 JSR     VmHelper_PopPositions
                 JSR     SetFieldChrBank
                 JSR     LB5BD
                 JSR     SetOamDmaRequest
-                JMP     LBA24
+                JMP     WaitNmiRaised
 
 WaitNextFrame:  LDA     $04DA
                 BNE     Return1
@@ -10349,7 +9600,7 @@ WaitNextFrame:  LDA     $04DA
                 BNE     @StatusareaBlackLoop
                 PLA                                     ;Restore software stack pointer
                 TAX
-                JSR     PlaySubSequence                 ;sound...?
+                JSR     PlaySubSequence
                 JSR     SetZeroSprite
                 JSR     SetOamDmaRequest
 ; Bug : 1/7 chance that NMI will not be executed
@@ -10361,25 +9612,28 @@ WaitNextFrame:  LDA     $04DA
                 BVS     @WaitVBlankExit                 ;Wait *Sprite 0hit*, loop during VBlank
                 JMP     SetDisplayScreenPosition
 
+; Argument:
+;   Stack[0] = Warp destination page X
+;   Stack[1] = Warp destination page Y
 LBBE8:          JSR     DisableApuChannel
-                JSR     SongRequest_15
-                JSR     VmHelper_PopFieldPageX
+                JSR     SongRequest_15                  ;Stop noise channel
+                JSR     VmHelper_PopFieldPageX          ;Set warp destination
                 JSR     VmHelper_PopFieldPageY
                 LDA     #$01
                 STA     $04DA
-                JSR     LE533
+                JSR     DisablePpuMask_BGDisable
                 JSR     LBAD5
                 JSR     LBAD5
                 LDA     FieldPageX
                 AND     #$01
                 STA     ScreenX+1
-                STA     PpuControlBuffer
+                STA     PpuCtrlBuffer_Bit0_BaseNametable
                 JSR     SetPpuControl
                 JSR     SongRequest_16
                 JSR     EnableApuChannel
                 JSR     VmProc_SetTargetPointScreenX
                 JSR     VmProc_SetTargetPointScreenY
-                JSR     LE537
+                JSR     DisablePpuMask_BGEnable
                 LDA     #$00
                 STA     $04DA
                 RTS
@@ -10439,7 +9693,7 @@ VmHelper_PushConst_0500:
                 LDY     #$00
                 JMP     VmOp_PushRegister
 
-LBC94:          JSR     VmOp_Asl_05
+LBC94:          JSR     VmOp_Asl_05                     ;read $999B[(y * 32 + x) * 2]
                 JSR     VmOp_Add_AB
                 JSR     VmOp_Asl_01
                 JSR     VmHelper_PushConst_999B
@@ -10501,7 +9755,7 @@ LBD15:          JSR     VmHelper_PushPad_Right
                 JSR     VmOp_ExitTrue
                 JMP     VmOp_Decrement
 
-LBD1E:          JSR     VmHelper_SaveMemTemp_0E
+LBD1E:          JSR     VmHelper_CreateStackFrame_0E
                 JSR     VmOp_Asl_04
                 JSR     VmHelper_PushConst_0500
                 JSR     VmOp_Add_AB
@@ -10545,7 +9799,7 @@ LBD1E:          JSR     VmHelper_SaveMemTemp_0E
                 JSR     VmOp_WriteByte
                 JSR     L9620
                 BCC     @LBD85
-@LBD9F:         JMP     VmOp_ReadTempMemAddr
+@LBD9F:         JMP     VmOp_DestroyStackFrame
 
 LBDA2:          JSR     VmHelper_PushFieldPageX
                 JSR     VmHelper_PushFieldPageY
@@ -10571,7 +9825,7 @@ LBDCC:          JSR     VmOp_Duplicate
                 JMP     VmHelper_PushConst_000B
 
 LBDDE:          JSR     VmHelper_PushPositions
-                JSR     VmHelper_SaveMemTemp_0E
+                JSR     VmHelper_CreateStackFrame_0E
                 JSR     VmHelper_PushConst_0500
                 JSR     VmHelper_PushFieldChipX
                 JSR     VmOp_Add_AB
@@ -10585,7 +9839,7 @@ LBDF0:          JSR     LBDDE
 @LBDFF:         JSR     LBDB1
                 JSR     L9620
                 BCC     @LBDFF
-                JSR     VmOp_ReadTempMemAddr
+                JSR     VmOp_DestroyStackFrame
                 JMP     VmHelper_PopPositions
 
 LBE0D:          JSR     LBDDE
@@ -10599,7 +9853,7 @@ LBE0D:          JSR     LBDDE
 @LBE25:         JSR     LBDB1
                 JSR     L9620
                 BCC     @LBE25
-                JSR     VmOp_ReadTempMemAddr
+                JSR     VmOp_DestroyStackFrame
                 JMP     VmHelper_PopPositions
 
 LBE33:          JSR     VmHelper_PushFieldChipX
@@ -10772,7 +10026,7 @@ LBFC3:          LDA     #$83
                 LDY     #$1B
                 JMP     VmOp_PushRegister
 
-LBFCA:          JSR     VmHelper_SaveMemTemp_06
+LBFCA:          JSR     VmHelper_CreateStackFrame_06
                 JSR     VmOp_Asl_04
                 JSR     VmHelper_PushConst_0500
                 JSR     VmOp_Add_AB
@@ -10806,7 +10060,7 @@ LBFCA:          JSR     VmHelper_SaveMemTemp_06
                 JSR     VmOp_WriteWord
                 JSR     L9620
                 BCC     @LBFE2
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LC032:          LDY     #$3F
 @LC034:         LDA     $0401,y
@@ -10995,7 +10249,7 @@ LC186:          JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmOp_Add_AB
                 JMP     VmOp_WriteByte
 
-LC1EC:          JSR     VmHelper_SaveMemTemp_06
+LC1EC:          JSR     VmHelper_CreateStackFrame_06
                 JSR     VmHelper_PushFieldChipX
                 JSR     VmHelper_PushConst_0500
                 JSR     VmOp_Add_AB
@@ -11004,7 +10258,7 @@ LC1EC:          JSR     VmHelper_SaveMemTemp_06
 @LC1FE:         JSR     LC186
                 JSR     L9620
                 BCC     @LC1FE
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LC209:          LDA     #$FF
                 STA     $D3
@@ -11216,11 +10470,11 @@ IncrementPartyAnimationFrame:
 
 SetFieldPartySprite:
                 JSR     IncrementPartyAnimationFrame
-                LDA     PadBuffer_Now+6                 ;Left
+                LDA     PadBuffer_Now_Left              ;Left
                 BEQ     @SkipLeft
                 LDA     #$01
                 STA     FieldPartyDirection
-@SkipLeft:      LDA     PadBuffer_Now+7                 ;Right
+@SkipLeft:      LDA     PadBuffer_Now_Right             ;Right
                 BEQ     @SkipRight
                 LDA     #$00
                 STA     FieldPartyDirection
@@ -11228,1592 +10482,813 @@ SetFieldPartySprite:
                 JSR     SetOamDmaRequest
                 RTS
 
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $FA
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $54
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $54
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $91
-                .byte   $CE
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $D7
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $B0
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $91
-                .byte   $CE
-                .byte   $75
-                .byte   $CD
-                .byte   $44
-                .byte   $CE
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $CB
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $54
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $49
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $2A
-                .byte   $CF
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $B0
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $03
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $8B
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $B3
-                .byte   $CA
-                .byte   $26
-                .byte   $D1
-                .byte   $42
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $B7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $81
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $54
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $12
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $BE
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $6C
-                .byte   $D0
-                .byte   $71
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $58
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $26
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $42
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $6C
-                .byte   $D0
-                .byte   $C2
-                .byte   $D1
-                .byte   $71
-                .byte   $D1
-                .byte   $B0
-                .byte   $CB
-                .byte   $6C
-                .byte   $D0
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $AA
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $6C
-                .byte   $D0
-                .byte   $71
-                .byte   $D1
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $CB
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $42
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $67
-                .byte   $CC
-                .byte   $03
-                .byte   $CE
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $3A
-                .byte   $CC
-                .byte   $42
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $6C
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $81
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $27
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $00
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                HiAscii "MOPBQ"
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $81
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $9A
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $90
-                .byte   $D0
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $0B
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $CB
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $76
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $90
-                .byte   $D0
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $B0
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $0B
-                .byte   $D1
-                .byte   $9F
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $80
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $91
-                .byte   $CE
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $B0
-                .byte   $CB
-                .byte   $6C
-                .byte   $D0
-                .byte   $6C
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $0B
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $8D
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $71
-                .byte   $D1
-                .byte   $A9
-                .byte   $CC
-                .byte   $75
-                HiAscii "MbLBQ"
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $81
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $26
-                .byte   $D1
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $98
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $C2
-                .byte   $D1
-                .byte   $33
-                .byte   $CA
-                .byte   $33
-                .byte   $CA
-                .byte   $33
-                .byte   $CA
-                .byte   $71
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $81
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $26
-                .byte   $D1
-                .byte   $90
-                .byte   $D0
-                .byte   $90
-                HiAscii "PKKdJ"
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $F3
-                .byte   $CE
-                .byte   $96
-                .byte   $CA
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $CA
-                .byte   $33
-                .byte   $CA
-                .byte   $33
-                .byte   $CA
-                .byte   $C2
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $91
-                .byte   $CE
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $1C
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $33
-                .byte   $CA
-                .byte   $AF
-                .byte   $CE
-                .byte   $33
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $B0
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $CB
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $3C
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $EF
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $0B
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $F1
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $0D
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $0B
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $17
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $D3
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                HiAscii "MgPgP"
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $D0
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $91
-                .byte   $CE
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $BC
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $D9
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $0C
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $2B
-                .byte   $CC
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                HiAscii "MgPgP"
-                .byte   $75
-                .byte   $CD
-                .byte   $B0
-                .byte   $CB
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $4E
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $90
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $50
-                .byte   $D1
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $E7
-                .byte   $D0
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $C5
-                .byte   $CA
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
-                .byte   $75
-                .byte   $CD
+MapEventProcessAddressList:
+                .word   VmProc_MapEventProcess_None     ;Row #00
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAFA
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD054
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD054
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCE91
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #01
+                .word   TCDD7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBB0
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   TCE91
+                .word   VmProc_MapEventProcess_None
+                .word   TCE44
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBCB
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD054
+                .word   VmProc_MapEventProcess_None
+                .word   TCC49
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCF2A
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBB0
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #02
+                .word   TCB03
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCC8B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAB3
+                .word   TD126
+                .word   TD042
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   TD033
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #03
+                .word   TD0B7
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD081
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD054
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCD12
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #04
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD198
+                .word   VmProc_MapEventProcess_None
+                .word   TCCBE
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TD06C
+                .word   TD171
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCC58
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD126
+                .word   VmProc_MapEventProcess_None
+                .word   TD042
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #05
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TD06C
+                .word   TD1C2
+                .word   TD171
+                .word   TCBB0
+                .word   TD06C
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAAA
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #06
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD06C
+                .word   TD171
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBCB
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD042
+                .word   VmProc_MapEventProcess_None
+                .word   TCC67
+                .word   TCE03
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCC3A
+                .word   TD042
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD06C                           ;Row #07
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD081
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCD27
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   TCD00
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #08
+                .word   VmProc_MapEventProcess_None
+                .word   TD0CF
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD081
+                .word   VmProc_MapEventProcess_None
+                .word   TCC9A
+                .word   VmProc_MapEventProcess_None
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   VmProc_MapEventProcess_None
+                .word   TD090
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD10B
+                .word   VmProc_MapEventProcess_None
+                .word   TCB98
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #09
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TCC76
+                .word   VmProc_MapEventProcess_None
+                .word   TD090
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   TCBB0
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD10B
+                .word   TCA9F
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD033
+                .word   VmProc_MapEventProcess_None
+                .word   TCB80
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0A
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCE91
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TCBB0
+                .word   TD06C
+                .word   TD06C
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD10B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCA8D
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD171
+                .word   TCCA9
+                .word   VmProc_MapEventProcess_None
+                .word   TCCE2
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD081
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD126
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCB98
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0C
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD1C2
+                .word   TCA33
+                .word   TCA33
+                .word   TCA33
+                .word   TD171
+                .word   VmProc_MapEventProcess_None
+                .word   TD081
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD126
+                .word   TD090
+                .word   TD090
+                .word   TCBCB
+                .word   TCAE4
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCEF3
+                .word   TCA96
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0D
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCA33
+                .word   TCA33
+                .word   TCA33
+                .word   TD1C2
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCE91
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD033
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCC1C
+                .word   VmProc_MapEventProcess_None
+                .word   TD033
+                .word   VmProc_MapEventProcess_None
+                .word   TD033
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0E
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCA33
+                .word   TCEAF
+                .word   TCA33
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBB0
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCBCB
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCD3C
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAEF
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   TD10B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #0F
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TCCF1
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   TCC0D
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #10
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD10B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCB17
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #11
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCCD3
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAD0
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #12
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCE91
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCABC
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAD9
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #13
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCB0C
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCC2B
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #14
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TCBB0
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #15
+                .word   VmProc_MapEventProcess_None
+                .word   TCD4E
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD090
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TD150
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #16
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   TD0E7
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #17
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   TCAC5
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None     ;Row #18
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
+                .word   VmProc_MapEventProcess_None
 
-@LCA2A:         JSR     VmHelper_LoadFieldTime_High
+LCA2A:          JSR     VmHelper_LoadFieldTime_High
                 JSR     VmHelper_PushConst_0020
                 JMP     VmOp_Compare_BGeatherThan
 
-                LDA     $047A
+TCA33:          LDA     $047A
                 BNE     @LCA69
                 JSR     VmHelper_PushConst_0000
                 JSR     LB9A5
@@ -12834,311 +11309,314 @@ SetFieldPartySprite:
                 BCC     @LCA5E
 @LCA69:         RTS
 
-@LCA6A:         JSR     VmHelper_SaveMemTemp_06
-                JSR     VmHelper_WriteTempAddressWord_02
+; Argument:
+;   Stack[0] = Warp destination page X
+;   Stack[1] = Warp destination page Y
+LCA6A:          JSR     VmHelper_CreateStackFrame_06
+                JSR     VmHelper_WriteTempAddressWord_02 ;Save to local area
                 JSR     VmHelper_WriteTempAddressWord_04
-                JSR     @LCD89
+                JSR     VmProc_CheckMapEventExecute     ;Check (0, 0)
                 JSR     VmOp_CheckNotZero
-                BCS     @LCA8A
-                JSR     @LCD89
-                JSR     VmHelper_ReadTempAddressWord_04
+                BCS     @Return
+                JSR     VmProc_CheckMapEventExecute
+                JSR     VmHelper_ReadTempAddressWord_04 ;Restore from local area
                 JSR     VmHelper_ReadTempAddressWord_02
                 JSR     LBBE8
-                JSR     @LCD9E
-@LCA8A:         JMP     VmOp_ReadTempMemAddr
+                JSR     LCD9E
+@Return:        JMP     VmOp_DestroyStackFrame
 
-                JSR     VmHelper_PushConst_000C
+TCA8D:          JSR     VmHelper_PushConst_000C
                 JSR     VmHelper_PushConst_0019
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_000A
+TCA96:          JSR     VmHelper_PushConst_000A
                 JSR     VmHelper_PushConst_0019
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0008
+TCA9F:          JSR     VmHelper_PushConst_0008
                 LDA     #$17
                 JSR     VmOp_PushByte
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0005
+TCAAA:          JSR     VmHelper_PushConst_0005
                 JSR     VmHelper_PushConst_001C
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0002
+TCAB3:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_0016
-                JMP     @LCA6A
+                JMP     LCA6A
 
+TCABC:          JSR     VmHelper_PushConst_0016
                 JSR     VmHelper_PushConst_0016
-                JSR     VmHelper_PushConst_0016
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0012
+TCAC5:          JSR     VmHelper_PushConst_0012
                 LDA     #$15
                 JSR     VmOp_PushByte
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0012
+TCAD0:          JSR     VmHelper_PushConst_0012
                 JSR     VmHelper_PushConst_001E
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0011
+TCAD9:          JSR     VmHelper_PushConst_0011
                 LDA     #$1B
                 JSR     VmOp_PushByte
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_000E
+TCAE4:          JSR     VmHelper_PushConst_000E
                 LDA     #$13
                 JSR     VmOp_PushByte
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_000C
+TCAEF:          JSR     VmHelper_PushConst_000C
                 LDA     #$13
                 JSR     VmOp_PushByte
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0001
-                JSR     VmHelper_PushConst_0005
-                JMP     @LCA6A
+TCAFA:          JSR     VmHelper_PushConst_0001         ;Warp Y Page
+                JSR     VmHelper_PushConst_0005         ;Warp X Page
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_000A
+TCB03:          JSR     VmHelper_PushConst_000A
                 JSR     VmHelper_PushConst_0006
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                LDA     #$13
+TCB0C:          LDA     #$13
                 JSR     VmOp_PushByte
                 JSR     VmHelper_PushConst_0005
-                JMP     @LCA6A
+                JMP     LCA6A
 
-                JSR     VmHelper_PushConst_0004
+TCB17:          JSR     VmHelper_PushConst_0004
                 JSR     VmHelper_PushConst_001C
-                JMP     @LCA6A
+                JMP     LCA6A
 
-@LCB20:         LDA     #$01
+LCB20:          LDA     #$01
                 STA     $0498
                 RTS
 
-@LCB26:         JSR     @LCB20
+LCB26:          JSR     LCB20
                 JSR     LE41F
                 JSR     LE431
-                JSR     @LCBF5
-                JSR     @LCDB6
+                JSR     LCBF5
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCBFB
+                JMP     LCBFB
 
-@LCB3E:         JSR     @LCB20
+LCB3E:          JSR     LCB20
                 JSR     LE41F
-                JSR     @LCBF5
-                JSR     @LCDB6
+                JSR     LCBF5
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCBFB
+                JMP     LCBFB
 
-@LCB53:         JSR     @LCB20
+LCB53:          JSR     LCB20
                 JSR     LE41F
                 JSR     LE431
-                JSR     @LCC01
-                JSR     @LCDB6
+                JSR     LCC01
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCC07
+                JMP     LCC07
 
-@LCB6B:         JSR     @LCB20
+LCB6B:          JSR     LCB20
                 JSR     LE431
-                JSR     @LCC01
-                JSR     @LCDB6
+                JSR     LCC01
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCC07
+                JMP     LCC07
 
-                JSR     @LCD89
+TCB80:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     @LCB20
+                JSR     LCB20
                 JSR     LE431
-                JSR     @LCDB6
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCD9E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCB98:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     @LCB20
+                JSR     LCB20
                 JSR     LE41F
-                JSR     @LCDB6
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCD9E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCBB0:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     @LCB20
+                JSR     LCB20
                 JSR     LE41F
                 JSR     LE431
-                JSR     @LCDB6
+                JSR     LCDB6
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCD9E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCBCB:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     @LCDB6
-                JSR     @LD018
+                JSR     LCDB6
+                JSR     LD018
                 JSR     VmHelper_PushConst_0001
                 JSR     LE37F
-                JSR     @LCDAA
-                JSR     @LD018
+                JSR     LCDAA
+                JSR     LD018
                 JSR     VmHelper_PushConst_0002
                 JSR     LE37F
-                JSR     @LCDAA
+                JSR     LCDAA
                 JSR     SongRequest_01
                 JSR     LE76A
-                JMP     @LCD9E
+                JMP     LCD9E
 
-@LCBF5:         LDA     #$01
+LCBF5:          LDA     #$01
                 STA     $0482
                 RTS
 
-@LCBFB:         LDA     #$00
+LCBFB:          LDA     #$00
                 STA     $0482
                 RTS
 
-@LCC01:         LDA     #$01
+LCC01:          LDA     #$01
                 STA     $0483
                 RTS
 
-@LCC07:         LDA     #$00
+LCC07:          LDA     #$00
                 STA     $0483
                 RTS
 
-                JSR     @LCD89
+TCC0D:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     LD254
-                JSR     @LCB26
-                JMP     @LCD9E
+                JSR     RequestDrawText_08
+                JSR     LCB26
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC1C:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     LD248
-                JSR     @LCB6B
-                JMP     @LCD9E
+                JSR     RequestDrawText_01
+                JSR     LCB6B
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC2B:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     LD258
-                JSR     @LCB3E
-                JMP     @LCD9E
+                JSR     RequestDrawText_09
+                JSR     LCB3E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC3A:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD274
-                JSR     @LCB26
-                JMP     @LCD9E
+                JSR     LCB26
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC49:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     LD24C
-                JSR     @LCB53
-                JMP     @LCD9E
+                JSR     RequestDrawText_02
+                JSR     LCB53
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC58:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     LD25C
-                JSR     @LCB3E
-                JMP     @LCD9E
+                JSR     RequestDrawText_0A
+                JSR     LCB3E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC67:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD264
-                JSR     @LCB6B
-                JMP     @LCD9E
+                JSR     LCB6B
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC76:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD32C
-                JSR     LD260
-                JSR     @LCB26
-                JMP     @LCD9E
+                JSR     RequestDrawText_0B
+                JSR     LCB26
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC8B:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD26C
-                JSR     @LCB3E
-                JMP     @LCD9E
+                JSR     LCB3E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCC9A:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD270
-                JSR     @LCB3E
-                JMP     @LCD9E
+                JSR     LCB3E
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCCA9:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD33C
                 JSR     LD268
-                JSR     @LCB53
-                JMP     @LCD9E
+                JSR     LCB53
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCCBE:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD334
-                JSR     LD250
-                JSR     @LCB53
-                JMP     @LCD9E
+                JSR     RequestDrawText_03
+                JSR     LCB53
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCCD3:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD278
-                JSR     @LCB53
-                JMP     @LCD9E
+                JSR     LCB53
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCCE2:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD27C
-                JSR     @LCB26
-                JMP     @LCD9E
+                JSR     LCB26
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCCF1:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     LD280
-                JSR     @LCB53
-                JMP     @LCD9E
+                JSR     LCB53
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCD00:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD284
-                JSR     @LCDC2
-                JMP     @LCD9E
+                JSR     LCDC2
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCD12:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD28C
                 JSR     LD31C
-                JSR     @LCDC2
-                JMP     @LCD9E
+                JSR     LCDC2
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCD27:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD294
                 JSR     LD324
-                JSR     @LCDC2
-                JMP     @LCD9E
+                JSR     LCDC2
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCD3C:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD29C
-                JSR     @LCDC2
-                JMP     @LCD9E
+                JSR     LCDC2
+                JMP     LCD9E
 
-                JSR     @LCD89
+TCD4E:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
-                JSR     SongRequest_04
+                JSR     SongRequest_04                  ;Set ending music
                 JSR     LD2CC
                 JSR     LD2D4
                 JSR     LD2DC
@@ -13146,173 +11624,178 @@ SetFieldPartySprite:
                 JSR     LD2EC
                 JSR     LD2F4
                 JSR     LD304
-@LCD6C:         JSR     LBA24
+@InfLoop:       JSR     WaitNmiRaised
                 JSR     PlaySubSequence
-                JMP     @LCD6C
+                JMP     @InfLoop
 
-                .byte   $EA
-                .byte   $60
+VmProc_MapEventProcess_None:
+                NOP
+                RTS
 
-@LCD77:         JSR     VmHelper_PushConst_0001
+LCD77:          JSR     VmHelper_PushConst_0001
                 JMP     LE37F
 
-@LCD7D:         JSR     VmHelper_PushConst_0002
+LCD7D:          JSR     VmHelper_PushConst_0002
                 JMP     LE37F
 
-@LCD83:         JSR     VmHelper_PushConst_0003
+LCD83:          JSR     VmHelper_PushConst_0003
                 JMP     LE37F
 
-@LCD89:         JSR     VmHelper_PushConst_0000
-                JSR     LB9A5
+; Check that the page coordinates of the map are (0, 0)
+; Return:
+;   Stack[0] : False(0) = (0, 0), True(1) otherwise
+VmProc_CheckMapEventExecute:
                 JSR     VmHelper_PushConst_0000
-                JSR     LB9B2
+                JSR     LB9A5                           ;$03FC = #$00
+                JSR     VmHelper_PushConst_0000
+                JSR     LB9B2                           ;$03FD = #$00
                 JSR     VmHelper_PushFieldChipX
                 JSR     VmHelper_PushFieldChipY
                 JMP     VmOp_Or
 
-@LCD9E:         JSR     VmHelper_PushFieldPageX
+LCD9E:          JSR     VmHelper_PushFieldPageX
                 JSR     LB9A5
                 JSR     VmHelper_PushFieldPageY
                 JMP     LB9B2
 
-@LCDAA:         JSR     VmHelper_PushConst_0001
+LCDAA:          JSR     VmHelper_PushConst_0001
                 JMP     LD944
 
-@LCDB0:         JSR     VmHelper_PushConst_0001
+LCDB0:          JSR     VmHelper_PushConst_0001
                 JMP     LD963
 
-@LCDB6:         JSR     VmHelper_PushConst_000B
+LCDB6:          JSR     VmHelper_PushConst_000B
                 JMP     LE362
 
-@LCDBC:         JSR     VmHelper_PushConst_0006
+LCDBC:          JSR     VmHelper_PushConst_0006
                 JMP     LE362
 
-@LCDC2:         JSR     @LCDBC
-                JSR     @LCF5B
-                JSR     @LCD77
+LCDC2:          JSR     LCDBC
+                JSR     LCF5B
+                JSR     LCD77
                 JSR     LE171
-                JSR     @LCDB0
+                JSR     LCDB0
                 JSR     SongRequest_01
                 JMP     LE76A
 
-                JSR     @LCD89
+TCDD7:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 LDA     $047A
                 BNE     @LCDF1
                 JSR     DisableApuChannel
                 JSR     LD2B4
-                JSR     @LCF76
-                JSR     @LCD77
+                JSR     LCF76
+                JSR     LCD77
                 JSR     LE168
-@LCDF1:         JSR     @LCDB6
+@LCDF1:         JSR     LCDB6
                 JSR     SongRequest_01
                 JSR     LE76A
-                JSR     @LCD9E
+                JSR     LCD9E
                 LDA     #$01
                 STA     $047A
                 RTS
 
-                LDA     $047B
+TCE03:          LDA     $047B
                 BNE     @LCE43
-                JSR     @LCD89
+                JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD2AC
                 JSR     VmHelper_PushConst_0009
                 JSR     LE362
-                JSR     @LCF7F
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LCF7F
-                JSR     @LCD7D
-                JSR     @LCDB0
-                JSR     @LCF7F
-                JSR     @LCD83
+                JSR     LCF7F
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LCF7F
+                JSR     LCD7D
+                JSR     LCDB0
+                JSR     LCF7F
+                JSR     LCD83
                 LDA     #$1F
                 STA     $045D
                 JSR     SongRequest_01
                 JSR     LE76A
-                JSR     @LCD9E
+                JSR     LCD9E
                 INC     $047B
 @LCE43:         RTS
 
-                LDA     $047C
+TCE44:          LDA     $047C
                 BNE     @LCE90
-                JSR     @LCD89
+                JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD2A4
                 JSR     VmHelper_PushConst_0007
                 JSR     LE362
-                JSR     @LCF64
-                JSR     @LCD77
+                JSR     LCF64
+                JSR     LCD77
                 JSR     LE171
-                JSR     @LCDB0
-                JSR     @LCF64
-                JSR     @LCD7D
+                JSR     LCDB0
+                JSR     LCF64
+                JSR     LCD7D
                 JSR     LE171
-                JSR     @LCDB0
-                JSR     @LCF64
-                JSR     @LCD83
+                JSR     LCDB0
+                JSR     LCF64
+                JSR     LCD83
                 JSR     LE171
-                JSR     @LCDB0
+                JSR     LCDB0
                 LDA     #$1F
                 STA     $045D
                 JSR     SongRequest_01
                 JSR     LE76A
-                JSR     @LCD9E
+                JSR     LCD9E
                 INC     $047C
 @LCE90:         RTS
 
-                JSR     @LCD89
+TCE91:          JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     VmHelper_PushConst_0003
                 JSR     LE362
                 JSR     LB409
                 JSR     SongRequest_05
                 JSR     LE76A
-                JMP     @LCD9E
+                JMP     LCD9E
 
-@LCEA9:         JSR     LE168
-                JMP     @LCDAA
+LCEA9:          JSR     LE168
+                JMP     LCDAA
 
-                LDA     PartyIn_Chohakkai-1
+TCEAF:          LDA     PartyIn_Chohakkai-1
                 BNE     @LCEF2
-                JSR     @LCD89
+                JSR     VmProc_CheckMapEventExecute
                 JSR     VmOp_ExitTrue
                 JSR     DisableApuChannel
                 JSR     LD2C4
-                JSR     @LCF88
-                JSR     @LCD77
-                JSR     @LCEA9
-                JSR     @LCF91
-                JSR     @LCD7D
-                JSR     @LCEA9
-                JSR     @LCF9A
-                JSR     @LCD83
-                JSR     @LCEA9
+                JSR     LCF88
+                JSR     LCD77
+                JSR     LCEA9
+                JSR     LCF91
+                JSR     LCD7D
+                JSR     LCEA9
+                JSR     LCF9A
+                JSR     LCD83
+                JSR     LCEA9
                 JSR     VmHelper_PushConst_000C
                 JSR     LE362
                 LDA     #$1F
                 STA     $045D
                 JSR     SongRequest_01
                 JSR     LE76A
-                JSR     @LCD9E
+                JSR     LCD9E
                 INC     PartyIn_Chohakkai-1
 @LCEF2:         RTS
 
-                LDA     PartyIn_Chohakkai
+TCEF3:          LDA     PartyIn_Chohakkai
                 BNE     @LCF29
                 JSR     DisableApuChannel
                 JSR     LD30C
                 JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCFA3
-                JSR     @LCD7D
-                JSR     @LCDB0
-                JSR     @LCFA3
-                JSR     @LCD83
-                JSR     @LCDB0
+                JSR     LCFA3
+                JSR     LCD7D
+                JSR     LCDB0
+                JSR     LCFA3
+                JSR     LCD83
+                JSR     LCDB0
                 LDA     #$01
                 STA     $0480
                 JSR     SongRequest_01
@@ -13322,16 +11805,16 @@ SetFieldPartySprite:
                 STA     $0480
 @LCF29:         RTS
 
-                LDA     PartyIn_Sagojo
+TCF2A:          LDA     PartyIn_Sagojo
                 BNE     @LCF5A
                 JSR     DisableApuChannel
                 JSR     LD314
                 JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCF5B
-                JSR     @LCD7D
+                JSR     LCF5B
+                JSR     LCD7D
                 JSR     LE171
-                JSR     @LCDB0
+                JSR     LCDB0
                 LDA     #$01
                 STA     $0481
                 JSR     SongRequest_01
@@ -13341,456 +11824,462 @@ SetFieldPartySprite:
                 STA     $0481
 @LCF5A:         RTS
 
-@LCF5B:         JSR     VmHelper_PushConst_0001
+LCF5B:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_0006
                 JMP     VmHelper_PushConst_000A
 
-@LCF64:         JSR     VmHelper_PushConst_0000
+LCF64:          JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PushConst_0008
                 JMP     VmHelper_PushConst_000A
 
-@LCF6D:         JSR     VmHelper_PushConst_0002
+LCF6D:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_000A
                 JMP     VmHelper_PushConst_000A
 
-@LCF76:         JSR     VmHelper_PushConst_0002
+LCF76:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_000B
                 JMP     VmHelper_PushConst_0007
 
-@LCF7F:         JSR     VmHelper_PushConst_0000
+LCF7F:          JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PushConst_0008
                 JMP     VmHelper_PushConst_0006
 
-@LCF88:         JSR     VmHelper_PushConst_0002
+LCF88:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_00E0
                 JMP     VmHelper_PushConst_0008
 
-@LCF91:         JSR     VmHelper_PushConst_0001
+LCF91:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_00E0
                 JMP     VmHelper_PushConst_0009
 
-@LCF9A:         JSR     VmHelper_PushConst_0001
+LCF9A:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_00E0
                 JMP     VmHelper_PushConst_000A
 
-@LCFA3:         JSR     VmHelper_PushConst_0002
+LCFA3:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_0008
                 JMP     VmHelper_PushConst_000B
 
-@LCFAC:         JSR     VmHelper_PushConst_0001
+LCFAC:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_000B
                 JMP     VmHelper_PushConst_000B
 
-@LCFB5:         JSR     VmHelper_PushConst_0000
+LCFB5:          JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PushConst_0008
                 JMP     VmHelper_PushConst_0009
 
-@LCFBE:         JSR     VmHelper_PushConst_0000
+LCFBE:          JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PushConst_000A
                 JMP     VmHelper_PushConst_000A
 
-@LCFC7:         JSR     VmHelper_PushConst_0000
+LCFC7:          JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PushConst_0006
                 JMP     VmHelper_PushConst_000B
 
-@LCFD0:         JSR     VmHelper_PushConst_0001
+LCFD0:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_000A
                 JMP     VmHelper_PushConst_000B
 
-@LCFD9:         JSR     VmHelper_PushConst_0001
+LCFD9:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_000A
                 JMP     VmHelper_PushConst_0007
 
-@LCFE2:         JSR     VmHelper_PushConst_0002
+LCFE2:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_000E
                 JMP     VmHelper_PushConst_0007
 
-@LCFEB:         JSR     VmHelper_PushConst_0001
+LCFEB:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_0004
                 JMP     VmHelper_PushConst_0009
 
-@LCFF4:         JSR     VmHelper_PushConst_0001
+LCFF4:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_0018
                 JMP     VmHelper_PushConst_0006
 
-@LCFFD:         JSR     VmHelper_PushConst_0002
+LCFFD:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_000F
                 JMP     VmHelper_PushConst_0008
 
-@LD006:         JSR     VmHelper_PushConst_0001
+LD006:          JSR     VmHelper_PushConst_0001
                 JSR     VmHelper_PushConst_0004
                 JMP     VmHelper_PushConst_0007
 
-@LD00F:         JSR     VmHelper_PushConst_0002
+LD00F:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_000F
                 JMP     VmHelper_PushConst_0008
 
-@LD018:         JSR     VmHelper_PushConst_0002
+LD018:          JSR     VmHelper_PushConst_0002
                 JSR     VmHelper_PushConst_0008
                 JMP     VmHelper_PushConst_0006
 
-@LD021:         JSR     @LCDB0
+LD021:          JSR     LCDB0
                 JSR     SongRequest_01
                 JMP     LE76A
 
-@LD02A:         JSR     @LCDAA
-@LD02D:         JSR     SongRequest_01
+LD02A:          JSR     LCDAA
+LD02D:          JSR     SongRequest_01
                 JMP     LE76A
 
-                JSR     VmHelper_PushConst_0005
+TD033:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCFA3
-                JSR     @LCD77
-                JMP     @LD021
+                JSR     LCFA3
+                JSR     LCD77
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0005
+TD042:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCF5B
-                JSR     @LCD77
+                JSR     LCF5B
+                JSR     LCD77
                 JSR     LE171
-                JMP     @LD021
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0001
+TD054:          JSR     VmHelper_PushConst_0001
                 JSR     LE362
-                JSR     @LCFB5
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LCFB5
-                JSR     @LCD7D
-                JMP     @LD021
+                JSR     LCFB5
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LCFB5
+                JSR     LCD7D
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0002
+TD06C:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCA2A
+                JSR     LCA2A
                 JSR     VmOp_ExitFalse
-                JSR     @LCFC7
-                JSR     @LCD77
-                JMP     @LD02A
+                JSR     LCFC7
+                JSR     LCD77
+                JMP     LD02A
 
-                JSR     VmHelper_PushConst_0002
+TD081:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCFD9
-                JSR     @LCD77
-                JMP     @LD02D
+                JSR     LCFD9
+                JSR     LCD77
+                JMP     LD02D
 
-                JSR     VmHelper_PushConst_0005
+TD090:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCA2A
+                JSR     LCA2A
                 JSR     VmOp_ExitFalse
-                JSR     @LCFEB
-                JSR     @LCD77
-                JSR     @LCDAA
-                JSR     @LCFEB
-                JSR     @LCD7D
-                JSR     @LCDAA
-                JSR     @LCFEB
-                JSR     @LCD83
-                JMP     @LD02A
+                JSR     LCFEB
+                JSR     LCD77
+                JSR     LCDAA
+                JSR     LCFEB
+                JSR     LCD7D
+                JSR     LCDAA
+                JSR     LCFEB
+                JSR     LCD83
+                JMP     LD02A
 
-                JSR     VmHelper_PushConst_0002
+TD0B7:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCFD9
-                JSR     @LCD77
-                JSR     @LCFF4
-                JSR     @LCD7D
+                JSR     LCFD9
+                JSR     LCD77
+                JSR     LCFF4
+                JSR     LCD7D
                 JSR     LE168
-                JMP     @LD02D
+                JMP     LD02D
 
-                JSR     VmHelper_PushConst_0002
+TD0CF:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCFD9
-                JSR     @LCD77
-                JSR     @LCFFD
-                JSR     @LCD7D
+                JSR     LCFD9
+                JSR     LCD77
+                JSR     LCFFD
+                JSR     LCD7D
                 JSR     LE168
-                JMP     @LD02D
+                JMP     LD02D
 
-                JSR     VmHelper_PushConst_0005
+TD0E7:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LD006
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LD006
-                JSR     @LCD7D
-                JSR     @LCDB0
-                JSR     @LD006
-                JSR     @LCD83
+                JSR     LD006
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LD006
+                JSR     LCD7D
+                JSR     LCDB0
+                JSR     LD006
+                JSR     LCD83
                 JSR     LE168
-                JMP     @LD02D
+                JMP     LD02D
 
-                JSR     VmHelper_PushConst_0005
+TD10B:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCFA3
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LD00F
-                JSR     @LCD83
+                JSR     LCFA3
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LD00F
+                JSR     LCD83
                 JSR     LE168
-                JMP     @LD02D
+                JMP     LD02D
 
-                JSR     VmHelper_PushConst_0005
+TD126:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCF5B
-                JSR     @LCD77
+                JSR     LCF5B
+                JSR     LCD77
                 JSR     LE171
-                JSR     @LCDB0
-                JSR     @LCF5B
-                JSR     @LCD7D
+                JSR     LCDB0
+                JSR     LCF5B
+                JSR     LCD7D
                 JSR     LE171
-                JSR     @LCDB0
-                JSR     @LCF6D
-                JSR     @LCD83
+                JSR     LCDB0
+                JSR     LCF6D
+                JSR     LCD83
                 JSR     LE171
-                JMP     @LD021
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0005
+TD150:          JSR     VmHelper_PushConst_0005
                 JSR     LE362
-                JSR     @LCFA3
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LCFA3
-                JSR     @LCD7D
-                JSR     @LCDB0
-                JSR     @LCFAC
-                JSR     @LCD83
-                JMP     @LD021
+                JSR     LCFA3
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LCFA3
+                JSR     LCD7D
+                JSR     LCDB0
+                JSR     LCFAC
+                JSR     LCD83
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0002
+TD171:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCA2A
+                JSR     LCA2A
                 JSR     VmOp_ExitFalse
-                JSR     @LCFC7
-                JSR     @LCD77
-                JSR     @LCDAA
-                JSR     @LCFC7
-                JSR     @LCD7D
-                JSR     @LCDAA
-                JSR     @LCFD0
-                JSR     @LCD83
-                JMP     @LD02A
+                JSR     LCFC7
+                JSR     LCD77
+                JSR     LCDAA
+                JSR     LCFC7
+                JSR     LCD7D
+                JSR     LCDAA
+                JSR     LCFD0
+                JSR     LCD83
+                JMP     LD02A
 
-                JSR     VmHelper_PushConst_0001
+TD198:          JSR     VmHelper_PushConst_0001
                 JSR     LE362
-                JSR     @LCFBE
-                JSR     @LCD77
+                JSR     LCFBE
+                JSR     LCD77
                 JSR     LE168
-                JSR     @LCDB0
-                JSR     @LCFBE
-                JSR     @LCD7D
+                JSR     LCDB0
+                JSR     LCFBE
+                JSR     LCD7D
                 JSR     LE168
-                JSR     @LCDB0
-                JSR     @LCFBE
-                JSR     @LCD83
+                JSR     LCDB0
+                JSR     LCFBE
+                JSR     LCD83
                 JSR     LE168
-                JMP     @LD021
+                JMP     LD021
 
-                JSR     VmHelper_PushConst_0002
+TD1C2:          JSR     VmHelper_PushConst_0002
                 JSR     LE362
-                JSR     @LCFD9
-                JSR     @LCD77
-                JSR     @LCDB0
-                JSR     @LCFD9
-                JSR     @LCD7D
-                JSR     @LCDB0
-                JSR     @LCFE2
-                JSR     @LCD83
-                JMP     @LD02D
+                JSR     LCFD9
+                JSR     LCD77
+                JSR     LCDB0
+                JSR     LCFD9
+                JSR     LCD7D
+                JSR     LCDB0
+                JSR     LCFE2
+                JSR     LCD83
+                JMP     LD02D
 
-LD1E3:          .byte   $00
-LD1E4:          .byte   $00
-                .word   TAA3C
-                .word   TAA4D
-                .word   TAA60
-                .word   TAA75
-                .word   TAA83
-                .word   TAA90
-                .word   TAA9F
-                .word   TAAAD
-                .word   TAABB
-                .word   TAAC5
-                .word   TAAD3
-                .word   TAADF
-                .word   TAAF3
-                .word   TAB08
-                .word   TAB21
-                .word   TAB35
-                .word   TAB48
-                .word   TAB5F
-                .word   TAB77
-                .word   TAB89
-                .word   TAB9A
-                .word   TABAC
-                .word   TABC3
-                .word   TABCD
-                .word   TABE0
-                .word   TABF8
-                .word   TAC01
-                .word   TAC14
-                .word   TAC28
-                .word   TAC34
-                .word   TAC39
-                .byte   $00
-                .byte   $00
-                .word   TAC4B
-                .word   TAC5F
-                .byte   $00
-                .byte   $00
-                .word   TAC6F
-                .word   TAC81
-                .word   TAC89
-                .word   TAC94
-                .word   TACA0
-                .word   TACA9
+TextAddressTable:
+                .word   $0000                           ;#00 ?
+                .word   TextData_01                     ;#01 「ここは かなんちほう です」
+                .word   TextData_02                     ;#02 「ここは ごびさばく です」
+                .word   TextData_03                     ;#03 「ここは たくらまかんさばく です」
+                .word   TextData_04                     ;#04 ちょうあんの みやこだ！
+                .word   TextData_05                     ;#05 らくようの みやこだ！
+                .word   TextData_06                     ;#06 ちょうしゅうの みやこだ！
+                .word   TextData_07                     ;#07 ちょんつうの みやこだ！
+                .word   TextData_08                     ;#08 「なかまを あつめなさい」
+                .word   TextData_09                     ;#09 「きたへ すすめ」
+                .word   TextData_0A                     ;#0A 「ときの もんを とおれ」
+                .word   TextData_0B                     ;#0B 「よるは きけんだ」
+                .word   TextData_0C                     ;#0C 「にしに かえんざんが あります」
+                .word   TextData_0D                     ;#0D 「てんじくは かえんざんの むこう」
+                .word   TextData_0E                     ;#0E 「らせつじょを たおせば かえんざんの・・」
+                .word   TextData_0F                     ;#0F 「きんかくは さばくの はてにいる」
+                .word   TextData_10                     ;#10 「ふしちょう ほうおうを さがせ」
+                .word   TextData_11                     ;#11 きんかくだいおう 「ぎんかくのかたき！」
+                .word   TextData_12                     ;#12 ぎんかくだいおう 「ここはとおさんぞ！」
+                .word   TextData_13                     ;#13 「わたしが らせつじょだ！」
+                .word   TextData_14                     ;#14 「てんじくはもうすぐです」
+                .word   TextData_15                     ;#15 「ながいたびが はじまる・・」
+                .word   TextData_16                     ;#16 こんせいまおう 「よくここまできたな・・」
+                .word   TextData_17                     ;#17 ごくういっこうの
+                .word   TextData_18                     ;#18 ながい ながい たびは おわり
+                .word   TextData_19                     ;#19 これからちゅうごくの れきしが はじまる
+                .word   TextData_1A                     ;#1A おしゃかさまより
+                .word   TextData_1B                     ;#1B ありがたいおきょうを いただいて
+                .word   TextData_1C                     ;#1C ひとびとに おしえを つたえましょう
+                .word   TextData_1D                     ;#1D ああ しんじゃった！
+                .word   TextData_1E                     ;#1E おしまい
+                .word   TextData_1F                     ;#1F はっかい 「だれか たすけて！」
+                .word   $0000                           ;#20 ?
+                .word   TextData_21                     ;#21 「さばくの いりぐちは ほくせい」
+                .word   TextData_22                     ;#22 「がんばってくださいね」
+                .word   $0000                           ;#23 ?
+                .word   TextData_24                     ;#24 さごじょう 「おともします！」
+                .word   TextData_25                     ;#25 「AB AB」
+                .word   TextData_26                     ;#26 「AB AB AB」
+                .word   TextData_27                     ;#27 「AB A A AB」
+                .word   TextData_28                     ;#28 「AB A A」
+                .word   TextData_29                     ;#29 「AB A AB AB」
 
-LD237:          ASL     A
+RequestDrawText:
+                ASL     A
                 TAY
-                LDA     LD1E4,y
-                STA     $C1
-                LDA     LD1E3,y
-                STA     $C0
+                LDA     TextAddressTable+1,y
+                STA     DrawTextPointer+1
+                LDA     TextAddressTable,y
+                STA     DrawTextPointer
                 LDA     #$01
-                STA     $C2
+                STA     DrawTextRequest
                 RTS
 
-LD248:          LDA     #$01
-                BNE     LD237
+RequestDrawText_01:
+                LDA     #$01
+                BNE     RequestDrawText
 
-LD24C:          LDA     #$02
-                BNE     LD237
+RequestDrawText_02:
+                LDA     #$02
+                BNE     RequestDrawText
 
-LD250:          LDA     #$03
-                BNE     LD237
+RequestDrawText_03:
+                LDA     #$03
+                BNE     RequestDrawText
 
-LD254:          LDA     #$08
-                BNE     LD237
+RequestDrawText_08:
+                LDA     #$08
+                BNE     RequestDrawText
 
-LD258:          LDA     #$09
-                BNE     LD237
+RequestDrawText_09:
+                LDA     #$09
+                BNE     RequestDrawText
 
-LD25C:          LDA     #$0A
-                BNE     LD237
+RequestDrawText_0A:
+                LDA     #$0A
+                BNE     RequestDrawText
 
-LD260:          LDA     #$0B
-                BNE     LD237
+RequestDrawText_0B:
+                LDA     #$0B
+                BNE     RequestDrawText
 
 LD264:          LDA     #$0C
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD268:          LDA     #$0D
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD26C:          LDA     #$0E
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD270:          LDA     #$0F
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD274:          LDA     #$10
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD278:          LDA     #$14
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD27C:          LDA     #$21
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD280:          LDA     #$22
-                BNE     LD237
+                BNE     RequestDrawText
 
 LD284:          LDA     #$04
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD28C:          LDA     #$05
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD294:          LDA     #$06
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD29C:          LDA     #$07
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2A4:          LDA     #$11
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2AC:          LDA     #$12
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2B4:          LDA     #$13
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2BC:          LDA     #$15
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2C4:          LDA     #$16
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2CC:          LDA     #$17
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD2D4:          LDA     #$18
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD2DC:          LDA     #$19
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD2E4:          LDA     #$1A
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD2EC:          LDA     #$1B
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD2F4:          LDA     #$1C
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD2FC:          LDA     #$1D
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD304:          LDA     #$1E
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE851
 
 LD30C:          LDA     #$1F
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD314:          LDA     #$24
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD31C:          LDA     #$25
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD324:          LDA     #$26
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD32C:          LDA     #$27
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD334:          LDA     #$28
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
 LD33C:          LDA     #$29
-                JSR     LD237
+                JSR     RequestDrawText
                 JMP     LE856
 
                 .byte   $C3
@@ -14195,15 +12684,9 @@ LD5BD:          LDA     #$D5
 LD5C4:          LDA     $3E
                 JMP     VmOp_PushByte
 
-                .byte   $20
-                .byte   $33
-                .byte   $97
-                .byte   $20
-                .byte   $D7
-                .byte   $95
-                .byte   $4C
-                .byte   $C5
-                .byte   $97
+                JSR     VmHelper_ReadTempAddressWord_08
+                JSR     VmOp_ExitFalse
+                JMP     L97C5
 
 LD5D2:          LDA     OamBuffer+51
                 JMP     VmOp_PushByte
@@ -14305,16 +12788,16 @@ LD692:          JSR     LD731
                 JSR     LDEBA
                 JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     VmOp_ExitFalse
-                LDA     PadBuffer_Now+4
+                LDA     PadBuffer_Now_Up
                 BEQ     @LD6AC
                 JSR     LD678
-@LD6AC:         LDA     PadBuffer_Now+5
+@LD6AC:         LDA     PadBuffer_Now_Down
                 BEQ     @LD6B4
                 JSR     LD682
-@LD6B4:         LDA     PadBuffer_Now+6
+@LD6B4:         LDA     PadBuffer_Now_Left
                 BEQ     @LD6BC
                 JSR     LD646
-@LD6BC:         LDA     PadBuffer_Now+7
+@LD6BC:         LDA     PadBuffer_Now_Right
                 BEQ     @LD6C4
                 JSR     LD611
 @LD6C4:         LDY     RleExpandIndex
@@ -14399,7 +12882,7 @@ LD771:          JSR     VmHelper_PushConst_0080
                 JSR     VmOp_ReadByte
                 JMP     VmOp_And
 
-LD77D:          JSR     VmHelper_SaveMemTemp_02
+LD77D:          JSR     VmHelper_CreateStackFrame_02
                 JSR     VmHelper_WriteTempAddressWord_02
                 JSR     VmHelper_PushConst_00F0
                 JSR     VmHelper_ReadTempAddressWord_02
@@ -14414,7 +12897,7 @@ LD77D:          JSR     VmHelper_SaveMemTemp_02
                 JSR     LE159
                 JSR     VmOp_Add_AB
                 JSR     VmOp_WriteByte
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LD7AD:          JSR     L9601
 @LD7B0:         JSR     LE159
@@ -14707,15 +13190,9 @@ LDA66:          JSR     VmOp_PopRegister
                 STA     $03A9,y
                 RTS
 
-                .byte   $AC
-                .byte   $5A
-                .byte   $03
-                .byte   $B9
-                .byte   $AF
-                .byte   $03
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
+                LDY     $035A
+                LDA     $03AF,y
+                JMP     VmOp_PushByte
 
 LDA7A:          JSR     VmOp_PopRegister
                 TYA
@@ -14774,42 +13251,38 @@ LDAEE:          JSR     LDEFD
                 JSR     VmHelper_PushConst_0000
                 JMP     LDF03
 
-LDB00:          LDA     PadBuffer_Now
+LDB00:          LDA     PadBuffer_Now_A
                 JMP     VmOp_PushByte
 
-                .byte   $AD
-                .byte   $21
-                .byte   $03
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
-
-LDB0C:          LDA     PadBuffer_Trigger
+                LDA     PadBuffer_Now_B
                 JMP     VmOp_PushByte
 
-LDB12:          LDA     PadBuffer_Trigger+1
+LDB0C:          LDA     PadBuffer_Trigger_A
                 JMP     VmOp_PushByte
 
-LDB18:          LDA     PadBuffer_Now+3
+LDB12:          LDA     PadBuffer_Trigger_B
+                JMP     VmOp_PushByte
+
+LDB18:          LDA     PadBuffer_Now_Start
                 JMP     VmOp_PushByte
 
 VmHelper_PushPad_Left:
-                LDA     PadBuffer_Now+6
+                LDA     PadBuffer_Now_Left
                 JMP     VmOp_PushByte
 
 VmHelper_PushPad_Right:
-                LDA     PadBuffer_Now+7
+                LDA     PadBuffer_Now_Right
                 JMP     VmOp_PushByte
 
 VmHelper_PushPad_Up:
-                LDA     PadBuffer_Now+4
+                LDA     PadBuffer_Now_Up
                 JMP     VmOp_PushByte
 
 VmHelper_PushPad_Down:
-                LDA     PadBuffer_Now+5
+                LDA     PadBuffer_Now_Down
                 JMP     VmOp_PushByte
 
-LDB36:          LDA     PadBuffer_Trigger+3
+LDB36:          LDA     PadBuffer_Trigger_Start
                 JMP     VmOp_PushByte
 
 LDB3C:          LDA     $0349
@@ -14859,19 +13332,12 @@ LDB86:          JSR     LDB18
                 BPL     @LDBA2
                 RTS
 
-                .byte   $AD
-                .byte   $74
-                .byte   $04
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
-                .byte   $20
-                .byte   $AB
-                .byte   $96
-                .byte   $8C
-                .byte   $74
-                .byte   $04
-                .byte   $60
+                LDA     $0474
+                JMP     VmOp_PushByte
+
+                JSR     VmOp_PopRegister
+                STY     $0474
+                RTS
 
 LDBB6:          JSR     LDB36
                 JSR     VmOp_ExitFalse
@@ -14925,7 +13391,7 @@ LDC28:          JSR     LEF35
                 JSR     LDBB6
                 JSR     LE0CE
                 JSR     LE101
-                JSR     VmHelper_SaveMemTemp_0E
+                JSR     VmHelper_CreateStackFrame_0E
                 JSR     LDB4B
                 JSR     VmHelper_WriteTempAddressWord_0A
                 JSR     LDB86
@@ -14940,7 +13406,7 @@ LDC28:          JSR     LEF35
                 JSR     LDC14
                 JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     LDB69
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LDC6D:          JSR     LDCEA
                 JMP     LDE9A
@@ -14995,33 +13461,21 @@ LDCEA:          LDY     $035A
                 LDA     $03EE,y
                 JMP     VmOp_PushByte
 
-                .byte   $20
-                .byte   $AB
-                .byte   $96
-                .byte   $98
-                .byte   $AC
-                .byte   $5A
-                .byte   $03
-                .byte   $99
-                .byte   $EE
-                .byte   $03
-                .byte   $60
+                JSR     VmOp_PopRegister
+                TYA
+                LDY     $035A
+                STA     $03EE,y
+                RTS
 
 LDCFE:          LDY     $035A
                 LDA     $03F4,y
                 JMP     VmOp_PushByte
 
-                .byte   $20
-                .byte   $AB
-                .byte   $96
-                .byte   $98
-                .byte   $AC
-                .byte   $5A
-                .byte   $03
-                .byte   $99
-                .byte   $F4
-                .byte   $03
-                .byte   $60
+                JSR     VmOp_PopRegister
+                TYA
+                LDY     $035A
+                STA     $03F4,y
+                RTS
 
 LDD12:          JSR     LDFF2
                 JSR     LD731
@@ -15147,121 +13601,58 @@ LDDDC:          LDA     $03A9,y
                 STA     $03A9,y
 @LDDF1:         RTS
 
-                .byte   $BD
-                .byte   $24
-                .byte   $02
-                .byte   $C9
-                .byte   $F0
-                .byte   $F0
-                .byte   $6A
-                .byte   $B9
-                .byte   $8B
-                .byte   $03
-                .byte   $D0
-                .byte   $21
-                .byte   $A9
-                .byte   $F0
-                .byte   $9D
-                .byte   $24
-                .byte   $02
-                .byte   $4C
-                .byte   $63
-                .byte   $DE
-                .byte   $BD
-                .byte   $24
-                .byte   $02
-                .byte   $C9
-                .byte   $F0
-                .byte   $F0
-                .byte   $56
-                .byte   $B9
-                .byte   $A9
-                .byte   $03
-                .byte   $F0
-                .byte   $0D
-                .byte   $18
-                .byte   $BD
-                .byte   $24
-                .byte   $02
-                .byte   $79
-                .byte   $AF
-                .byte   $03
-                .byte   $9D
-                .byte   $24
-                .byte   $02
-                .byte   $4C
-                .byte   $45
-                .byte   $DE
-                .byte   $B9
-                .byte   $8B
-                .byte   $03
-                .byte   $19
-                .byte   $B5
-                .byte   $03
-                .byte   $F0
-                .byte   $1E
-                .byte   $B9
-                .byte   $67
-                .byte   $03
-                .byte   $F0
-                .byte   $0A
-                .byte   $38
-                .byte   $BD
-                .byte   $24
-                .byte   $02
-                .byte   $F9
-                .byte   $AA
-                .byte   $DD
-                .byte   $9D
-                .byte   $24
-                .byte   $02
-                .byte   $B9
-                .byte   $6D
-                .byte   $03
-                .byte   $F0
-                .byte   $0A
-                .byte   $18
-                .byte   $BD
-                .byte   $24
-                .byte   $02
-                .byte   $79
-                .byte   $AA
-                .byte   $DD
-                .byte   $9D
-                .byte   $24
-                .byte   $02
-                .byte   $B9
-                .byte   $79
-                .byte   $03
-                .byte   $F0
-                .byte   $0A
-                .byte   $38
-                .byte   $BD
-                .byte   $27
-                .byte   $02
-                .byte   $F9
-                .byte   $A0
-                .byte   $DD
-                .byte   $9D
-                .byte   $27
-                .byte   $02
-                .byte   $B9
-                .byte   $73
-                .byte   $03
-                .byte   $F0
-                .byte   $0A
-                .byte   $18
-                .byte   $BD
-                .byte   $27
-                .byte   $02
-                .byte   $79
-                .byte   $A0
-                .byte   $DD
-                .byte   $9D
-                .byte   $27
-                .byte   $02
-                HiAscii "hhhh"
-                .byte   $60
+                LDA     OamBuffer+36,x
+                CMP     #$F0
+                BEQ     @LDE63
+                LDA     $038B,y
+                BNE     @LDE1F
+                LDA     #$F0
+                STA     OamBuffer+36,x
+                JMP     @LDE63
+
+                LDA     OamBuffer+36,x
+                CMP     #$F0
+                BEQ     @LDE63
+                LDA     $03A9,y
+                BEQ     @LDE1F
+                CLC
+                LDA     OamBuffer+36,x
+                ADC     $03AF,y
+                STA     OamBuffer+36,x
+                JMP     @LDE45
+
+@LDE1F:         LDA     $038B,y
+                ORA     $03B5,y
+                BEQ     @LDE45
+                LDA     $0367,y
+                BEQ     @LDE36
+                SEC
+                LDA     OamBuffer+36,x
+                SBC     LDDAA,y
+                STA     OamBuffer+36,x
+@LDE36:         LDA     $036D,y
+                BEQ     @LDE45
+                CLC
+                LDA     OamBuffer+36,x
+                ADC     LDDAA,y
+                STA     OamBuffer+36,x
+@LDE45:         LDA     $0379,y
+                BEQ     @LDE54
+                SEC
+                LDA     OamBuffer+39,x
+                SBC     LDDA0,y
+                STA     OamBuffer+39,x
+@LDE54:         LDA     $0373,y
+                BEQ     @LDE63
+                CLC
+                LDA     OamBuffer+39,x
+                ADC     LDDA0,y
+                STA     OamBuffer+39,x
+@LDE63:         INX
+                INX
+                INX
+                INX
+                RTS
 
 LDE68:          TXA
                 PHA
@@ -15544,17 +13935,12 @@ LE0CE:          LDA     $035A
                 STA     $67
                 RTS
 
-                .byte   $A0
-                .byte   $05
-                .byte   $A9
-                .byte   $00
-                .byte   $99
-                .byte   $61
-                .byte   $03
-                .byte   $88
-                .byte   $10
-                .byte   $FA
-                .byte   $60
+                LDY     #$05
+                LDA     #$00
+@LE0E6:         STA     $0361,y
+                DEY
+                BPL     @LE0E6
+                RTS
 
 LE0ED:          JSR     VmOp_Duplicate
                 JSR     LD6F9
@@ -15605,14 +13991,10 @@ LE159:          LDA     $67
                 LDY     $66
                 JMP     VmOp_PushRegister
 
-                .byte   $20
-                .byte   $AB
-                .byte   $96
-                .byte   $85
-                .byte   $67
-                .byte   $84
-                .byte   $66
-                .byte   $60
+                JSR     VmOp_PopRegister
+                STA     $67
+                STY     $66
+                RTS
 
 LE168:          LDA     #$81
                 LDY     $035A
@@ -15629,33 +14011,15 @@ LE17A:          LDA     #$00
                 STA     $03C1,y
                 RTS
 
-                .byte   $20
-                .byte   $70
-                .byte   $DD
-                .byte   $20
-                .byte   $6C
-                .byte   $DF
-                .byte   $20
-                .byte   $B5
-                .byte   $98
-                .byte   $20
-                .byte   $04
-                .byte   $95
-                .byte   $20
-                .byte   $88
-                .byte   $DD
-                .byte   $20
-                .byte   $6C
-                .byte   $DF
-                .byte   $20
-                .byte   $B5
-                .byte   $98
-                .byte   $20
-                .byte   $FD
-                .byte   $94
-                .byte   $4C
-                .byte   $19
-                .byte   $95
+                JSR     LDD70
+                JSR     LDF6C
+                JSR     VmHelper_PushConst_0020
+                JSR     VmOp_Compare_BGeatherThan
+                JSR     LDD88
+                JSR     LDF6C
+                JSR     VmHelper_PushConst_0020
+                JSR     VmOp_Compare_AGeatherThan
+                JMP     VmOp_And
 
 LE19E:          LDY     #$06
                 LDA     #$00
@@ -15779,7 +14143,7 @@ LE275:          JSR     LD731
                 JSR     VmOp_ExitTrue
                 JSR     LE0CE
                 JSR     LDFE3
-                JSR     VmHelper_SaveMemTemp_0C
+                JSR     VmHelper_CreateStackFrame_0C
                 JSR     LE24C
                 JSR     VmHelper_WriteTempAddressWord_06
                 JSR     LE1B6
@@ -15802,7 +14166,7 @@ LE275:          JSR     LD731
                 LDA     #$01
                 STA     $0495
                 STA     $0496
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LE2DA:          LDA     $0496
                 BNE     @LE2E0
@@ -15812,7 +14176,7 @@ LE2DA:          LDA     $0496
                 STA     $0496
                 JSR     LE0CE
                 JSR     LE101
-                JSR     VmHelper_SaveMemTemp_0C
+                JSR     VmHelper_CreateStackFrame_0C
                 JSR     VmHelper_WriteTempAddressWord_0C
                 JSR     VmHelper_WriteTempAddressWord_0A
                 JSR     VmHelper_WriteTempAddressWord_08
@@ -15824,18 +14188,13 @@ LE2DA:          LDA     $0496
                 JSR     LD929
                 JSR     VmHelper_ReadTempAddressWord_0A
                 JSR     LE1E0
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
-                .byte   $A9
-                .byte   $31
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
-                .byte   $A9
-                .byte   $33
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
+                LDA     #$31
+                JMP     VmOp_PushByte
+
+                LDA     #$33
+                JMP     VmOp_PushByte
 
 LE31C:          LDA     ChrBankRequest
                 JMP     VmOp_PushByte
@@ -15868,11 +14227,8 @@ LE351:          JSR     VmHelper_PushConst_0003
 LE357:          JSR     VmHelper_PushConst_0003
                 JMP     LE32D
 
-                .byte   $A5
-                .byte   $C9
-                .byte   $4C
-                .byte   $CC
-                .byte   $98
+                LDA     RleExpandIndex
+                JMP     VmOp_PushByte
 
 LE362:          JSR     VmOp_PopRegister
                 STY     RleExpandIndex
@@ -15987,15 +14343,10 @@ LE40A:          LDA     #$F0
                 STA     OamBuffer+8
                 RTS
 
-                .byte   $A9
-                .byte   $F0
-                .byte   $8D
-                .byte   $0C
-                .byte   $02
-                .byte   $8D
-                .byte   $10
-                .byte   $02
-                .byte   $60
+                LDA     #$F0
+                STA     OamBuffer+12
+                STA     OamBuffer+16
+                RTS
 
 LE419:          LDA     $0470
                 JMP     VmOp_PushByte
@@ -16017,30 +14368,17 @@ LE431:          LDA     #$01
 
 LE437:          LDA     #$00
                 STA     $0471
-                RTS
+@LE43C:         RTS
 
-                .byte   $AD
-                .byte   $80
-                .byte   $04
-                .byte   $F0
-                .byte   $06
-                .byte   $20
-                .byte   $55
-                .byte   $98
-                .byte   $4C
-                .byte   $A9
-                .byte   $B3
-                .byte   $AD
-                .byte   $81
-                .byte   $04
-                .byte   $F0
-                .byte   $EF
-                .byte   $20
-                .byte   $51
-                .byte   $98
-                .byte   $4C
-                .byte   $A9
-                .byte   $B3
+                LDA     $0480
+                BEQ     @LE448
+                JSR     VmHelper_PushConst_0003
+                JMP     LB3A9
+
+@LE448:         LDA     $0481
+                BEQ     @LE43C
+                JSR     VmHelper_PushConst_0002
+                JMP     LB3A9
 
 LE453:          JSR     VmHelper_PushConst_0005
                 JMP     LB3A9
@@ -16129,11 +14467,14 @@ LE508:          LDA     #$8A
                 STA     OamBuffer+221
                 RTS
 
-LE533:          LDA     #$00
-                BEQ     LE539
+DisablePpuMask_BGDisable:
+                LDA     #$00
+                BEQ     WriteDisablePpuMask_BGEnable
 
-LE537:          LDA     #$01
-LE539:          STA     PpuMaskBuffer+3
+DisablePpuMask_BGEnable:
+                LDA     #$01
+WriteDisablePpuMask_BGEnable:
+                STA     PpuMaskBuffer_Bit3_ShowBG       ;BG enable
                 JMP     SetPpuMask
 
 LE53E:          LDY     RleExpandIndex
@@ -16261,9 +14602,9 @@ LE653:          JSR     LE53E
                 JSR     VmHelper_PushConst_0004
                 JSR     VmOp_Compare_AGeatherThan
                 JSR     VmOp_ExitFalse
-                JSR     VmHelper_SaveMemTemp_06
+                JSR     VmHelper_CreateStackFrame_06
                 JSR     LE61E
-                JMP     VmOp_ReadTempMemAddr
+                JMP     VmOp_DestroyStackFrame
 
 LE677:          JSR     LE653
                 JSR     LE551
@@ -16273,7 +14614,7 @@ LE680:          JSR     LAF7C
                 JSR     SetOamDmaRequest
                 JMP     LE644
 
-LE689:          LDA     PadBuffer_Trigger+2
+LE689:          LDA     PadBuffer_Trigger_Select
                 JSR     VmOp_PushByte
                 JSR     VmOp_ExitFalse
                 JSR     LD60A
@@ -16282,7 +14623,7 @@ LE689:          LDA     PadBuffer_Trigger+2
                 JSR     DisableApuChannel
 @LE69D:         JSR     ReadJoypad
                 JSR     LE7BE
-                LDA     PadBuffer_Trigger+2
+                LDA     PadBuffer_Trigger_Select
                 BEQ     @LE69D
                 LDA     #$00
                 STA     $0473
@@ -16370,8 +14711,8 @@ LE76A:          JSR     DisableApuChannel
                 LDA     #$01
                 STA     $0484
                 JSR     LE759
-                JSR     LE533
-                JSR     LB71A
+                JSR     DisablePpuMask_BGDisable
+                JSR     HideNormalSprites
                 JSR     LB034
                 LDY     #$04
                 LDA     #$00
@@ -16380,7 +14721,7 @@ LE76A:          JSR     DisableApuChannel
                 BPL     @LE785
                 JSR     SetOamDmaRequest
                 JSR     LE74E
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     LE0F6
                 JSR     VmHelper_PushConst_0000
                 JSR     VmHelper_PopScreenY
@@ -16389,9 +14730,9 @@ LE76A:          JSR     DisableApuChannel
                 JSR     VmHelper_PushConst_0000
                 JSR     LE70E
                 JSR     LAF9A
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     LB13B
-                JSR     LE537
+                JSR     DisablePpuMask_BGEnable
                 JSR     LE508
                 JSR     EnableApuChannel
                 JMP     Fight_MainLoop
@@ -16415,15 +14756,15 @@ LE7D1:          LDA     #$01
                 JSR     LE19E
                 JSR     LD96E
                 JSR     LD94F
-                JSR     LB71A
-                JSR     LBA24
+                JSR     HideNormalSprites
+                JSR     WaitNmiRaised
                 JSR     LE856
                 LDA     #$01
                 STA     $0484
-                JSR     LE533
+                JSR     DisablePpuMask_BGDisable
                 JSR     SetZeroSprite
                 JSR     SetOamDmaRequest
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 LDA     #$00
                 STA     $0498
                 STA     RleExpandIndex
@@ -16431,16 +14772,16 @@ LE7D1:          LDA     #$01
                 JSR     LBAD5
                 JSR     LBAD5
                 JSR     LB014
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 LDA     #$02
                 JSR     SongRequest
                 JSR     LB1A8
                 JSR     SetOamDmaRequest
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     LD98D
                 JSR     @LE841
                 JSR     LEE0A
-                JSR     LE537
+                JSR     DisablePpuMask_BGEnable
                 LDA     #$00
                 STA     $04DA
                 RTS
@@ -16458,20 +14799,20 @@ LE851:          TXA
                 PHA
                 JMP     LE879
 
-LE856:          LDA     $C2
-                BNE     @LE85B
+LE856:          LDA     DrawTextRequest
+                BNE     @Accept
                 RTS
 
-@LE85B:         TXA
+@Accept:        TXA
                 PHA
-                LDA     #$01
+                LDA     #$01                            ;Set flag
                 STA     $0484
-                JSR     LB71A
+                JSR     HideNormalSprites
                 JSR     SetOamDmaRequest
-                JSR     LBA24
+                JSR     WaitNmiRaised
                 JSR     PlaySubSequence
                 LDA     #$00
-                STA     $C2
+                STA     DrawTextRequest
                 LDA     #$0E
                 STA     RleExpandIndex
                 JSR     LAF9A
@@ -16482,7 +14823,7 @@ LE879:          LDY     #$00
                 CPY     #$40
                 BNE     @LE87D
                 LDY     #$00
-@LE887:         LDA     ($C0),y
+@LE887:         LDA     (DrawTextPointer),y
                 INY
                 CMP     #$2A
                 BNE     @LE887
@@ -16495,7 +14836,7 @@ LE879:          LDY     #$00
                 LDY     #$FF
 @LE898:         INX
                 INY
-                LDA     ($C0),y
+                LDA     (DrawTextPointer),y
                 CLC
                 ADC     #$80
                 STA     $0401,x
@@ -16512,7 +14853,7 @@ LE879:          LDY     #$00
                 STA     ScreenX+1
                 STA     ScreenY
                 STA     ScreenY+1
-                LDA     #$33
+                LDA     #$33                            ;Bank #3
                 STA     ChrBankRequest
                 LDA     #$06
                 STA     $55
@@ -16520,11 +14861,11 @@ LE879:          LDY     #$00
                 STA     $54
                 JSR     LB614
                 LDA     #$00
-                STA     $0484
+                STA     $0484                           ;Clear flag
                 JSR     VmHelper_PushConst_00F0
                 JSR     VmHelper_PushConst_0000
                 JSR     L9601
-@LE8DA:         JSR     LBA24
+@LE8DA:         JSR     WaitNmiRaised
                 JSR     PlaySubSequence
                 JSR     L9620
                 BCC     @LE8DA
@@ -16563,7 +14904,7 @@ LE8E8:          TXA
                 LDY     RleExpandIndex
                 LDA     LA02A,y
                 AND     #$04
-                STA     $045A
+                STA     ContinuePasswordPressA
                 BNE     @LE942
                 LDA     OamBuffer+48
                 CMP     #$80
@@ -16602,7 +14943,7 @@ LE8E8:          TXA
                 BCC     @LE93C
 @LE96F:         LDA     $045D
                 BEQ     @LE9AF
-                LDA     $045A
+                LDA     ContinuePasswordPressA
                 BEQ     @LE97E
                 LDA     $03FA
                 BEQ     @LE93C
@@ -16635,7 +14976,7 @@ LE8E8:          TXA
                 BNE     @LE9B3
                 JMP     @LE93F
 
-@LE9BF:         LDA     $045A
+@LE9BF:         LDA     ContinuePasswordPressA
                 BNE     @LE9E7
                 LDY     #$03
 @LE9C6:         LDA     $03DC,y
@@ -16653,56 +14994,58 @@ LE8E8:          TXA
                 BNE     @LE9C6
 @LE9E7:         RTS
 
-LE9E8:          JSR     ReadJoypad
-                LDA     PadBuffer_Now+3
-                BNE     @LEA0C
-                LDA     PadBuffer_Now
-                CMP     $045A
-                BEQ     @LEA0A
-                STA     $045A
+CheckExitTitleScreen:
+                JSR     ReadJoypad
+                LDA     PadBuffer_Now_Start             ;Check if start button is pressed
+                BNE     @StartPressed
+                LDA     PadBuffer_Now_A                 ;Check A button press down
+                CMP     ContinuePasswordPressA          ;Compare with previous input
+                BEQ     @Return
+                STA     ContinuePasswordPressA          ;Update previous input
                 LSR     A
-                BCC     @LEA0A
-                LDA     $0459
+                BCC     @Return                         ;Not press
+                LDA     ContinuePasswordInput
                 ASL     A
-                ADC     PadBuffer_Now+1
-                AND     #$0F
-                STA     $0459
-@LEA0A:         CLC
+                ADC     PadBuffer_Now_B                 ;Shift in B button input to password buffer
+                AND     #$0F                            ;Recent 4 inputs
+                STA     ContinuePasswordInput
+@Return:        CLC                                     ;Return false (continue title screen)
                 RTS
 
-@LEA0C:         LDA     #$01
+@StartPressed:  LDA     #$01                            ;Party in when continue
                 STA     PartyIn_Chohakkai
                 STA     PartyIn_Sagojo
-                LDY     $0459
-                LDA     @LEA31,y
-                BNE     @LEA26
-                STA     PartyIn_Chohakkai
+                LDY     ContinuePasswordInput
+                LDA     ContinueFieldXPageList,y
+                BNE     @InvalidEntry
+                STA     PartyIn_Chohakkai               ;Cancel party in (start from the beginning)
                 STA     PartyIn_Sagojo
-                LDA     #$1E
-                LDY     #$10
-@LEA26:         PHA
+                LDA     #$1E                            ;Start field X page
+                LDY     #$10                            ;Start field Y page
+@InvalidEntry:  PHA
                 TYA
-                JSR     VmOp_PushByte
+                JSR     VmOp_PushByte                   ;Push field Y page
                 PLA
-                JSR     VmOp_PushByte
-                SEC
+                JSR     VmOp_PushByte                   ;Push field X page
+                SEC                                     ;Return true (continue next screen)
                 RTS
 
-@LEA31:         .byte   $00
-                .byte   $14
+ContinueFieldXPageList:
                 .byte   $00
-                .byte   $1A
-                .byte   $06
+                .byte   $14                             ;($14, $01)          AB : Gobi Desert
+                .byte   $00
+                .byte   $1A                             ;($1A, $03)       AB AB : Luoyang
+                .byte   $06                             ;($06, $04)    AB A  A  : Taklimakan Desert
                 .byte   $00
                 .byte   $00
-                .byte   $11
+                .byte   $11                             ;($11, $07)    AB AB AB : Choshu
                 .byte   $00
-                .byte   $0E
-                .byte   $1A
-                .byte   $05
+                .byte   $0E                             ;($0E, $09) AB A  A  AB : House
+                .byte   $1A                             ;($1A, $0A) AB A  AB A  : (No building)
+                .byte   $05                             ;($05, $0B) AB A  AB AB : House
                 .byte   $00
-                .byte   $18
-                .byte   $10
+                .byte   $18                             ;($18, $0D) AB AB A  AB : Henan
+                .byte   $10                             ;($10, $0E) AB AB AB A  : Chengdu
                 .byte   $00
 LEA41:          .byte   $B0
                 .byte   $B2
@@ -16725,10 +15068,10 @@ LEA45:          TXA
                 ASL     A
                 LDA     #$0C
                 ADC     #$00
-                STX     $045A
+                STX     ContinuePasswordPressA
                 STY     $045B
                 JSR     SongRequest                     ;#12 or #13
-                LDX     $045A
+                LDX     ContinuePasswordPressA
                 LDY     $045B
                 LDA     OamBuffer+48,y
                 SEC
@@ -16796,7 +15139,7 @@ LEA45:          TXA
                 STA     $C6
                 JSR     LEBB2
                 BCC     @LEB16
-                STX     $045A
+                STX     ContinuePasswordPressA
                 STY     $045B
                 PLA
                 TAX
@@ -16805,7 +15148,7 @@ LEA45:          TXA
                 PHA
                 LDA     #$08
                 JSR     SongRequest
-                LDX     $045A
+                LDX     ContinuePasswordPressA
                 LDY     $045B
                 JMP     @LEB8A
 
@@ -16828,7 +15171,7 @@ LEA45:          TXA
                 STA     $046B
                 JMP     @LEB8A
 
-@LEB41:         STX     $045A
+@LEB41:         STX     ContinuePasswordPressA
                 STY     $045B
                 LDX     #$03
 @LEB49:         LDA     $0455
@@ -16854,7 +15197,7 @@ LEA45:          TXA
                 BNE     @LEB81
 @LEB7E:         DEX
                 BNE     @LEB49
-@LEB81:         LDX     $045A
+@LEB81:         LDX     ContinuePasswordPressA
                 LDY     $045B
                 JMP     @LEB8D
 
@@ -17041,7 +15384,7 @@ LEC54:          TXA
 
 @LECCB:         STA     $045B
                 LDA     OamBuffer+51,y
-                STA     $045A
+                STA     ContinuePasswordPressA
                 LDA     OamBuffer+50,y
                 AND     #$40
                 ORA     #$03
@@ -17080,8 +15423,8 @@ LEC54:          TXA
                 CLC
                 ADC     #$01
 @LED27:         CLC
-                ADC     $045A
-                STA     $045A
+                ADC     ContinuePasswordPressA
+                STA     ContinuePasswordPressA
 @LED2E:         LDX     #$05
 @LED30:         TXA
                 LDY     SrcPtr
@@ -17109,7 +15452,7 @@ LEC54:          TXA
                 CLC
                 ADC     DstPtr+1
                 CLC
-                ADC     $045A
+                ADC     ContinuePasswordPressA
                 STA     OamBuffer+39,y
                 DEX
                 BPL     @LED30
@@ -17158,7 +15501,7 @@ LEC54:          TXA
                 CLC
                 ADC     DstPtr+1
                 CLC
-                ADC     $045A
+                ADC     ContinuePasswordPressA
                 STA     OamBuffer+39,x
                 LDA     $0491
                 STA     OamBuffer+38,x
@@ -17244,16 +15587,16 @@ LEE0A:          TXA
                 CPX     #$30
                 BNE     @LEE10
                 LDA     #$00
-                STA     PpuMaskBuffer+1
+                STA     PpuMaskBuffer_Bit1_ShowBGLeft
                 JSR     SetPpuMask
                 PLA
                 TAX
                 RTS
 
 LEE39:          LDA     #$01
-                STA     PpuMaskBuffer+1
+                STA     PpuMaskBuffer_Bit1_ShowBGLeft
                 JSR     SetPpuMask
-                JMP     LB71A
+                JMP     HideNormalSprites
 
 LEE43:          JSR     VmHelper_ReadTempAddressWord_02
                 JSR     VmOp_Decrement
@@ -17304,7 +15647,7 @@ VmProc_NormalizeOperatingParty:
 @Return:        RTS
 
 LEE9A:          JSR     VmProc_NormalizeOperatingParty
-                JSR     VmHelper_SaveMemTemp_08
+                JSR     VmHelper_CreateStackFrame_08
                 JSR     VmHelper_PushOperatingPartyLife
                 JSR     VmOp_CheckNotZero
                 BCC     @OperatingPartyAlive
@@ -17314,7 +15657,7 @@ LEE9A:          JSR     VmProc_NormalizeOperatingParty
                 BCS     @Return
                 JSR     LEEF4
                 JSR     LEF69
-@Return:        JMP     VmOp_ReadTempMemAddr
+@Return:        JMP     VmOp_DestroyStackFrame
 
 VmHelper_PushGokuLife:
                 LDA     PartyLifes                      ;Party[0] : Goku
@@ -17517,31 +15860,31 @@ RST:            SEI
                 BNE     @MemoryClearLoop
                 LDX     #$FF
                 TXS                                     ;Initialize stack pointer
-                JSR     LF160
+                JSR     ClearVram
                 LDA     #$1C
                 STA     VmMem_SecondStack
                 LDX     #$7C
                 LDA     #$80
-                STA     VmMem_Temp
+                STA     VmMem_StackFramePointer
                 LDA     #$07
-                STA     VmMem_Temp+1
-                LDA     #$0A
+                STA     VmMem_StackFramePointer+1
+                LDA     #$0A                            ;Set field page (unused???)
                 STA     FieldPageY
                 LDA     #$19
                 STA     FieldPageX
                 CLI
-                JSR     LAF02
+                JSR     ClearPpuControlBuffer
                 LDA     #$01
-                STA     PpuControlBuffer+7
-                STA     PpuControlBuffer+4
-                STA     PpuControlBuffer+5
+                STA     PpuCtrlBuffer_Bit7_NmiEnable    ;NMI enable
+                STA     PpuCtrlBuffer_Bit4_BGAddress    ;BG address ($0000)
+                STA     PpuCtrlBuffer_Bit5_SpriteSize   ;SP size (8x16)
                 JSR     SetPpuControl
-                JSR     LAF0D
+                JSR     ClearPpuMaskBuffer
                 LDA     #$01
-                STA     PpuMaskBuffer+1
-                STA     PpuMaskBuffer+2
-                STA     PpuMaskBuffer+3
-                STA     PpuMaskBuffer+4
+                STA     PpuMaskBuffer_Bit1_ShowBGLeft   ;Show BG left 8px
+                STA     PpuMaskBuffer_Bit2_ShowSPLeft   ;Show SP left 8px
+                STA     PpuMaskBuffer_Bit3_ShowBG       ;Show BG
+                STA     PpuMaskBuffer_Bit4_ShowSP       ;Show SP
                 JSR     SetPpuMask
                 LDA     #$38
                 STA     $39
@@ -17561,87 +15904,89 @@ SetOamDmaRequest:
                 STA     OamDmaRequest
                 RTS
 
-LF0E2:          JSR     @LF14A
+LF0E2:          JSR     ForceClearVram
                 LDA     #$30
-                STA     LFFF4
+                STA     LFFF4                           ;Set bank #0
                 LDA     #$00
                 STA     ScreenX
                 STA     ScreenX+1
                 STA     ScreenY
                 STA     $045D
                 STA     $0472
-                JSR     VmHelper_PushConst_0001
+                JSR     VmHelper_PushConst_0001         ;Write 1 to $03FF
                 JSR     LEF41
-                JSR     VmHelper_PushConst_0001
+                JSR     VmHelper_PushConst_0001         ;Write 1 to $0400
                 JSR     LEF48
-                JSR     @LF13F
-                JSR     LBA24
-                JSR     LE533
-                LDA     #$0D
+                JSR     HideAllSprites
+                JSR     WaitNmiRaised
+                JSR     DisablePpuMask_BGDisable
+                LDA     #$0D                            ;Title screen index
                 STA     RleExpandIndex
                 JSR     LAF9A
                 JSR     InitializeSounddriver
-                JSR     LE537
+                JSR     DisablePpuMask_BGEnable
                 LDA     #$00
                 STA     $0484
-                JSR     SongRequest_03
-@LF122:         JSR     @LF13F
+                JSR     SongRequest_03                  ;BGM : Title
+@WaitLoop:      JSR     HideAllSprites
                 JSR     PlaySubSequence
-                JSR     LBA24
-                JSR     LE9E8
+                JSR     WaitNmiRaised
+                JSR     CheckExitTitleScreen            ;Carry = IsNextScreen
                 LDA     LFFF4                           ;Set bank #0
                 STA     LFFF4
-                BCC     @LF122
-                JSR     SongRequest_00
+                BCC     @WaitLoop                       ;Loop until start button is pressed
+                JSR     SongRequest_00                  ;Song mute
                 JSR     LBA3D
                 JMP     LF0E2
 
-@LF13F:         LDA     #$F0
+HideAllSprites: LDA     #$F0                            ;Hide sprite #0
                 STA     OamBuffer
-                JSR     LB71A
+                JSR     HideNormalSprites               ;Hide sprites #1-#63
                 JMP     SetOamDmaRequest
 
-@LF14A:         TXA
+ForceClearVram: TXA
                 PHA
                 LDA     #$00
-                STA     PPUCTRL
+                STA     PPUCTRL                         ;Fource blanking
                 STA     PPUMASK
-                JSR     LF160
-                JSR     SetPpuControl
+                JSR     ClearVram
+                JSR     SetPpuControl                   ;Revert draw
                 JSR     SetPpuMask
                 PLA
                 TAX
                 RTS
 
-LF160:          LDY     #$00
-                STY     PPUMASK
-                TXA
+ClearVram:      LDY     #$00
+                STY     PPUMASK                         ;All disable
+                TXA                                     ;Save X register
                 PHA
-                LDX     #$20
-@LF169:         LDA     PPUSTATUS
+                LDX     #$20                            ;Claer VRAM $2000-$3FFF
+@ClearVramLoop: LDA     PPUSTATUS
                 TXA
                 STA     PPUADDR
                 LDA     #$00
                 STA     PPUADDR
-@LF175:         STA     PPUDATA
+@ClearPageLoop: STA     PPUDATA
                 INY
-                BNE     @LF175
+                BNE     @ClearPageLoop
                 INX
                 CPX     #$40
-                BCC     @LF169
-                LDA     #$3F
+                BCC     @ClearVramLoop
+                LDA     #$3F                            ;VramAddress = $3F00 (?)
                 STA     PPUADDR
                 LDA     #$00
                 STA     PPUADDR
+                STA     PPUADDR                         ;VramAddress = $0000
                 STA     PPUADDR
-                STA     PPUADDR
-                PLA
+                PLA                                     ;Restore X register
                 TAX
                 RTS
 
-                .byte   "SR"                            ;Junk data
-                .byte   $09                             ;Uncompiled source
-                .byte   "TRUE_CASE",$0D,$0A             ;PC:0x40E8, ROM:$C0D8 (Maybe)
+; Junk data (Uncompiled source)
+; PC:0x40E8, ROM:$C0D8 (Maybe)
+                .byte   "SR"
+                .byte   $09
+                .byte   "TRUE_CASE",$0D,$0A
                 .byte   $09
                 .byte   "JSR"
                 .byte   $09

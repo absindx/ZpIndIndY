@@ -21,7 +21,7 @@
 	h2{
 		margin			: 8px 8px;
 		padding			: 2px;
-		border-bottom		: solid 1px #388700;
+		border-bottom		: solid 1px #BCBE00;
 	}
 	h3{
 		margin			: 8px 16px;
@@ -87,6 +87,21 @@
 		margin			: 8px auto;
 	}
 
+	table{
+		border-collapse		: collapse;
+		margin			: 4px auto;
+	}
+	td, th{
+		border			: solid 1px #BCBE00;
+		padding-left		: 8px;
+		padding-right		: 8px;
+	}
+	th{
+		background-color	: RGBA(188, 190, 0, 0.25);
+		padding-left		: 8px;
+		padding-right		: 8px;
+	}
+
 	pre{
 		margin			: 8px 48px;
 		border			: 1px solid rgba(255, 255, 255, 0.50);
@@ -132,7 +147,7 @@
     <h2>プログラム構成</h2>
      <p>
       配信中、<a href="https://ja.wikipedia.org/wiki/Forth">WikipediaのForthの記事</a>のURLだけ書かれたコメントをいただいたことがあるため関連を要調査。<br>
-      確かに命令体型が似ています。
+      細かな差はありそうですが、確かに命令体型が似ています。
      </p>
 
     <article>
@@ -212,6 +227,7 @@ B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilo
       32フレーム周期では、このフレームは移動先決定処理、次フレーム待機、目的座標へ1px移動、次フレーム待機、…といった流れになっています。<br>
       フレームの待機時には、VBlankフラグ監視ルーチンに入るタイプで、サブルーチンをすべて抜けて無限ループに戻ることはありません。
      </p>
+     <!-- TODO : 1ループ内での処理内容 -->
 
     </article>
    </section>
@@ -244,12 +260,12 @@ B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilo
 
      <p>
       実際にリードアクセスが発生するのは、Absoluteアドレッシングの場合は4サイクル目となります。<br>
-      また、CPUはPPUの1/3の速度で動作しているため、PPU 3サイクル分、
-      しかし<a href="https://wiki.nesdev.com/w/index.php/CPU_pin_out_and_signal_description#Signal_description">M2クロックのhigh</a>がリードのため、1.875サイクル分のリードが発生することになります。
+      また、CPUはPPUの1/3の速度で動作しているためPPU 3サイクル分、
+      そのうち<a href="https://wiki.nesdev.com/w/index.php/CPU_pin_out_and_signal_description#Signal_description">M2クロックのhigh</a>がリードのため、PPU 1.875サイクル分のリードが発生することになります。
      </p>
      <!-- TODO : サイクルチャート画像 -->
      <p>
-      ラグフレーム発生の期待値は、 32 [frame] * (2 / 21) [PPU cycle] = 3.048 程度になります。
+      1タイルの歩行におけるラグフレーム発生の期待値は、 32 [frame] * (2 / 21) [PPU cycle] = 3.048 [frame] 程度になります。
      </p>
 
      <h3>エミュレータ上でのラグフレーム再現</h3>
@@ -275,6 +291,7 @@ B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilo
        <li>[NG] FCEUX (New PPU)</li>
        <li>[NG] VirtuaNES</li>
       </ul>
+     <!-- TODO : バージョン記載 -->
      </p>
      <p>
       なお、このゲームに限定してであればラグフレームが発生した場合 $BA1B が実行されるため、
@@ -294,17 +311,83 @@ B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilo
    </section>
 
    <section>
+    <h2>コンティニュー</h2>
+     <h3>仕組み</h3>
+     <p>
+      Aボタンを押下した瞬間のBボタン入力状態直近4回分によってコンティニュー先が決定されます。<br>
+      そのため「AB AB AB」のようなメッセージにおける「AB」とは同時押しを意味しています。
+      同時押しが難しい場合、Bボタンを押してからAボタンを押しても同等の効果を持つため、入力が安定しやすいです。
+     </p>
+     <p>
+      なお、コンティニューコマンドについては拡張ポートに刺したコントローラーは反応しないので、標準コントローラーから入力してください。
+     </p>
+     <p>
+      入力された直近4回分のコマンドを4bitの数値として以下のテーブルのインデックスとして参照し、Xページを表の値、Yページを入力値として再開します。<br>
+      そのため、同じYページに複数の再開エントリは登録できず、また0x10ページ目以降のYページからの再開はできません。<br>
+      登録値が0x00の場合、標準スタート（台湾）になります。
+     </p>
+     <h3>コンティニュー先一覧</h3>
+     <p>
+      <table>
+       <tr><th>入力値</th	><th>登録値</th	><th>入力コマンド</th	><th>再開ページ</th	><th>再開ポイント</th		></tr>
+       <tr><td>$00</td		><td>$00</td	><td>---</td		><td>($0E, $10)</td	><td>標準スタート</td		></tr>
+       <tr><td>$01</td		><td>$14</td	><td>AB</td		><td>($14, $01)</td	><td>ゴビ砂漠</td		></tr>
+       <tr><td>$02</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+       <tr><td>$03</td		><td>$1A</td	><td>AB AB</td		><td>($1A, $03)</td	><td>洛陽の都</td		></tr>
+       <tr><td>$04</td		><td>$06</td	><td>AB A  A </td	><td>($06, $04)</td	><td>タクラマカン砂漠</td	></tr>
+       <tr><td>$05</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+       <tr><td>$06</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+       <tr><td>$07</td		><td>$11</td	><td>AB AB AB</td	><td>($11, $07)</td	><td>長州の都</td		></tr>
+       <tr><td>$08</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+       <tr><td>$09</td		><td>$0E</td	><td>AB A  A  AB</td	><td>($0E, $09)</td	><td>小屋</td			></tr>
+       <tr><td>$0A</td		><td>$1A</td	><td>AB A  AB A </td	><td>($1A, $0A)</td	><td>建物なし</td		></tr>
+       <tr><td>$0B</td		><td>$05</td	><td>AB A  AB AB</td	><td>($05, $0B)</td	><td>小屋</td			></tr>
+       <tr><td>$0C</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+       <tr><td>$0D</td		><td>$18</td	><td>AB AB A  AB</td	><td>($18, $0D)</td	><td>河南地方</td		></tr>
+       <tr><td>$0E</td		><td>$10</td	><td>AB AB AB A </td	><td>($10, $0E)</td	><td>成都の都</td		></tr>
+       <tr><td>$0F</td		><td>$00</td	><td>---</td		><td>---</td		><td>標準スタート</td		></tr>
+      </table>
+     </p>
+     <p>
+      注釈 : ゲーム内の表記を尊重し、可読性のために漢字へ直すのみに留めています。政治的主張・意図はありません。
+     </p>
+   </section>
+
+   <section>
     <h2>サウンドドライバ</h2>
      <p>
       あとで書く。
      </p>
      <p>
       <ul>
-       <li>フレーム単位音長で、ハードウェアエンベロープのみ、APUレジスタに書く値ほぼそのまま</li>
-       <li>簡単なサブルーチン機能はある</li>
+       <li>フレーム単位音長（Tick × Length）で、ハードウェアエンベロープのみ、APUレジスタに書く値ほぼそのまま</li>
+       <li>各チャンネルごとに、シーケンスデータ参照とシーケンス制御の2段構成</li>
        <li>BGM復帰機能は無いので、効果音を鳴らすシーンのBGMはそのチャンネルが使われていない</li>
-       <li>演奏開始アドレスの指定方法がゴミ</li>
+       <li>演奏開始アドレスの指定方法がゴミ（即値ロードしてポインタをセットするサブルーチンへテーブルジャンプする）</li>
        <li>時々短周期ノイズ乗る（タイトル画面の曲とか）けど原因はまだ読んでない</li>
+       <li>APUレジスタの未使用領域にビットを立てようとすることがある</li>
+      </ul>
+     </p>
+   </section>
+
+   <section>
+    <h2>その他細かいこと</h2>
+     <p>
+      全域ツッコミどころ満載。
+     </p>
+     <p>
+      <ul>
+       <li>VM実装にバグがあり、非同一チェック（<code>$94EB : VmOp_Compare_NotEqual</code>）は同じ上位バイトを比較してしまうため常に下位バイトだけでしか比較されない</li>
+       <li>ネームテーブルに一部黒い領域を作って、0爆弾ヒット後執拗にその位置を指定することでステータス領域を作り出している</li>
+       <li>ステータス領域にBGが描画できないため、全てスプライトで描画されている</li>
+       <li>左8pxクリッピングと整合性を保つためか、右側に黒いスプライトを置いている（スプライトは1pxずれるため一番上のスキャンラインのBGが見えてしまっている）</li>
+       <li>バンク切り替えにASCIIの数値指定している（<a href="https://wiki.nesdev.com/w/index.php/INES_Mapper_003">INES Mapper 003</a>はバイナリ指定なので上位ニブルが無視されているだけ）</li>
+       <li>コントローラー1ボタンにRAM1バイト割り当てており、現フレーム, 前フレーム, 押下トリガーの3種類の計24バイト消費している</li>
+       <li>さらにゲーム内処理で同等機能を再実装していることがあり（コンティニュー時のA押下）、さらに追加で消費している</li>
+       <li>拡張ポートのビットをそのまま扱っており非ゼロチェック以外してはいけないにもかかわらず、シフト演算している箇所があるため一部機能は拡張ポートのコントローラーでは操作できない（コンティニューコマンド入力）</li>
+       <li>ネイティブ実装の最適化が甘い （例 : 処理順を気にする必要がない場所で <code>INY : CPY #$xx : BCC .Xxx</code>）</li>
+       <li><code>$003A : $4C, $75, $CD (JMP $CD75)</code> とあり、ゼロページのメモリダンプを見るだけでおかしさがわかる（RAMに機械語を動的生成して任意アドレスへジャンプしているが、それだけなら<code>$6C</code>の<code>JMP (indirect)</code>で十分）</li>
+       <li>$F193にある未コンパイルソースは、$C0D8の処理と思われる（<code>JMP SUB : JSR : JMP</code> の組み合わせはここだけ）</li>
       </ul>
      </p>
    </section>
@@ -340,12 +423,13 @@ B94D :	4C B3 96	.Accept	JMP	VmOp_ReadTempMemAddr				<span class="comment">;epilo
       6502ネイティブで書くともっと入りますよ^^<br>
       <br>
       …という冗談はさておき。<br>
-      ゲームロジック以外のシステム的な処理や静的な画面データの簡単なRLE圧縮等、一部はネイティブ実装されていたりするので、6502が全く書けない方ではなかったと推察されます。
+      ゲームロジック以外のシステム的な処理や静的な画面データの簡単なRLE圧縮等、一部はネイティブ実装されていたりするので、6502が全く書けない方ではなかったと推察されます。（コードの効率はさておき）<br>
       開発ツール選定の時点で間違っていたわけです。<br>
+      データの持ち方をちょっと変えるだけでそれなりのプログラム容量が捻出できるので、アルゴリズム選択も間違っていますが。<br>
       時間も足りなかったのではないでしょうか。
      </p>
      <p>
-      CHRも（あの内容に対して）CHR 32KB(4バンク)は多い方だと思いますよ。メッセージ分差し引いてもかなり余ってるので。
+      CHRも（あの内容に対して）マッパー使ってCHR 32KB(4バンク)は多い方だと思いますよ。メッセージ分差し引いてもかなり余ってるので。
      </p>
     </article>
    </section>
