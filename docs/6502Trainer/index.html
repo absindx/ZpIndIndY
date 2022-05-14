@@ -95,42 +95,42 @@
 		a.Rel,a.ZIY,a.Imp,a.ZIY,a.ZpX,a.ZpX,a.ZpX,a.ZpX,a.Imp,a.AbY,a.Imp,a.AbY,a.AbX,a.AbX,a.AbX,a.AbX,	// F0
 	];
 	const instructionCycle		= [
-	//	0 1 2 3 4 5 6 7 8 9 A B C D E F
-		7,6,0,8,3,3,5,5,3,2,2,2,4,4,6,6,	// 00
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 10
-		6,6,0,8,3,3,5,5,4,2,2,2,4,4,6,6,	// 20
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 30
-		6,6,0,8,3,3,5,5,3,2,2,2,3,4,6,6,	// 40
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 50
-		6,6,0,8,3,3,5,5,4,2,2,2,5,4,6,6,	// 60
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// 70
-		2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,	// 80
-		2,6,0,6,4,4,4,4,2,5,2,5,5,5,5,5,	// 90
-		2,6,2,6,3,3,3,3,2,2,2,2,4,4,4,4,	// A0
-		2,5,0,5,4,4,4,4,2,4,2,4,4,4,4,4,	// B0
-		2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,	// C0
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// D0
-		2,6,2,8,3,3,5,5,2,2,2,2,4,4,6,6,	// E0
-		2,5,0,8,4,4,6,6,2,4,2,7,4,4,7,7,	// F0
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		7,    6,    0,    8,    3,    3,    5,    5,    3,    2,    2,    2,    4,    4,    6,    6,		// 00
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// 10
+		6,    6,    0,    8,    3,    3,    5,    5,    4,    2,    2,    2,    4,    4,    6,    6,		// 20
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// 30
+		6,    6,    0,    8,    3,    3,    5,    5,    3,    2,    2,    2,    3,    4,    6,    6,		// 40
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// 50
+		6,    6,    0,    8,    3,    3,    5,    5,    4,    2,    2,    2,    5,    4,    6,    6,		// 60
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// 70
+		2,    6,    2,    6,    3,    3,    3,    3,    2,    2,    2,    2,    4,    4,    4,    4,		// 80
+		2,    6,    0,    6,    4,    4,    4,    4,    2,    5,    2,    5,    5,    5,    5,    5,		// 90
+		2,    6,    2,    6,    3,    3,    3,    3,    2,    2,    2,    2,    4,    4,    4,    4,		// A0
+		2,    5,    0,    5,    4,    4,    4,    4,    2,    4,    2,    4,    4,    4,    4,    4,		// B0
+		2,    6,    2,    8,    3,    3,    5,    5,    2,    2,    2,    2,    4,    4,    6,    6,		// C0
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// D0
+		2,    6,    2,    8,    3,    3,    5,    5,    2,    2,    2,    2,    4,    4,    6,    6,		// E0
+		2,    5,    0,    8,    4,    4,    6,    6,    2,    4,    2,    7,    4,    4,    7,    7,		// F0
 	];
 	const instructionUnofficial	= [
 	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
-		false,false,true, true, true, false,false,true, false,false,false,true, true, false,false,true,	// 00
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 10
-		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// 20
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 30
-		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,	// 40
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 50
-		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,	// 60
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// 70
-		true, false,true, true, false,false,false,true, false,true, false,true, false,false,false,true,	// 80
-		false,false,true, true, false,false,false,true, false,false,false,true, true, false,true, true,	// 90
-		false,false,false,true, false,false,false,true, false,false,false,true, false,false,false,true,	// A0
-		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// B0
-		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// C0
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// D0
-		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,	// E0
-		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,	// F0
+		false,false,true, true, true, false,false,true, false,false,false,true, true, false,false,true,		// 00
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// 10
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,		// 20
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// 30
+		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,		// 40
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// 50
+		false,false,true, true, true, false,false,true, false,false,false,true, false,false,false,true,		// 60
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// 70
+		true, false,true, true, false,false,false,true, false,true, false,true, false,false,false,true,		// 80
+		false,false,true, true, false,false,false,true, false,false,false,true, true, false,true, true,		// 90
+		false,false,false,true, false,false,false,true, false,false,false,true, false,false,false,true,		// A0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,		// B0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,		// C0
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// D0
+		false,false,true, true, false,false,false,true, false,false,false,true, false,false,false,true,		// E0
+		false,false,true, true, true, false,false,true, false,false,true, true, true, false,false,true,		// F0
 	];
 
 	const hexCharacter	= [
@@ -153,6 +153,16 @@
 		'HexToOp',
 		'OpToCycle',
 		'HexToCycle',
+	];
+	const instructionMode		= {
+		Official	: 0,
+		Unofficial	: 1,
+		All		: 2,
+	};
+	const instructionModeName	= [
+		'Official',
+		'Unofficial',
+		'All',
 	];
 
 	//--------------------------------------------------
@@ -244,6 +254,7 @@
 		nowQuestion	= null;
 		questionCount	= 0;
 		correctCount	= 0;
+		UpdateCorrect();
 
 		// Get mode
 		modeSetting	= GetModeSetting();
@@ -285,7 +296,21 @@
 			};
 
 			allOpCode.push(op);
-			if(modeSetting.Unofficial || !instructionUnofficial[index]){
+
+			const isOfficial	= !instructionUnofficial[index];
+			let isPush		= false;
+			switch(modeSetting.Instruction){
+				case instructionMode.Official:
+					isPush	= isOfficial;
+					break;
+				case instructionMode.Unofficial:
+					isPush	= !isOfficial;
+					break;
+				case instructionMode.All:
+					isPush	= true;
+					break;
+			}
+			if(isPush){
 				useOpCode.push(op);
 			}
 		});
@@ -378,12 +403,13 @@
 
 	function Question(){
 		if(Number.isInteger(nowQuestion)){
+			const prevQuestion		= nowQuestion;
 			const elemCorrectUser		= document.getElementById('CorrectText_User');
 			const elemCorrectCorrect	= document.getElementById('CorrectText_Correct');
 			switch(modeSetting.Mode){
 				case trainingMode.OpToHex:{
 					const userAnswer		= GetAnswerBinary();
-					const correctAnswer		= useOpCode[nowQuestion];
+					const correctAnswer		= useOpCode[prevQuestion];
 
 					if((userAnswer < 0) || (0x100 <= userAnswer)){
 						QuestionIncorrect();
@@ -407,8 +433,8 @@
 						}
 					});
 
-					elemCorrectUser.textContent	= ToHexString(userAnswer, 2) + ' (' + allOpCode[userAnswer].ShortFormatted + ')';
-					elemCorrectCorrect.textContent	= correctAnswersString;
+					elemCorrectUser.innerHTML	= ToHexString(userAnswer, 2)	+ ' <span class="Comment">; ' + allOpCode[userAnswer].ShortFormatted	+ '</span>';
+					elemCorrectCorrect.innerHTML	= correctAnswersString		+ ' <span class="Comment">; ' + useOpCode[prevQuestion].ShortFormatted	+ '</span>';
 
 					QuestionCorrect(isCorrect);
 
@@ -434,8 +460,8 @@
 						}
 					});
 
-					elemCorrectUser.textContent	= userAnswer.ShortFormatted + ' (' + userAnswersString + ')';
-					elemCorrectCorrect.textContent	= correctAnswer.ShortFormatted;
+					elemCorrectUser.innerHTML	= userAnswer.ShortFormatted	+ ' <span class="Comment">; ' + userAnswersString		+ '</span>';
+					elemCorrectCorrect.innerHTML	= correctAnswer.ShortFormatted	+ ' <span class="Comment">; ' + correctAnswer.OpCodeString	+ '</span>';
 
 					QuestionCorrect(userAnswer.ShortFormatted === correctAnswer.ShortFormatted);
 
@@ -446,8 +472,8 @@
 					const userAnswer		= GetAnswerCycle();
 					const correctAnswer		= useOpCode[nowQuestion].Cycle;
 
-					elemCorrectUser.textContent	= userAnswer;
-					elemCorrectCorrect.textContent	= correctAnswer;
+					elemCorrectUser.innerHTML	= userAnswer;
+					elemCorrectCorrect.innerHTML	= correctAnswer	+ ' <span class="Comment">; ' + useOpCode[nowQuestion].ShortFormatted	+ '</span>';
 
 					QuestionCorrect(userAnswer === correctAnswer);
 
@@ -486,17 +512,32 @@
 
 	function GetModeSetting(){
 		const modeString	= document.forms['ModeSelectForm'].mode.value;
-		const modeUnofficial	= document.forms['ModeSelectForm'].unofficial.checked;
-		let mode		= null;
+		const instString	= document.forms['ModeSelectForm'].inst.value;
+		let mode		= {};
 
+		let found;
+
+		found	= false;
 		trainingModeName.filter(function(name, index){
 			if(modeString === name){
-				mode	= {
-					Mode		: index,
-					Unofficial	: modeUnofficial,
-				};
+				mode.Mode		= index;
+				found			= true;
 			}
 		});
+		if(!found){
+			return null;
+		}
+
+		found	= false;
+		instructionModeName.filter(function(name, index){
+			if(instString === name){
+				mode.Instruction	= index;
+				found			= true;
+			}
+		});
+		if(!found){
+			return null;
+		}
 
 		return mode;
 	}
@@ -537,32 +578,40 @@
 		}
 	}
 
+	function UpdateCorrect(){
+		const elemQuestion	= document.getElementById('StatisticsText_Question');
+		const elemCorrect	= document.getElementById('StatisticsText_Correct');
+		const elemIncorrect	= document.getElementById('StatisticsText_Incorrect');
+
+		const elemCorrectBg	= document.getElementById('Statistics_Correct');
+		const elemIncorrectBg	= document.getElementById('Statistics_Incorrect');
+
+		elemQuestion.textContent	= questionCount;
+		elemCorrect.textContent		= correctCount;
+		elemIncorrect.textContent	= questionCount - correctCount;
+
+		elemCorrectBg.classList.remove('AnswerCorrect');
+		elemIncorrectBg.classList.remove('AnswerIncorrect');
+	}
 	function QuestionCorrect(correct){
 		questionCount++;
 		if(correct){
 			correctCount++;
 		}
 
-		const elemQuestion	= document.getElementById('StatisticsText_Question');
-		const elemCorrect	= document.getElementById('StatisticsText_Correct');
-		const elemIncorrect	= document.getElementById('StatisticsText_Incorrect');
-		elemQuestion.textContent	= questionCount;
-		elemCorrect.textContent		= correctCount;
-		elemIncorrect.textContent	= questionCount - correctCount;
+		UpdateCorrect();
 
 		const elemCorrectBg	= document.getElementById('Statistics_Correct');
 		const elemIncorrectBg	= document.getElementById('Statistics_Incorrect');
 		if(correct){
 			elemCorrectBg.classList.add('AnswerCorrect');
-			elemIncorrectBg.classList.remove('AnswerIncorrect');
 		}
 		else{
-			elemCorrectBg.classList.remove('AnswerCorrect');
 			elemIncorrectBg.classList.add('AnswerIncorrect');
 		}
 	}
 
--->
+// -->
   </script>
   <style type="text/css">
 <!--
@@ -609,6 +658,10 @@
 		float		: right;
 	}
 	input[type="button"]{
+	}
+
+	.Comment{
+		color		: #008000;
 	}
 
 	.AnswerCorrect{
@@ -688,12 +741,21 @@
     <form id="ModeSelectForm" autocomplete="off">
      <fieldset>
       <legend>Mode select</legend>
-      <label  ><input type="radio" name="mode" value="OpToHex" checked	>OpCode -&gt; Hex</input></label
-      > <label><input type="radio" name="mode" value="HexToOp"		>Hex -&gt; OpCode</input></label
-      > <label><input type="radio" name="mode" value="OpToCycle"	>OpCode -&gt; Cycle</input></label
-      > <label><input type="radio" name="mode" value="HexToCycle"	>Hex -&gt; Cycle</input></label
-      > / <label><input type="checkbox" name="unofficial"				>Unofficial instruction</input></label
-      > <input id="ApplyMode" type="button" value="Apply" onclick="Initialize();"></input>
+      <dl>
+       <dt>Mode</dt><dd>
+        <label    ><input type="radio" name="mode" value="OpToHex" checked	>OpCode -&gt; Hex</input></label
+        > <label  ><input type="radio" name="mode" value="HexToOp"		>Hex -&gt; OpCode</input></label
+        > <label  ><input type="radio" name="mode" value="OpToCycle"		>OpCode -&gt; Cycle</input></label
+        > <label  ><input type="radio" name="mode" value="HexToCycle"		>Hex -&gt; Cycle</input></label
+        >
+       </dd>
+       <dt>Instruction</dt><dd>
+        <label><input type="radio" name="inst" value="Official" checked		>Official</input></label
+        > <label  ><input type="radio" name="inst" value="Unofficial"		>Unofficial</input></label
+        > <label  ><input type="radio" name="inst" value="All"			>All (Official + Unofficial)</input></label
+        >
+       </dd>
+      <input id="ApplyMode" type="button" value="Apply" onclick="Initialize();"></input>
      </fieldset>
     </form>
    </section>
@@ -702,7 +764,7 @@
   <script type="text/javascript">
 <!--
 	Initialize();
--->
+// -->
   </script>
  </body>
 </html>
