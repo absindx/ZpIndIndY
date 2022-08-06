@@ -1,0 +1,215 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>ZpIndIndY - SNES CIC Bypass</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <style type="text/css">
+<!--
+-->
+  </style>
+ </head>
+ <body>
+  <header>
+   <h1><a href="./">[$AB], Y</a> - SNES CIC Bypass</h1>
+  </header>
+  <main>
+
+   <section>
+    <article>
+     <p>
+      FX-951を買っていろいろできるようになったので。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>カートリッジなし駆動</h2>
+    <article>
+     <h3>先行事例 - ファミコン</h3>
+     <p>
+      以前「RAM内で実行コードが完結していればカートリッジが挿さっていなくても動作する」という仮説から、
+      ファミコンにてROM領域やPPUアドレスバスのオープンバス挙動を調べるテストROMや、<a href="https://github.com/absindx/ResumeCartridge">Resume cartridge</a>（ステートロード）を作成しました。
+     </p>
+     <p>
+      ファミコンではうまく機能しましたが、NESは未所持のため確認できていません。<br>
+      おそらく、<a href="https://www.nesdev.org/wiki/CIC_lockout_chip" target="_blank">CIC</a>の状態不一致によりリセットが発生してしまうでしょう。
+     </p>
+     <p>
+      スーパーファミコンもまたCICが搭載されていますが、<a href="https://wiki.superfamicom.org/schematics-ports-and-pinouts#snes-schematic-491" target="_blank">回路図</a>を眺めるとCIC以外に接続確認をおこなっている信号がないため、ファミコンと同様にROM領域を実行さえしなければ動作可能に見えます。
+     </p>
+     <p class="small">
+      厳密にはROM領域も実行可能ですが、未接続のROM領域は<a href="https://wiki.superfamicom.org/open-bus" target="_blank">オープンバス</a>となり、65C816のMDRの値（<a href="https://www.westerndesigncenter.com/wdc/documentation/w65c816s.pdf" target="_blank">WDCのマニュアル P.36</a>や、<a href="http://www.brutaldeluxe.fr/documentation/cortland/v7%2065SC816%20opcodes%20Cycle%20by%20cycle%20listing.pdf" target="_blank">実際の観測値</a>が参考になります）が都度読み込まれるため、制御が難しい事実上暴走状態となります。
+     </p>
+     <p>
+      また、Super FXは <code class="inline">SCMR.RON = 1</code> の時にROMを占有するため、その間SNES CPUはRAMに退避してROMアクセスをおこなってはならない事例が当時からあったようです。
+     </p>
+    </article>
+    <article>
+     <h3>CICバイパス基板</h3>
+     <p>
+      SRAM未搭載のジャンクソフト適当に見繕い、ROMチップを取り外します。<br>
+      端子部上のレジストを剥がし場所を確保して、ケーブルをはんだ付けしていきます。<br>
+      今後別用途でも使えるようにブレッドボードへ引き出すためと、<span class="jokeDel">被覆を剥くのが面倒くさかったので</span>デュポンワイヤーにしました。
+     </p>
+     <img src="img_01.jpg" height="640" alt="CICバイパス基板">
+     <p>
+      この際、CIC関係のピンだけはドナーカートのものを使用するようにして、配線はおこなわないようにします。<br>
+      24, 25, 55, 56 の4つ。
+     </p>
+     <p>
+      ピンスロットコネクタを<span class="jokeDel">これまた雑に</span>ピンヘッダで間隔やピッチ変換をしてブレッドボードに接続できるようにしました。<br>
+      2.5mm→2.54mmピッチへの変換は結構無理矢理。
+     </p>
+     <p>
+      FXPAKからRAMにジャンプして画面更新をおこなうテストROMを起動し、FXPAKを引き抜きます。<br>
+      画面の暗転やCPUリセットは発生せず、画面描画が継続されました。
+     </p>
+     <p>
+      よって、CICさえ騙してしまえばファミコン同様に活線挿抜が可能であることがわかりました。<br>
+      <span class="jokeDel">こんな面倒なことしなくても本体側のCICを黙らせちゃえばいいんですけどね。</span>
+     </p>
+    </article>
+    <article>
+     <h3>FlashROM 置換</h3>
+     <p>
+      また適当なジャンクソフトを用意してROMチップを取り外してICソケットに交換します。<br>
+      あ、これHiROMじゃん…。
+     </p>
+     <p>
+      ソケットに挿すFlashROMを用意します。<br>
+      ファミコン用に確保していたFlashROMおよび<a href="https://bakutendo.net/blog-entry-417.html" target="_blank">変換基板</a>を使用しました。ありがとうございます。
+     </p>
+     <p>
+      とはいえスーパーファミコン用のkazzoなんてものはないので、元のFlashROMのDIP版ピン配置となるような変換基板を作成してROMライターで書きこむようにします。<br>
+      自作変換基板は<span class="small">繋ぎ間違えのせいで</span>配線量が多くて半日ほどかかりました。<br>
+      とはいえ書き込み装置自作は転送プログラム開発含めたらもっと時間かかるからね…
+     </p>
+     <img src="img_02.jpg" width="640" alt="ROM書き込み">
+     <p>
+      制御信号（マスクROMには <code class="inline">/WE</code> がなく、書き込み時には何とかする）の取り扱いが不適切で書き込んだ内容がカートリッジからうまく読みだせず、
+      しばらくデータシートと回路図を眺めたり、アドレスバスを手動で切り替えてデータ出力をLEDで読みだしたりしていました。<br>
+      抵抗付きLED初めて使ってみましたが便利ですね。
+     </p>
+     <p>
+      はんだごて経由でカッターの刃を温めてホットナイフにして、FlashROMが位置するカセット裏をくりぬきます。<br>
+      ケースを開けなくてもFlashROMが抜き差しできるようになり書き換え効率が
+     </p>
+     <img src="img_03.jpg" width="640" alt="カセットを挿しこむ">
+     <p>
+      …。<br>
+      次は低ピンソケットを使おう。
+     </p>
+     <p>
+      早速CICバイパス基板が<span class="jokeDel">本来の目的とは異なる形で</span>役に立ちました。<br>
+      ケースに入れなければ挿さるんですけどね。
+     </p>
+     <p>
+      適当なHiROMのテストROMを書き込んで、動作確認ができました。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>疑似ステートロード</h2>
+    <article>
+     <h3>「先人が思いついたけどあえてやらなかった」こと</h3>
+     <p>
+      ここまでたどり着いたらあとはメインメモリが許す限り文字通りなんでもありです。<br>
+      任意のメモリ状態に初期化して、カートリッジ交換後に任意のアドレスへジャンプすれば実機ステートロードの完成です。
+     </p>
+     <p>
+      ステートロード自体はFXPAKがもう実現しているし、カートリッジ側のSRAMや拡張RAM、コプロセッサの細かい状態調整までは容量的に厳しいので実用性は劣ります。
+     </p>
+    </article>
+    <article>
+     <h3>SMW Credits warp</h3>
+     <p>
+      手っ取り早く効力を示すためにスーパーマリオワールドのエンディングに直行してみましょう。<br>
+      リセットベクタからの起動シーケンスやゲームモードを雑に解析して、なるべく少ない手続きを構築します。
+     </p>
+     <p>
+      <ul>
+       <li>I/Oレジスタの初期化</li>
+       <li><code class="inline">$7F8000</code> OAM初期化コードの生成<span class="small">（Dレジスタを使うようにするとコード生成時も実行コード共にサイクル数もバイト数も削れるのに…）</span></li>
+       <li>サウンドドライバーの転送</li>
+       <li>メモリ初期化</li>
+       <li>サウンドデータの転送</li>
+       <li>ウィンドウHDMAの有効化</li>
+       <li>メインループ（ゲームモード処理へのテーブルジャンプ）</li>
+      </ul>
+     </p>
+     <p>
+      少し前にHello, Worldを表示するプログラムを作っていたので、雑に組み込みます。<br>
+      <a href="https://github.com/absindx/ZpIndIndY/tree/master/docs/Articles/SnesCicBypass/SmwCreditsWarpCartridge">組み込みました。</a>
+     </p>
+     <img src="img_04.gif" width="640" alt="SMW Credits warp 実行">
+     <p>
+      Full版は<a href="https://www.youtube.com/watch?v=a6CT64HMp-s" target="_blank">YouTube</a>まで。
+     </p>
+     <p>
+      英語版、日本語版両対応<span class="jokeDel">させたつもり</span>です。<span class="jokeDel">他バージョンは知らん。</span>
+     </p>
+     <p>
+      カートリッジ交換検出としてチェックサム一致を一定回数連続成功するチェックをしていますが、接続が不安定なためか半分くらい失敗します。<br>
+      <span class="small">要検討課題ですが実証自体は成功したのでたぶんやらない。</span>
+     </p>
+    </article>
+    <article>
+     <h3>さらなる高みへ</h3>
+     <p>
+      カットリッジには <code class="inline">/CART</code> 端子というものがありましてね？
+     </p>
+     <p>
+      ピンスロットコネクタがもったいないのでやめましょう。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>さいごに</h2>
+    <article>
+     <h3>Q. ○○に使えますか？</h3>
+     <p>
+      A. うるせえナンセンスなことすな。
+     </p>
+    </article>
+    <article>
+     <h3>諸注意</h3>
+     <p>
+      機器の改造・破壊は自己責任の下おこなってください。<br>
+      当記事によって発生したいかなるトラブル・損害に対して責任を負いかねます。
+     </p>
+    </article>
+   </section>
+
+<!-- Template
+   <section>
+    <h2></h2>
+    <article>
+     <h3></h3>
+     <p>
+      
+     </p>
+     <ul>
+      <li></li>
+     </ul>
+    </article>
+   </section>
+-->
+
+   <section>
+    <h2>更新履歴</h2>
+    <article>
+     <ul>
+      <li>2022/08/07 初版作成</li>
+     </ul>
+    </article>
+   </section>
+
+  <footer>
+   <p class="author"><a href="https://github.com/absindx">absindx</a></p>
+  </footer>
+ </body>
+</html>

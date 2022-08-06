@@ -99,6 +99,28 @@ dt{
 	float			: left;
 	clear			: left;
 	width			: 128px;
+	display			: list-item;
+	margin-left		: 24px;
+	width			: 192px;
+}
+dd:before{
+	content			: ": ";
+}
+
+header{
+	text-align		: center;
+}
+header a:link{
+	color			: #002C3C;
+	text-decoration		: none;
+}
+header a:hover{
+	opacity			: 0.75;
+	text-decoration		: underline;
+}
+
+.jokeDel{
+	text-decoration		: line-through;
 }
 
 
