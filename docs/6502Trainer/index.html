@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>6502 Trainer</title>
   <link rel="shortcut icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
   <script type="text/javascript">
 <!--
 	//--------------------------------------------------
@@ -210,6 +211,18 @@
 		return hex;
 	}
 
+	function StringMatchLength(a, b){
+		let matchLength	= 0;
+		let length	= Math.min(a.length, b.length);
+		for(let i = 0; i < length; i++){
+			if(a[i] !== b[i]){
+				break;
+			}
+			matchLength++;
+		}
+		return matchLength;
+	}
+
 	//--------------------------------------------------
 	// DOM Utility
 	//--------------------------------------------------
@@ -227,6 +240,12 @@
 		}
 	}
 
+	function DeleteAllTable(table){
+		while(table.rows.length > 0){
+			table.deleteRow(0);
+		}
+	}
+
 	function AddComboboxItem(combobox, text, value, maxSize){
 		let item	= document.createElement('option');
 		item.textContent= text;
@@ -235,6 +254,60 @@
 		if(maxSize && (combobox.size < maxSize)){
 			combobox.size++;
 		}
+	}
+
+	function SelectTableCell(table, cell){
+		const className	= 'selected';
+
+		const elements	= table.getElementsByClassName(className);
+		for(let i = 0; i < elements.length; i++){
+			elements[i].classList.remove(className);
+		}
+		cell.classList.add(className);
+	}
+	function SelectFirstCell(id){
+		const table	= document.getElementById(id);
+		SelectTableCell(table, table.rows[0].children[0]);
+	}
+	function GetSelectedTableCell(id){
+		const className	= 'selected';
+		const table	= document.getElementById(id);
+		const elements	= table.getElementsByClassName(className);
+		return elements[0];
+	}
+
+	function AddTableCell(table, text, value){
+		const maxColumns	= parseInt(table.getAttribute('_col'));
+		let insertColumn	= 0;
+
+		// find insert column position
+		for(let r = 0; r < table.rows.length; r++){
+			let column	= table.rows[r].children.length;
+			if(column < maxColumns){
+				insertColumn	= column;
+				break;
+			}
+		}
+		if(insertColumn <= 0){
+			table.insertRow();
+		}
+		let cell		= table.rows[table.rows.length - 1].insertCell();
+		cell.textContent	= text;
+		cell.setAttribute('_value', value);
+		cell.onclick		= function(event){
+			SelectTableCell(table, event.srcElement);
+		};
+	}
+
+	function AddMouseoverEvents(id){
+		const element	= document.getElementById(id);
+		element.onmouseenter	= function(e){ e.srcElement.classList.add('focus'); FocusMoved(id); };
+		element.onmouseleave	= function(e){ e.srcElement.classList.remove('focus'); };
+	}
+	function GetFocusElement(){
+		const className	= 'focus';
+		const elements	= document.getElementsByClassName(className);
+		return elements[0];
 	}
 
 	//--------------------------------------------------
@@ -250,6 +323,9 @@
 	let correctCount;
 
 	function Initialize(){
+		// Set event
+		document.addEventListener('keydown', SearchSelectCell);
+
 		// Clear value
 		nowQuestion	= null;
 		questionCount	= 0;
@@ -318,53 +394,89 @@
 		// Create answers form
 		// OpCode
 		{
-			const elemAnswerOpInst	= document.getElementById('AnswerOpCode_OpCode');
-			const elemAnswerOpAddr	= document.getElementById('AnswerOpCode_Addressing');
-
-			DeleteAllChildren(elemAnswerOpInst);
-			DeleteAllChildren(elemAnswerOpAddr);
-			elemAnswerOpInst.size	= 0;
-			elemAnswerOpAddr.size	= 0;
-
 			let instList	= [];
 			useOpCode.map(function(op){
 				instList.push(op.InstructionName);
 			});
 			instList	= ToUniqueItemArray(instList);
 			SortArray(instList);
-			instList.filter(function(inst){
-				AddComboboxItem(elemAnswerOpInst, inst, inst, addressingName.length);
-			});
 
-			addressingName.filter(function(addr, index){
-				AddComboboxItem(elemAnswerOpAddr, addr, index, addressingName.length);
-			});
+			{	// old
+				const elemAnswerOpInst	= document.getElementById('AnswerOpCode_OpCode');
+				const elemAnswerOpAddr	= document.getElementById('AnswerOpCode_Addressing');
+
+				DeleteAllChildren(elemAnswerOpInst);
+				DeleteAllChildren(elemAnswerOpAddr);
+				elemAnswerOpInst.size	= 0;
+				elemAnswerOpAddr.size	= 0;
+
+				instList.filter(function(inst){
+					AddComboboxItem(elemAnswerOpInst, inst, inst, addressingName.length);
+				});
+				addressingName.filter(function(addr, index){
+					AddComboboxItem(elemAnswerOpAddr, addr, index, addressingName.length);
+				});
+			}
+			{	// new
+				const elemAnswerOpInst	= document.getElementById('AnswerOpCodeNew_OpCode');
+				const elemAnswerOpAddr	= document.getElementById('AnswerOpCodeNew_Addressing');
+
+				DeleteAllTable(elemAnswerOpInst);
+				DeleteAllTable(elemAnswerOpAddr);
+
+				instList.filter(function(inst, index){
+					AddTableCell(elemAnswerOpInst, inst, inst);
+				});
+				addressingName.filter(function(addr, index){
+					AddTableCell(elemAnswerOpAddr, addr, index);
+				});
+
+				SelectFirstCell('AnswerOpCodeNew_OpCode');
+				SelectFirstCell('AnswerOpCodeNew_Addressing');
+
+				AddMouseoverEvents('AnswerOpCodeNew_OpCode');
+				AddMouseoverEvents('AnswerOpCodeNew_Addressing');
+			}
 		}
 
 		// Binary
 		{
-			const elemAnswerBinHigh	= document.getElementById('AnswerBinary_High');
-			const elemAnswerBinLow	= document.getElementById('AnswerBinary_Low');
+			{	// old
+				const elemAnswerBinHigh	= document.getElementById('AnswerBinary_High');
+				const elemAnswerBinLow	= document.getElementById('AnswerBinary_Low');
 
-			DeleteAllChildren(elemAnswerBinHigh);
-			DeleteAllChildren(elemAnswerBinLow);
-			elemAnswerBinHigh.size	= 0;
-			elemAnswerBinLow.size	= 0;
+				DeleteAllChildren(elemAnswerBinHigh);
+				DeleteAllChildren(elemAnswerBinLow);
+				elemAnswerBinHigh.size	= 0;
+				elemAnswerBinLow.size	= 0;
 
-			hexCharacter.filter(function(ch, index){
-				AddComboboxItem(elemAnswerBinHigh, ch, index, 16);
-				AddComboboxItem(elemAnswerBinLow, ch, index, 16);
-			});
+				hexCharacter.filter(function(ch, index){
+					AddComboboxItem(elemAnswerBinHigh, ch, index, 16);
+					AddComboboxItem(elemAnswerBinLow, ch, index, 16);
+				});
+			}
+			{	// new
+				const elemAnswerBinHigh	= document.getElementById('AnswerBinaryNew_High');
+				const elemAnswerBinLow	= document.getElementById('AnswerBinaryNew_Low');
+
+				DeleteAllTable(elemAnswerBinHigh);
+				DeleteAllTable(elemAnswerBinLow);
+
+				hexCharacter.filter(function(ch, index){
+					AddTableCell(elemAnswerBinHigh, ch, index);
+					AddTableCell(elemAnswerBinLow, ch, index);
+				});
+
+				SelectFirstCell('AnswerBinaryNew_High');
+				SelectFirstCell('AnswerBinaryNew_Low');
+
+				AddMouseoverEvents('AnswerBinaryNew_High');
+				AddMouseoverEvents('AnswerBinaryNew_Low');
+			}
 		}
 
 		// Cycle
 		{
-			const elemAnswerCycle	= document.getElementById('AnswerCycle_Cycle');
-
-			DeleteAllChildren(elemAnswerCycle);
-
-			elemAnswerCycle.size	= 0;
-
 			let cycleList	= [];
 			useOpCode.map(function(op){
 				cycleList.push(op.Cycle);
@@ -372,29 +484,56 @@
 			cycleList	= ToUniqueItemArray(cycleList);
 			SortArray(cycleList);
 
-			cycleList.filter(function(cycle){
-				AddComboboxItem(elemAnswerCycle, cycle, cycle, 16);
-			});
+			{	// old
+				const elemAnswerCycle	= document.getElementById('AnswerCycle_Cycle');
+
+				DeleteAllChildren(elemAnswerCycle);
+				elemAnswerCycle.size	= 0;
+
+				cycleList.filter(function(cycle){
+					AddComboboxItem(elemAnswerCycle, cycle, cycle, 16);
+				});
+			}
+			{	// new
+				const elemAnswerCycle	= document.getElementById('AnswerCycleNew_Cycle');
+
+				DeleteAllTable(elemAnswerCycle);
+
+				cycleList.filter(function(cycle){
+					AddTableCell(elemAnswerCycle, cycle, cycle);
+				});
+
+				SelectFirstCell('AnswerCycleNew_Cycle');
+
+				AddMouseoverEvents('AnswerCycleNew_Cycle');
+			}
 		}
 
 		// Hide unused answer forms
-		const formAnswerOpCode	= document.getElementById('AnswerOpCode');
-		const formAnswerBinary	= document.getElementById('AnswerBinary');
-		const formAnswerCycle	= document.getElementById('AnswerCycle');
-		formAnswerOpCode.style.display	= 'none';
-		formAnswerBinary.style.display	= 'none';
-		formAnswerCycle.style.display	= 'none';
+		const formAnswerOpCode			= document.getElementById('AnswerOpCode');
+		const formAnswerOpCodeNew		= document.getElementById('AnswerOpCodeNew');
+		const formAnswerBinary			= document.getElementById('AnswerBinary');
+		const formAnswerBinaryNew		= document.getElementById('AnswerBinaryNew');
+		const formAnswerCycle			= document.getElementById('AnswerCycle');
+		const formAnswerCycleNew		= document.getElementById('AnswerCycleNew');
+		formAnswerOpCode.style.display		= 'none';
+		formAnswerOpCodeNew.style.display	= 'none';
+		formAnswerBinary.style.display		= 'none';
+		formAnswerBinaryNew.style.display	= 'none';
+		formAnswerCycle.style.display		= 'none';
+		formAnswerCycleNew.style.display	= 'none';
+		const displaySetting			= 'block';
 
 		switch(modeSetting.Mode){
 			case trainingMode.OpToHex:
-				formAnswerBinary.style.display	= 'block';
+				((modeSetting.NewInterface)? formAnswerBinaryNew : formAnswerBinary ).style.display	= displaySetting;
 				break;
 			case trainingMode.HexToOp:
-				formAnswerOpCode.style.display	= 'block';
+				((modeSetting.NewInterface)? formAnswerOpCodeNew : formAnswerOpCode ).style.display	= displaySetting;
 				break;
 			case trainingMode.OpToCycle:
 			case trainingMode.HexToCycle:
-				formAnswerCycle.style.display	= 'block';
+				((modeSetting.NewInterface)? formAnswerCycleNew  : formAnswerCycle  ).style.display	= displaySetting;
 				break;
 		}
 
@@ -539,12 +678,27 @@
 			return null;
 		}
 
+		mode.NewInterface	= document.forms['ModeSelectForm'].newinterface.checked;
+
 		return mode;
 	}
 
 	function GetAnswerOpCode(){
-		let inst	= document.forms['AnswerForm'].AnswerOpCode_OpCode.value.toUpperCase();
-		let addr	= parseInt(document.forms['AnswerForm'].AnswerOpCode_Addressing.value);
+		let inst;
+		let addr;
+		if(!modeSetting.NewInterface){
+			// old
+			inst	= document.forms['AnswerForm'].AnswerOpCode_OpCode.value.toUpperCase();
+			addr	= parseInt(document.forms['AnswerForm'].AnswerOpCode_Addressing.value);
+		}
+		else{
+			// new
+			const selectedOpCode		= GetSelectedTableCell('AnswerOpCodeNew_OpCode');
+			const selectedAddressing	= GetSelectedTableCell('AnswerOpCodeNew_Addressing');
+
+			inst	= selectedOpCode.textContent.toUpperCase();
+			addr	= parseInt(selectedAddressing.getAttribute('_value'));
+		}
 		if(isNaN(addr)){
 			return null;
 		}
@@ -559,8 +713,22 @@
 		};
 	}
 	function GetAnswerBinary(){
-		let high	= parseInt(document.forms['AnswerForm'].AnswerBinary_High.value, 10);
-		let low		= parseInt(document.forms['AnswerForm'].AnswerBinary_Low.value, 10);
+		let high;
+		let low;
+
+		if(!modeSetting.NewInterface){
+			// old
+			high	= parseInt(document.forms['AnswerForm'].AnswerBinary_High.value, 10);
+			low	= parseInt(document.forms['AnswerForm'].AnswerBinary_Low.value, 10);
+		}
+		else{
+			// new
+			const selectedHigh		= GetSelectedTableCell('AnswerBinaryNew_High');
+			const selectedLow		= GetSelectedTableCell('AnswerBinaryNew_Low');
+			high	= parseInt(selectedHigh.getAttribute('_value'));
+			low	= parseInt(selectedLow.getAttribute('_value'));
+		}
+
 		if(isNaN(high) || isNaN(low)){
 			return -1;
 		}
@@ -569,7 +737,16 @@
 		}
 	}
 	function GetAnswerCycle(){
-		let cycle	= parseInt(document.forms['AnswerForm'].AnswerCycle_Cycle.value, 10);
+		let cycle;
+		if(!modeSetting.NewInterface){
+			// old
+			cycle	= parseInt(document.forms['AnswerForm'].AnswerCycle_Cycle.value, 10);
+		}
+		else{
+			// new
+			const selectedCycle		= GetSelectedTableCell('AnswerCycleNew_Cycle');
+			cycle	= parseInt(selectedCycle.getAttribute('_value'));
+		}
 		if(isNaN(cycle)){
 			return -1;
 		}
@@ -611,6 +788,65 @@
 		}
 	}
 
+	let lastFocusedId	= null;
+	let searchString	= '';
+	function FocusMoved(id){
+		if(id !== lastFocusedId){
+			searchString	= '';
+		}
+		lastFocusedId	= id;
+	}
+
+	function SearchSelectCell(event){
+		// check focus
+		const selectedElement	= GetFocusElement();
+		if(!selectedElement){
+			return;
+		}
+
+		// clear search
+		const keyName	= event.key;
+		if(keyName.toLowerCase() === 'escape'){
+			searchString	= '';
+			return;
+		}
+		else if(keyName.length > 1){
+			return;
+		}
+
+		// pushback search string
+		if(selectedElement.getAttribute('_match') === 'true'){
+			// string match
+			searchString	+= event.key.toUpperCase();
+		}
+		else{
+			// initial match
+			searchString	= event.key.toUpperCase();
+		}
+
+		// search element
+		let updateElement	= null;
+		let maxMatchLength	= 0;
+		let cells		= selectedElement.getElementsByTagName('td');
+		for(let i = 0; i < cells.length; i++){
+			let matchLength	= StringMatchLength(cells[i].textContent.toUpperCase(), searchString);
+			if(maxMatchLength < matchLength){
+				updateElement	= cells[i];
+				maxMatchLength	= matchLength;
+			}
+		}
+
+		// update select
+		const className	= 'selected';
+		if(updateElement){
+			const selectedElements	= selectedElement.getElementsByClassName(className);
+			for(let i = 0; i < selectedElements.length; i++){
+				selectedElements[i].classList.remove(className);
+			}
+			updateElement.classList.add(className);
+		}
+	}
+
 // -->
   </script>
   <style type="text/css">
@@ -638,12 +874,54 @@
 
 	.AnswerInput{
 		text-align	: center;
+		user-select	: none;
 	}
 	.AnswerInput select{
 		font-size	: 100%;
 	}
 	#AnswerForm select option{
 		padding		: 0px 32px;
+	}
+
+	.AnswerInputContainer .AnswerInput{
+		margin		: auto;
+		display		: flex;
+		flex-wrap	: wrap;
+		justify-content	: center;
+	}
+	.AnswerInputContainer table{
+		flex		: 1;
+	}
+
+	#AnswerForm table{
+		margin		: 2px 16px;
+		border		: solid 1px rgba(0, 0, 0, 0.250);
+		border-spacing	: 2px;
+	}
+	#AnswerForm td{
+		border		: solid 1px rgba(0, 0, 0, 0.125);
+		padding		: 4px;
+	}
+	#AnswerForm td:hover{
+		background	: rgba(0, 174, 239, 0.125);
+	}
+	#AnswerForm td.selected{
+		background	: rgba(0, 174, 239, 0.500);
+	}
+	#AnswerForm .focus{
+		border		: solid 1px rgba(0, 0, 0, 0.500);
+	}
+
+	#AnswerBinaryNew table{
+		width		: 40%;
+		max-width	: 160px;
+	}
+	#AnswerCycleNew table{
+		width		: 80%;
+		max-width	: 160px;
+	}
+	#AnswerOpCodeNew_Addressing{
+		text-align	: left;
 	}
 
 	#QuestionText{
@@ -701,6 +979,7 @@
     <form id="AnswerForm" autocomplete="off">
      <fieldset>
       <legend>Answer</legend>
+
       <fieldset id="AnswerOpCode">
        <legend>OpCode</legend>
        <p class="AnswerInput">
@@ -708,6 +987,16 @@
         <select id="AnswerOpCode_Addressing"></select>
        </p>
       </fieldset>
+      <fieldset id="AnswerOpCodeNew">
+       <legend>OpCode</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerOpCodeNew_OpCode"     _col="5" _match="true"></table>
+         <table id="AnswerOpCodeNew_Addressing" _col="1" _match="true"></table>
+        </div>
+       </div>
+      </fieldset>
+
       <fieldset id="AnswerBinary">
        <legend>Binary</legend>
        <p class="AnswerInput">
@@ -715,12 +1004,31 @@
         <select id="AnswerBinary_Low"></select>
        </p>
       </fieldset>
+      <fieldset id="AnswerBinaryNew">
+       <legend>Binary</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerBinaryNew_High" _col="1" _match="false"></table>
+         <table id="AnswerBinaryNew_Low"  _col="1" _match="false"></table>
+        </div>
+       </div>
+      </fieldset>
+
       <fieldset id="AnswerCycle">
        <legend>Cycle</legend>
        <p class="AnswerInput">
         <select id="AnswerCycle_Cycle"></select>
        </p>
       </fieldset>
+      <fieldset id="AnswerCycleNew">
+       <legend>Cycle</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerCycleNew_Cycle" _col="1" _match="false"></table>
+        </div>
+       </div>
+      </fieldset>
+
       <input id="Confirm" type="button" value="Answer" onclick="ConfirmQuestion();"></input>
      </fieldset>
     </form>
@@ -754,6 +1062,9 @@
         > <label  ><input type="radio" name="inst" value="Unofficial"		>Unofficial</input></label
         > <label  ><input type="radio" name="inst" value="All"			>All (Official + Unofficial)</input></label
         >
+       </dd>
+       <dt>Interface</dt><dd>
+        <label><input type="checkbox" name="newinterface" checked		>New interface</input></label>
        </dd>
       <input id="ApplyMode" type="button" value="Apply" onclick="Initialize();"></input>
      </fieldset>
