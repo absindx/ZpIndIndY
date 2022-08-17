@@ -1,0 +1,1139 @@
+﻿<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <title>65816 Trainer</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, user-scalable=yes">
+  <script type="text/javascript">
+<!--
+	//--------------------------------------------------
+	// 65816 instruction data
+	//--------------------------------------------------
+
+	const addressing		= {
+		Imp	: 0,
+		Acc	: 1,
+		Stk	: 2,
+		Imm	: 3,
+		Dpg	: 4,
+		DpX	: 5,
+		DpY	: 6,
+		DpI	: 7,
+		DIX	: 8,
+		DIY	: 9,
+		DIL	: 10,
+		ILY	: 11,
+		Abs	: 12,
+		AbX	: 13,
+		AbY	: 14,
+		AbI	: 15,
+		AIX	: 16,
+		AIL	: 17,
+		Lng	: 18,
+		LnX	: 19,
+		Rel	: 20,
+		ReL	: 21,
+		SrS	: 22,
+		SrY	: 23,
+		Xyc	: 24,
+	};
+	const a				= addressing;
+	const addressingName		= [
+		'Implied',
+		'Accumulator',
+		'Stack',
+		'Immediate',
+		'Direct page',
+		'Direct page Indexed, X',
+		'Direct page Indexed, Y',
+		'Direct page Indirect',
+		'Direct page Indexed Indirect, X',
+		'Direct page Indirect Indexed, Y',
+		'Direct page Indirect Long',
+		'Direct page Indirect Long Indexed, Y',
+		'Absolute',
+		'Absolute Indexed, X',
+		'Absolute Indexed, Y',
+		'Absolute Indirect',
+		'Absolute Indexed Indirect',
+		'Absolute Indirect Long',
+		'Absolute Long',
+		'Absolute Long Indexed, X',
+		'Relative',
+		'Relative Long',
+		'Stack Relative',
+		'Stack Relative Indirect Indexed, Y',
+		'Block Move',
+	];
+	const addressingShortName	= [
+		'impl',
+		'A',
+		'S',
+		'#imm',
+		'dp',
+		'dp, X',
+		'dp, Y',
+		'(dp)',
+		'(dp, X)',
+		'(dp), Y',
+		'[dp]',
+		'[dp], Y',
+		'abs',
+		'abs, X',
+		'abs, Y',
+		'(abs)',
+		'(abs, X)',
+		'[abs]',
+		'long',
+		'long, X',
+		'rel',
+		'rlong',
+		'sr, S',
+		'(sr, S), Y',
+		'xyc',
+	];
+	const instructionName		= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		'BRK','ORA','COP','ORA','TSB','ORA','ASL','ORA','PHP','ORA','ASL','PHD','TSB','ORA','ASL','ORA',	// 00
+		'BPL','ORA','ORA','ORA','TRB','ORA','ASL','ORA','CLC','ORA','INC','TCS','TRB','ORA','ASL','ORA',	// 10
+		'JSR','AND','JSL','AND','BIT','AND','ROL','AND','PLP','AND','ROL','PLD','BIT','AND','ROL','AND',	// 20
+		'BMI','AND','AND','AND','BIT','AND','ROL','AND','SEC','AND','DEC','TSC','BIT','AND','ROL','AND',	// 30
+		'RTI','EOR','WDM','EOR','MVP','EOR','LSR','EOR','PHA','EOR','LSR','PHK','JMP','EOR','LSR','EOR',	// 40
+		'BVC','EOR','EOR','EOR','MVN','EOR','LSR','EOR','CLI','EOR','PHY','TCD','JML','EOR','LSR','EOR',	// 50
+		'RTS','ADC','PER','ADC','STZ','ADC','ROR','ADC','PLA','ADC','ROR','RTL','JMP','ADC','ROR','ADC',	// 60
+		'BVS','ADC','ADC','ADC','STZ','ADC','ROR','ADC','SEI','ADC','PLY','TDC','JMP','ADC','ROR','ADC',	// 70
+		'BRA','STA','BRL','STA','STY','STA','STX','STA','DEY','BIT','TXA','PHB','STY','STA','STX','STA',	// 80
+		'BCC','STA','STA','STA','STY','STA','STX','STA','TYA','STA','TXS','TXY','STZ','STA','STZ','STA',	// 90
+		'LDY','LDA','LDX','LDA','LDY','LDA','LDX','LDA','TAY','LDA','TAX','PLB','LDY','LDA','LDX','LDA',	// A0
+		'BCS','LDA','LDA','LDY','LDA','LDY','LDX','LDA','CLV','LDA','TSX','TYX','LDY','LDA','LDX','LDA',	// B0
+		'CPY','CMP','REP','CMP','CPY','CMP','DEC','CMP','INY','CMP','DEX','WAI','CPY','CMP','DEC','CMP',	// C0
+		'BNE','CMP','CMP','CMP','PEI','CMP','DEC','CMP','CLD','CMP','PHX','STP','JML','CMP','DEC','CMP',	// D0
+		'CPX','SBC','SEP','SBC','CPX','SBC','INC','SBC','INX','SBC','NOP','XBA','CPX','SBC','INC','SBC',	// E0
+		'BEQ','SBC','SBC','SBC','PEA','SBC','INC','SBC','SED','SBC','PLX','XCE','JSR','SBC','INC','SBC',	// F0
+	];
+	const instructionAddressing	= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		a.Stk,a.DIX,a.Stk,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Stk,a.Imm,a.Acc,a.Stk,a.Abs,a.Abs,a.Abs,a.Lng,	// 00
+		a.Rel,a.DIY,a.DpI,a.SrY,a.Dpg,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Acc,a.Imp,a.Abs,a.AbX,a.AbX,a.LnX,	// 10
+		a.Abs,a.DIX,a.Lng,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Stk,a.Imm,a.Acc,a.Stk,a.Abs,a.Abs,a.Abs,a.Lng,	// 20
+		a.Rel,a.DIY,a.DpI,a.SrY,a.DpX,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Acc,a.Imp,a.AbX,a.AbX,a.AbX,a.LnX,	// 30
+		a.Stk,a.DIX,a.Imm,a.SrS,a.Xyc,a.Dpg,a.Dpg,a.DIL,a.Stk,a.Imm,a.Acc,a.Stk,a.Abs,a.Abs,a.Abs,a.Lng,	// 40
+		a.Rel,a.DIY,a.DpI,a.SrY,a.Xyc,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Stk,a.Imp,a.Lng,a.AbX,a.AbX,a.LnX,	// 50
+		a.Stk,a.DIX,a.ReL,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Stk,a.Imm,a.Acc,a.Stk,a.AbI,a.Abs,a.Abs,a.Lng,	// 60
+		a.Rel,a.DIY,a.DpI,a.SrY,a.DpX,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Stk,a.Imp,a.AIX,a.AbX,a.AbX,a.LnX,	// 70
+		a.Rel,a.DIX,a.ReL,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Imp,a.Imm,a.Imp,a.Stk,a.Abs,a.Abs,a.Abs,a.Lng,	// 80
+		a.Rel,a.DIY,a.DpI,a.SrY,a.DpX,a.DpX,a.DpY,a.ILY,a.Imp,a.AbY,a.Imp,a.Imp,a.Abs,a.AbX,a.AbX,a.LnX,	// 90
+		a.Imm,a.DIX,a.Imm,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Imp,a.Imm,a.Imp,a.Stk,a.Abs,a.Abs,a.Abs,a.Lng,	// A0
+		a.Rel,a.DIY,a.DpI,a.SrY,a.DpX,a.DpX,a.DpY,a.ILY,a.Imp,a.AbY,a.Imp,a.Imp,a.AbX,a.AbX,a.AbY,a.LnX,	// B0
+		a.Imm,a.DIX,a.Imm,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Imp,a.Imm,a.Imp,a.Imp,a.Abs,a.Abs,a.Abs,a.Lng,	// C0
+		a.Rel,a.DIY,a.DpI,a.SrY,a.Stk,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Stk,a.Imp,a.AIL,a.AbX,a.AbX,a.LnX,	// D0
+		a.Imm,a.DIX,a.Imm,a.SrS,a.Dpg,a.Dpg,a.Dpg,a.DIL,a.Imp,a.Imm,a.Imp,a.Imp,a.Abs,a.Abs,a.Abs,a.Lng,	// E0
+		a.Rel,a.DIY,a.DpI,a.SrY,a.Stk,a.DpX,a.DpX,a.ILY,a.Imp,a.AbY,a.Stk,a.Imp,a.AIX,a.AbX,a.AbX,a.LnX,	// F0
+	];
+	const instructionCycle		= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		7,    6,    7,    4,    5,    3,    5,    6,    3,    2,    2,    4,    6,    4,    6,    5,		// 00
+		2,    5,    5,    7,    5,    4,    6,    6,    2,    4,    2,    2,    6,    4,    7,    5,		// 10
+		6,    6,    8,    4,    3,    3,    5,    6,    4,    2,    2,    5,    4,    4,    6,    5,		// 20
+		2,    5,    5,    7,    4,    4,    6,    6,    2,    4,    2,    2,    4,    4,    7,    5,		// 30
+		6,    6,    2,    4,    7,    3,    5,    6,    3,    2,    2,    3,    3,    4,    6,    5,		// 40
+		2,    5,    5,    7,    7,    4,    6,    6,    2,    4,    3,    2,    4,    4,    7,    5,		// 50
+		6,    6,    6,    4,    3,    3,    5,    6,    4,    2,    2,    6,    5,    4,    6,    5,		// 60
+		2,    5,    5,    7,    4,    4,    6,    6,    2,    4,    4,    2,    6,    4,    7,    5,		// 70
+		3,    6,    4,    4,    3,    3,    3,    6,    2,    2,    2,    3,    4,    4,    4,    5,		// 80
+		2,    6,    5,    7,    4,    4,    4,    6,    2,    5,    2,    2,    4,    5,    5,    5,		// 90
+		2,    6,    2,    4,    3,    3,    3,    6,    2,    2,    2,    4,    4,    4,    4,    5,		// A0
+		2,    5,    5,    7,    4,    4,    4,    6,    2,    4,    2,    2,    4,    4,    4,    5,		// B0
+		2,    6,    3,    4,    3,    3,    5,    6,    2,    2,    2,    3,    4,    4,    6,    5,		// C0
+		2,    5,    5,    7,    6,    4,    6,    6,    2,    4,    3,    3,    6,    4,    7,    5,		// D0
+		2,    6,    3,    4,    3,    3,    5,    6,    2,    2,    2,    3,    4,    4,    6,    5,		// E0
+		2,    5,    5,    7,    5,    4,    6,    6,    2,    4,    4,    2,    8,    4,    7,    5,		// F0
+	];
+	const instructionUnofficial	= [
+	//      00    01    02    03    04    05    06    07    08    09    0A    0B    0C    0D    0E    0F
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 00
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 10
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 20
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 30
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 40
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 50
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 60
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 70
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 80
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// 90
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// A0
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// B0
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// C0
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// D0
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// E0
+		false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,	// F0
+	];
+
+	const hexCharacter	= [
+		'0','1','2','3','4','5','6','7',
+		'8','9','A','B','C','D','E','F',
+	];
+
+	//--------------------------------------------------
+	// 65816 Trainer used data
+	//--------------------------------------------------
+
+	const trainingMode		= {
+		OpToHex		: 0,
+		HexToOp		: 1,
+		OpToCycle	: 2,
+		HexToCycle	: 3,
+	};
+	const trainingModeName		= [
+		'OpToHex',
+		'HexToOp',
+		'OpToCycle',
+		'HexToCycle',
+	];
+	const instructionMode		= {
+		Official	: 0,
+		Unofficial	: 1,
+		All		: 2,
+	};
+	const instructionModeName	= [
+		'Official',
+		'Unofficial',
+		'All',
+	];
+
+	//--------------------------------------------------
+	// Utility
+	//--------------------------------------------------
+
+	function SortArray(a){
+		a.sort(function(a, b){
+			if(a < b){
+				return -1;
+			}
+			else if(a > b){
+				return 1;
+			}
+			else{
+				return 0;
+			}
+		});
+	}
+
+	function ToUniqueItemArray(a){
+		return a.filter(function(x, i, self){
+			return self.indexOf(x) === i;
+		});
+	}
+
+	function GetIntegerRandom(min, max){
+		if(max < min){
+			const tmp	= min;
+			min		= max;
+			max		= min;
+		}
+		const range	= max - min;
+		return min + Math.floor(Math.random() * range);
+	}
+
+	function ToHexString(value, digit){
+		let hex	= value.toString(16).toUpperCase();
+		if(digit){
+			digit	= digit - hex.length;
+			if(digit > 0){
+				hex	= '0'.repeat(digit) + hex;
+			}
+		}
+		return hex;
+	}
+
+	function StringMatchLength(a, b){
+		let matchLength	= 0;
+		let length	= Math.min(a.length, b.length);
+		for(let i = 0; i < length; i++){
+			if(a[i] !== b[i]){
+				break;
+			}
+			matchLength++;
+		}
+		return matchLength;
+	}
+
+	//--------------------------------------------------
+	// DOM Utility
+	//--------------------------------------------------
+
+	function DeleteAllChildren(element){
+		if(!element || !element.lastChild){
+			return;
+		}
+		try{
+			while(element.lastChild){
+				element.removeChild(element.lastChild);
+			}
+		}
+		catch(e){
+		}
+	}
+
+	function DeleteAllTable(table){
+		while(table.rows.length > 0){
+			table.deleteRow(0);
+		}
+	}
+
+	function AddComboboxItem(combobox, text, value, maxSize){
+		let item	= document.createElement('option');
+		item.textContent= text;
+		item.value	= value;
+		combobox.appendChild(item);
+		if(maxSize && (combobox.size < maxSize)){
+			combobox.size++;
+		}
+	}
+
+	function SelectTableCell(table, cell){
+		const className	= 'selected';
+
+		let tableCell	= null;
+		while(cell.parentElement){
+			if(cell.tagName.toUpperCase() === 'TD'){
+				tableCell	= cell;
+				break;
+			}
+			cell	= cell.parentElement;
+		}
+
+		const elements	= table.getElementsByClassName(className);
+		for(let i = 0; i < elements.length; i++){
+			elements[i].classList.remove(className);
+		}
+		tableCell.classList.add(className);
+	}
+	function SelectFirstCell(id){
+		const table	= document.getElementById(id);
+		SelectTableCell(table, table.rows[0].children[0]);
+	}
+	function GetSelectedTableCell(id){
+		const className	= 'selected';
+		const table	= document.getElementById(id);
+		const elements	= table.getElementsByClassName(className);
+		return elements[0];
+	}
+
+	function AddTableCell(table, text, value){
+		const maxColumns	= parseInt(table.getAttribute('_col'));
+		let insertColumn	= 0;
+
+		// find insert column position
+		for(let r = 0; r < table.rows.length; r++){
+			let column	= table.rows[r].children.length;
+			if(column < maxColumns){
+				insertColumn	= column;
+				break;
+			}
+		}
+		if(insertColumn <= 0){
+			table.insertRow();
+		}
+		let cell		= table.rows[table.rows.length - 1].insertCell();
+		cell.innerHTML		= text;
+		cell.setAttribute('_value', value);
+		cell.onclick		= function(event){
+			SelectTableCell(table, event.srcElement);
+		};
+	}
+
+	function AddMouseoverEvents(id){
+		const element	= document.getElementById(id);
+		element.onmouseenter	= function(e){ e.srcElement.classList.add('focus'); FocusMoved(id); };
+		element.onmouseleave	= function(e){ e.srcElement.classList.remove('focus'); };
+	}
+	function GetFocusElement(){
+		const className	= 'focus';
+		const elements	= document.getElementsByClassName(className);
+		return elements[0];
+	}
+
+	//--------------------------------------------------
+	// Processing code
+	//--------------------------------------------------
+
+	let useOpCode;
+	let allOpCode;
+	let modeSetting;
+
+	let nowQuestion;
+	let questionCount;
+	let correctCount;
+
+	function Initialize(){
+		// Set event
+		document.addEventListener('keydown', SearchSelectCell);
+
+		// Clear value
+		nowQuestion	= null;
+		questionCount	= 0;
+		correctCount	= 0;
+		UpdateCorrect();
+
+		// Get mode
+		modeSetting	= GetModeSetting();
+
+		// Answer visibility
+		const elemHideModeSelect	= [
+			document.getElementById('Question'),
+			document.getElementById('Answer'),
+			document.getElementById('Correct'),
+			document.getElementById('Statistics'),
+		];
+
+		const hideModeSelectStyle	= (modeSetting)? 'block' : 'none';
+		elemHideModeSelect.filter(function(elem){
+			elem.style.display		= hideModeSelectStyle;
+		});
+
+		// check Mode
+		if(!modeSetting){
+			return;
+		}
+
+		// Create questions candidate
+		allOpCode	= [];
+		useOpCode	= [];
+		instructionName.map(function(instName, index){
+			const addr	= instructionAddressing[index];
+			const addrName	= addressingName[instructionAddressing[index]];
+			const addrShort	= addressingShortName[instructionAddressing[index]];
+			const op	= {
+				OpCode			: index,
+				OpCodeString		: ToHexString(index, 2),
+				InstructionName		: instName,
+				Addressing		: addr,
+				AddressingName		: addrName,
+				AddressingShortName	: addrShort,
+				ShortFormatted		: (addr !== addressing.Imp)? instName + ' ' + addrShort : instName,
+				Cycle			: instructionCycle[index],
+			};
+
+			allOpCode.push(op);
+
+			const isOfficial	= !instructionUnofficial[index];
+			let isPush		= false;
+			switch(modeSetting.Instruction){
+				case instructionMode.Official:
+					isPush	= isOfficial;
+					break;
+				case instructionMode.Unofficial:
+					isPush	= !isOfficial;
+					break;
+				case instructionMode.All:
+					isPush	= true;
+					break;
+			}
+			if(isPush){
+				useOpCode.push(op);
+			}
+		});
+
+		// Create answers form
+		// OpCode
+		{
+			let instList	= [];
+			useOpCode.map(function(op){
+				instList.push(op.InstructionName);
+			});
+			instList	= ToUniqueItemArray(instList);
+			SortArray(instList);
+
+			{	// old
+				const elemAnswerOpInst	= document.getElementById('AnswerOpCode_OpCode');
+				const elemAnswerOpAddr	= document.getElementById('AnswerOpCode_Addressing');
+
+				DeleteAllChildren(elemAnswerOpInst);
+				DeleteAllChildren(elemAnswerOpAddr);
+				elemAnswerOpInst.size	= 0;
+				elemAnswerOpAddr.size	= 0;
+
+				instList.filter(function(inst){
+					AddComboboxItem(elemAnswerOpInst, inst, inst, addressingName.length);
+				});
+				addressingName.filter(function(addr, index){
+					AddComboboxItem(elemAnswerOpAddr, addr, index, addressingName.length);
+				});
+			}
+			{	// new
+				const elemAnswerOpInst	= document.getElementById('AnswerOpCodeNew_OpCode');
+				const elemAnswerOpAddr	= document.getElementById('AnswerOpCodeNew_Addressing');
+
+				DeleteAllTable(elemAnswerOpInst);
+				DeleteAllTable(elemAnswerOpAddr);
+
+				instList.filter(function(inst, index){
+					AddTableCell(elemAnswerOpInst, inst, inst);
+				});
+				addressingName.filter(function(addr, index){
+					let addrName	= addr;
+					if(modeSetting.ShowShortAddressingName){
+						addrName	= '<dt>' + addr + '</dt><dd><span class="Comment">; ' + addressingShortName[index] + '</span></dd>';
+					}
+					AddTableCell(elemAnswerOpAddr, addrName, index);
+				});
+
+				SelectFirstCell('AnswerOpCodeNew_OpCode');
+				SelectFirstCell('AnswerOpCodeNew_Addressing');
+
+				AddMouseoverEvents('AnswerOpCodeNew_OpCode');
+				AddMouseoverEvents('AnswerOpCodeNew_Addressing');
+			}
+		}
+
+		// Binary
+		{
+			{	// old
+				const elemAnswerBinHigh	= document.getElementById('AnswerBinary_High');
+				const elemAnswerBinLow	= document.getElementById('AnswerBinary_Low');
+
+				DeleteAllChildren(elemAnswerBinHigh);
+				DeleteAllChildren(elemAnswerBinLow);
+				elemAnswerBinHigh.size	= 0;
+				elemAnswerBinLow.size	= 0;
+
+				hexCharacter.filter(function(ch, index){
+					AddComboboxItem(elemAnswerBinHigh, ch, index, 16);
+					AddComboboxItem(elemAnswerBinLow, ch, index, 16);
+				});
+			}
+			{	// new
+				const elemAnswerBinHigh	= document.getElementById('AnswerBinaryNew_High');
+				const elemAnswerBinLow	= document.getElementById('AnswerBinaryNew_Low');
+
+				DeleteAllTable(elemAnswerBinHigh);
+				DeleteAllTable(elemAnswerBinLow);
+
+				hexCharacter.filter(function(ch, index){
+					AddTableCell(elemAnswerBinHigh, ch, index);
+					AddTableCell(elemAnswerBinLow, ch, index);
+				});
+
+				SelectFirstCell('AnswerBinaryNew_High');
+				SelectFirstCell('AnswerBinaryNew_Low');
+
+				AddMouseoverEvents('AnswerBinaryNew_High');
+				AddMouseoverEvents('AnswerBinaryNew_Low');
+			}
+		}
+
+		// Cycle
+		{
+			let cycleList	= [];
+			useOpCode.map(function(op){
+				cycleList.push(op.Cycle);
+			});
+			cycleList	= ToUniqueItemArray(cycleList);
+			SortArray(cycleList);
+
+			{	// old
+				const elemAnswerCycle	= document.getElementById('AnswerCycle_Cycle');
+
+				DeleteAllChildren(elemAnswerCycle);
+				elemAnswerCycle.size	= 0;
+
+				cycleList.filter(function(cycle){
+					AddComboboxItem(elemAnswerCycle, cycle, cycle, 16);
+				});
+			}
+			{	// new
+				const elemAnswerCycle	= document.getElementById('AnswerCycleNew_Cycle');
+
+				DeleteAllTable(elemAnswerCycle);
+
+				cycleList.filter(function(cycle){
+					AddTableCell(elemAnswerCycle, cycle, cycle);
+				});
+
+				SelectFirstCell('AnswerCycleNew_Cycle');
+
+				AddMouseoverEvents('AnswerCycleNew_Cycle');
+			}
+		}
+
+		// Hide unused answer forms
+		const formAnswerOpCode			= document.getElementById('AnswerOpCode');
+		const formAnswerOpCodeNew		= document.getElementById('AnswerOpCodeNew');
+		const formAnswerBinary			= document.getElementById('AnswerBinary');
+		const formAnswerBinaryNew		= document.getElementById('AnswerBinaryNew');
+		const formAnswerCycle			= document.getElementById('AnswerCycle');
+		const formAnswerCycleNew		= document.getElementById('AnswerCycleNew');
+		formAnswerOpCode.style.display		= 'none';
+		formAnswerOpCodeNew.style.display	= 'none';
+		formAnswerBinary.style.display		= 'none';
+		formAnswerBinaryNew.style.display	= 'none';
+		formAnswerCycle.style.display		= 'none';
+		formAnswerCycleNew.style.display	= 'none';
+		const displaySetting			= 'block';
+
+		switch(modeSetting.Mode){
+			case trainingMode.OpToHex:
+				((modeSetting.NewInterface)? formAnswerBinaryNew : formAnswerBinary ).style.display	= displaySetting;
+				break;
+			case trainingMode.HexToOp:
+				((modeSetting.NewInterface)? formAnswerOpCodeNew : formAnswerOpCode ).style.display	= displaySetting;
+				break;
+			case trainingMode.OpToCycle:
+			case trainingMode.HexToCycle:
+				((modeSetting.NewInterface)? formAnswerCycleNew  : formAnswerCycle  ).style.display	= displaySetting;
+				break;
+		}
+
+		Question();
+	}
+
+	function Question(){
+		if(Number.isInteger(nowQuestion)){
+			const prevQuestion		= nowQuestion;
+			const elemCorrectUser		= document.getElementById('CorrectText_User');
+			const elemCorrectCorrect	= document.getElementById('CorrectText_Correct');
+			switch(modeSetting.Mode){
+				case trainingMode.OpToHex:{
+					const userAnswer		= GetAnswerBinary();
+					const correctAnswer		= useOpCode[prevQuestion];
+
+					if((userAnswer < 0) || (0x100 <= userAnswer)){
+						QuestionIncorrect();
+						break;
+					}
+
+					let correctAnswersString	= null;
+					let isCorrect			= false;
+					useOpCode.filter(function(op){
+						if((op.InstructionName === correctAnswer.InstructionName) && (op.Addressing === correctAnswer.Addressing)){
+							if(correctAnswersString){
+								correctAnswersString	= correctAnswersString + ', ' + op.OpCodeString;
+							}
+							else{
+								correctAnswersString	= op.OpCodeString;
+							}
+
+							if(op.OpCode === userAnswer){
+								isCorrect	= true;
+							}
+						}
+					});
+
+					elemCorrectUser.innerHTML	= ToHexString(userAnswer, 2)	+ ' <span class="Comment">; ' + allOpCode[userAnswer].ShortFormatted	+ '</span>';
+					elemCorrectCorrect.innerHTML	= correctAnswersString		+ ' <span class="Comment">; ' + useOpCode[prevQuestion].ShortFormatted	+ '</span>';
+
+					QuestionCorrect(isCorrect);
+
+					break;
+				}
+				case trainingMode.HexToOp:{
+					const userAnswer		= GetAnswerOpCode();
+					const correctAnswer		= useOpCode[nowQuestion];
+					if(!userAnswer){
+						QuestionIncorrect();
+						break;
+					}
+
+					let userAnswersString	= null;
+					useOpCode.filter(function(op){
+						if((op.InstructionName === userAnswer.InstructionName) && (op.Addressing === userAnswer.Addressing)){
+							if(userAnswersString){
+								userAnswersString	= userAnswersString + ', ' + op.OpCodeString;
+							}
+							else{
+								userAnswersString	= op.OpCodeString;
+							}
+						}
+					});
+
+					elemCorrectUser.innerHTML	= userAnswer.ShortFormatted	+ ' <span class="Comment">; ' + userAnswersString		+ '</span>';
+					elemCorrectCorrect.innerHTML	= correctAnswer.ShortFormatted	+ ' <span class="Comment">; ' + correctAnswer.OpCodeString	+ '</span>';
+
+					QuestionCorrect(userAnswer.ShortFormatted === correctAnswer.ShortFormatted);
+
+					break;
+				}
+				case trainingMode.OpToCycle:
+				case trainingMode.HexToCycle:{
+					const userAnswer		= GetAnswerCycle();
+					const correctAnswer		= useOpCode[nowQuestion].Cycle;
+
+					elemCorrectUser.innerHTML	= userAnswer;
+					elemCorrectCorrect.innerHTML	= correctAnswer	+ ' <span class="Comment">; ' + useOpCode[nowQuestion].ShortFormatted	+ '</span>';
+
+					QuestionCorrect(userAnswer === correctAnswer);
+
+					break;
+				}
+			}
+		}
+
+		// Generate next question
+		let qIndex;
+		do{
+			qIndex	= GetIntegerRandom(0, useOpCode.length);
+		}while(qIndex === nowQuestion);
+		nowQuestion	= qIndex;
+
+		// Display question
+		const elemQuestion	= document.getElementById('QuestionText');
+		const qOp		= useOpCode[nowQuestion];
+		let qMessage;
+		switch(modeSetting.Mode){
+			case trainingMode.OpToHex:
+			case trainingMode.OpToCycle:
+				qMessage	= qOp.ShortFormatted;
+				break;
+			case trainingMode.HexToOp:
+			case trainingMode.HexToCycle:
+				qMessage	= qOp.OpCodeString;
+				break;
+		}
+		elemQuestion.textContent	= qMessage;
+	}
+
+	function ConfirmQuestion(){
+		Question();
+	}
+
+	function GetModeSetting(){
+		const modeString	= document.forms['ModeSelectForm'].mode.value;
+		//const instString	= document.forms['ModeSelectForm'].inst.value;
+		let mode		= {};
+
+		let found;
+
+		found	= false;
+		trainingModeName.filter(function(name, index){
+			if(modeString === name){
+				mode.Mode		= index;
+				found			= true;
+			}
+		});
+		if(!found){
+			return null;
+		}
+
+		//found	= false;
+		//instructionModeName.filter(function(name, index){
+		//	if(instString === name){
+		//		mode.Instruction	= index;
+		//		found			= true;
+		//	}
+		//});
+		//if(!found){
+		//	return null;
+		//}
+		mode.Instruction		= instructionMode.All;
+
+		mode.NewInterface		= document.forms['ModeSelectForm'].newinterface.checked;
+		mode.ShowShortAddressingName	= document.forms['ModeSelectForm'].showshort.checked;
+
+		return mode;
+	}
+
+	function GetAnswerOpCode(){
+		let inst;
+		let addr;
+		if(!modeSetting.NewInterface){
+			// old
+			inst	= document.forms['AnswerForm'].AnswerOpCode_OpCode.value.toUpperCase();
+			addr	= parseInt(document.forms['AnswerForm'].AnswerOpCode_Addressing.value);
+		}
+		else{
+			// new
+			const selectedOpCode		= GetSelectedTableCell('AnswerOpCodeNew_OpCode');
+			const selectedAddressing	= GetSelectedTableCell('AnswerOpCodeNew_Addressing');
+
+			inst	= selectedOpCode.textContent.toUpperCase();
+			addr	= parseInt(selectedAddressing.getAttribute('_value'));
+		}
+		if(isNaN(addr)){
+			return null;
+		}
+		const addrName	= addressingName[addr];
+		const addrShort	= addressingShortName[addr];
+		return {
+			InstructionName		: inst,
+			Addressing		: addr,
+			AddressingName		: addrName,
+			AddressingShortName	: addrShort,
+			ShortFormatted		: (addr !== addressing.Imp)? inst + ' ' + addrShort : inst,
+		};
+	}
+	function GetAnswerBinary(){
+		let high;
+		let low;
+
+		if(!modeSetting.NewInterface){
+			// old
+			high	= parseInt(document.forms['AnswerForm'].AnswerBinary_High.value, 10);
+			low	= parseInt(document.forms['AnswerForm'].AnswerBinary_Low.value, 10);
+		}
+		else{
+			// new
+			const selectedHigh		= GetSelectedTableCell('AnswerBinaryNew_High');
+			const selectedLow		= GetSelectedTableCell('AnswerBinaryNew_Low');
+			high	= parseInt(selectedHigh.getAttribute('_value'));
+			low	= parseInt(selectedLow.getAttribute('_value'));
+		}
+
+		if(isNaN(high) || isNaN(low)){
+			return -1;
+		}
+		else{
+			return high * 16 + low;
+		}
+	}
+	function GetAnswerCycle(){
+		let cycle;
+		if(!modeSetting.NewInterface){
+			// old
+			cycle	= parseInt(document.forms['AnswerForm'].AnswerCycle_Cycle.value, 10);
+		}
+		else{
+			// new
+			const selectedCycle		= GetSelectedTableCell('AnswerCycleNew_Cycle');
+			cycle	= parseInt(selectedCycle.getAttribute('_value'));
+		}
+		if(isNaN(cycle)){
+			return -1;
+		}
+		else{
+			return cycle;
+		}
+	}
+
+	function UpdateCorrect(){
+		const elemQuestion	= document.getElementById('StatisticsText_Question');
+		const elemCorrect	= document.getElementById('StatisticsText_Correct');
+		const elemIncorrect	= document.getElementById('StatisticsText_Incorrect');
+
+		const elemCorrectBg	= document.getElementById('Statistics_Correct');
+		const elemIncorrectBg	= document.getElementById('Statistics_Incorrect');
+
+		elemQuestion.textContent	= questionCount;
+		elemCorrect.textContent		= correctCount;
+		elemIncorrect.textContent	= questionCount - correctCount;
+
+		elemCorrectBg.classList.remove('AnswerCorrect');
+		elemIncorrectBg.classList.remove('AnswerIncorrect');
+	}
+	function QuestionCorrect(correct){
+		questionCount++;
+		if(correct){
+			correctCount++;
+		}
+
+		UpdateCorrect();
+
+		const elemCorrectBg	= document.getElementById('Statistics_Correct');
+		const elemIncorrectBg	= document.getElementById('Statistics_Incorrect');
+		if(correct){
+			elemCorrectBg.classList.add('AnswerCorrect');
+		}
+		else{
+			elemIncorrectBg.classList.add('AnswerIncorrect');
+		}
+	}
+
+	let lastFocusedId	= null;
+	let searchString	= '';
+	function FocusMoved(id){
+		if(id !== lastFocusedId){
+			searchString	= '';
+		}
+		lastFocusedId	= id;
+	}
+
+	function SearchSelectCell(event){
+		// check focus
+		const selectedElement	= GetFocusElement();
+		if(!selectedElement){
+			return;
+		}
+
+		// clear search
+		const keyName	= event.key;
+		if(keyName.toLowerCase() === 'escape'){
+			searchString	= '';
+			return;
+		}
+		else if(keyName.length > 1){
+			return;
+		}
+
+		// pushback search string
+		if(selectedElement.getAttribute('_match') === 'true'){
+			// string match
+			searchString	+= event.key.toUpperCase();
+		}
+		else{
+			// initial match
+			searchString	= event.key.toUpperCase();
+		}
+
+		// search element
+		let updateElement	= null;
+		let maxMatchLength	= 0;
+		let cells		= selectedElement.getElementsByTagName('td');
+		for(let i = 0; i < cells.length; i++){
+			let matchLength	= StringMatchLength(cells[i].textContent.toUpperCase(), searchString);
+			if(maxMatchLength < matchLength){
+				updateElement	= cells[i];
+				maxMatchLength	= matchLength;
+			}
+		}
+
+		// update select
+		const className	= 'selected';
+		if(updateElement){
+			const selectedElements	= selectedElement.getElementsByClassName(className);
+			for(let i = 0; i < selectedElements.length; i++){
+				selectedElements[i].classList.remove(className);
+			}
+			updateElement.classList.add(className);
+		}
+		else if(searchString.length <= 1){
+			searchString	= '';
+		}
+	}
+
+// -->
+  </script>
+  <style type="text/css">
+<!--
+
+	p{
+		margin		: 2px 4px;
+	}
+	dl{
+		margin		: 2px 4px;
+	}
+	dt{
+		float		: left;
+		clear		: left;
+		width		: 128px;
+	}
+	dd:before{
+		content		: ": ";
+	}
+
+	.Code{
+		font-family	: "Consolas", "Courier New", "monospace";
+		text-align	: center;
+	}
+
+	.AnswerInput{
+		text-align	: center;
+		user-select	: none;
+	}
+	.AnswerInput select{
+		font-size	: 100%;
+	}
+	#AnswerForm select option{
+		padding		: 0px 32px;
+	}
+
+	.AnswerInputContainer .AnswerInput{
+		margin		: auto;
+		display		: flex;
+		flex-wrap	: wrap;
+		justify-content	: center;
+	}
+	.AnswerInputContainer table{
+		flex		: 1;
+	}
+
+	#AnswerForm table{
+		margin		: 2px 16px;
+		border		: solid 1px rgba(0, 0, 0, 0.250);
+		border-spacing	: 2px;
+	}
+	#AnswerForm td{
+		border		: solid 1px rgba(0, 0, 0, 0.125);
+		padding		: 4px;
+	}
+	#AnswerForm td:hover{
+		background	: rgba(0, 174, 239, 0.125);
+	}
+	#AnswerForm td.selected{
+		background	: rgba(0, 174, 239, 0.500);
+	}
+	#AnswerForm .focus{
+		border		: solid 1px rgba(0, 0, 0, 0.500);
+	}
+	#AnswerForm dt{
+		width		: 320px;
+	}
+	#AnswerForm dd{
+		margin-inline-start	: 0px;
+	}
+	#AnswerForm dd:before{
+		content		: "";
+	}
+
+	#AnswerBinaryNew table{
+		width		: 40%;
+		max-width	: 160px;
+	}
+	#AnswerCycleNew table{
+		width		: 80%;
+		max-width	: 160px;
+	}
+	#AnswerOpCodeNew_Addressing{
+		text-align	: left;
+	}
+
+	#QuestionText{
+		font-size	: 200%;
+	}
+
+	#Confirm{
+		width		: 100%;
+		font-size	: 200%;
+	}
+	#ApplyMode{
+		float		: right;
+	}
+	input[type="button"]{
+	}
+
+	.Comment{
+		color		: #008000;
+	}
+
+	.AnswerCorrect{
+		background-color: rgba(0, 255, 0, 0.125);
+	}
+	.AnswerIncorrect{
+		background-color: rgba(255, 0, 0, 0.125);
+	}
+
+-->
+  </style>
+ </head>
+ <body>
+  <noscript>
+   <p>Javascript is disable.</p>
+  </noscript>
+
+  <main>
+   <section id="Question">
+    <fieldset>
+     <legend>Question</legend>
+     <p id="QuestionText" class="Code"></p>
+    </fieldset>
+   </section>
+
+   <section id="Correct">
+    <fieldset>
+     <legend>Correct</legend>
+     <dl>
+      <dt>Your answer		</dt><dd id="CorrectText_User"		></dd>
+      <dt>Correct answer	</dt><dd id="CorrectText_Correct"	></dd>
+     </dl>
+    </fieldset>
+   </section>
+
+   <section id="Answer">
+    <form id="AnswerForm" autocomplete="off">
+     <fieldset>
+      <legend>Answer</legend>
+
+      <fieldset id="AnswerOpCode">
+       <legend>OpCode</legend>
+       <p class="AnswerInput">
+        <select id="AnswerOpCode_OpCode"></select>
+        <select id="AnswerOpCode_Addressing"></select>
+       </p>
+      </fieldset>
+      <fieldset id="AnswerOpCodeNew">
+       <legend>OpCode</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerOpCodeNew_OpCode"     _col="5" _match="true"></table>
+         <table id="AnswerOpCodeNew_Addressing" _col="1" _match="true"></table>
+        </div>
+       </div>
+      </fieldset>
+
+      <fieldset id="AnswerBinary">
+       <legend>Binary</legend>
+       <p class="AnswerInput">
+        <select id="AnswerBinary_High"></select>
+        <select id="AnswerBinary_Low"></select>
+       </p>
+      </fieldset>
+      <fieldset id="AnswerBinaryNew">
+       <legend>Binary</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerBinaryNew_High" _col="1" _match="false"></table>
+         <table id="AnswerBinaryNew_Low"  _col="1" _match="false"></table>
+        </div>
+       </div>
+      </fieldset>
+
+      <fieldset id="AnswerCycle">
+       <legend>Cycle</legend>
+       <p class="AnswerInput">
+        <select id="AnswerCycle_Cycle"></select>
+       </p>
+      </fieldset>
+      <fieldset id="AnswerCycleNew">
+       <legend>Cycle</legend>
+       <div class="AnswerInputContainer">
+        <div class="AnswerInput">
+         <table id="AnswerCycleNew_Cycle" _col="1" _match="false"></table>
+        </div>
+       </div>
+      </fieldset>
+
+      <input id="Confirm" type="button" value="Answer" onclick="ConfirmQuestion();"></input>
+     </fieldset>
+    </form>
+   </section>
+
+   <section id="Statistics">
+    <fieldset>
+     <legend>Statistics</legend>
+     <dl>
+      <div id="Statistics_Question"	><dt>Question		</dt><dd id="StatisticsText_Question"	></dd></div>
+      <div id="Statistics_Correct"	><dt>Correct		</dt><dd id="StatisticsText_Correct"	></dd></div>
+      <div id="Statistics_Incorrect"	><dt>Incorrect		</dt><dd id="StatisticsText_Incorrect"	></dd></div>
+     </dl>
+    </fieldset>
+   </section>
+
+   <section>
+    <form id="ModeSelectForm" autocomplete="off">
+     <fieldset>
+      <legend>Mode select</legend>
+      <dl>
+       <dt>Mode</dt><dd>
+        <label    ><input type="radio" name="mode" value="OpToHex" checked	>OpCode -&gt; Hex</input></label
+        > <label  ><input type="radio" name="mode" value="HexToOp"		>Hex -&gt; OpCode</input></label
+        > <label  ><input type="radio" name="mode" value="OpToCycle"		>OpCode -&gt; Cycle</input></label
+        > <label  ><input type="radio" name="mode" value="HexToCycle"		>Hex -&gt; Cycle</input></label
+        >
+       </dd>
+       <dt>Interface</dt><dd>
+        <label><input type="checkbox" name="newinterface" checked		>New interface</input></label>
+        <label><input type="checkbox" name="showshort" checked			>Show short addressing name</input></label>
+       </dd>
+      <input id="ApplyMode" type="button" value="Apply" onclick="Initialize();"></input>
+     </fieldset>
+    </form>
+   </section>
+
+  </main>
+  <script type="text/javascript">
+<!--
+	Initialize();
+// -->
+  </script>
+ </body>
+</html>
