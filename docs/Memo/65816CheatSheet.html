@@ -1,0 +1,1433 @@
+﻿<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex,nofollow">
+
+  <title>65816 CheatSheet</title>
+
+  <style type="text/css">
+	body{
+		margin			: 0px;
+		padding			: 0px;
+		color			: #000000;
+	}
+	body.dark{
+		color			: silver;
+		background-color	: #101010;
+	}
+
+	h1,h2{
+		font-family		: "Helvetica black", "Arial Black";
+		font-weight		: normal;
+	}
+
+	h1{
+		margin			: 0px;
+		padding			: 4px 8px;
+		color			: #002C3C;
+		border-bottom		: 1px solid #00AEEF;
+		background-color	: RGBA(0, 174, 239, 0.25);
+	}
+	.dark h1{
+		color			: #BFEAFB;
+	}
+	h2{
+		padding-left		: 8px;
+		border-bottom		: 1px solid #00AEEF;
+	}
+	h3{
+		padding-left		: 16px;
+		border-bottom		: 1px solid RGBA(0, 174, 239, 0.50);
+	}
+	h4{
+		padding-left		: 24px;
+	}
+
+	p{
+		margin-left		: 32px;
+		line-height		: 1.5em;
+	}
+
+	table{
+		display			: block;
+		margin			: 12px 12px;
+
+		border-collapse		: collapse;
+	}
+	tr:hover{
+		background-color	: RGBA(0, 174, 239, 0.1);
+	}
+	thead td, tr.head td, th{
+		border			: solid 1px #bbbbbb;
+		background-color	: RGBA(0, 0, 0, 0.1);
+		font-weight		: bold;
+		text-align		: center;
+	}
+	.dark thead td, .dark tr.head td, .dark th{
+		border-color		: #555555;
+		background-color	: RGBA(255, 255, 255, 0.1);
+	}
+	td{
+		border			: solid 1px #cccccc;
+	}
+	.dark td{
+		border-color		: #444444;
+	}
+	td, th{
+		padding			: 2px 8px;
+	}
+
+
+	dt{
+		float			: left;
+		clear			: left;
+		margin-left		: 24px;
+		margin-right		: 8px;
+	}
+	dt:after{
+		content			: ": ";
+	}
+
+	.small{
+		font-size		: 80%;
+	}
+
+	.InstructionSetTable{
+		font-size		: 80%;
+		overflow		: hidden;
+	}
+	.InstructionSetTable th, .InstructionSetTable td{
+		position		: relative;
+	}
+	.InstructionSetTable td:hover::after,
+	.InstructionSetTable th:hover::after{
+		content			: "";
+		position		: absolute;
+		background-color	: RGBA(0, 174, 239, 0.1);
+		left			: 0;
+		top			: -5000px;
+		height			: 10000px;
+		width			: 100%;
+		z-index			: -1;
+	}
+
+	.InstructionSetTable .OpCode:after{
+		content			: "\A";
+		white-space		: pre;
+	}
+	.InstructionSetTable .Note .Length:after{
+		content			: " / ";
+	}
+	.InstructionSetTable .Comment{
+		margin-left		: 4px;
+		opacity			: 0.75;
+		font-size		: 80%;
+	}
+
+	#RegisterTable .Length{
+		text-align		: right;
+	}
+	#StatusFlagTable .Bit, #StatusFlagTable .Name{
+		text-align		: center;
+	}
+	#StatusFlagTable .Emulation{
+		opacity			: 0.75;
+	}
+
+	#InstructionSetTable_Binary td{
+		width			: 80px;
+	}
+
+	#InstructionSetTable_Addressing{
+		font-family		: "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", "Courier", "monospace";
+		text-align		: center;
+	}
+	#InstructionSetTable_Addressing th, #InstructionSetTable_Addressing td{
+		padding			: 0px 2px;
+	}
+	#InstructionSetTable_Addressing .Mnemonic{
+		width			: 64px;
+	}
+	#InstructionSetTable_Addressing .Addressing{
+		width			: 48px;
+	}
+	#InstructionSetTable_Addressing .Flags{
+		padding			: 0px 4px;
+		text-align		: left;
+	}
+	#InstructionSetTable_Addressing .Alias{
+		opacity			: 0.50;
+	}
+
+	#VectorLocationsTable .Address{
+		width			: 96px;
+		text-align		: center;
+	}
+	#VectorLocationsTable .Mode{
+		width			: 96px;
+	}
+	#VectorLocationsTable .Label{
+		width			: 96px;
+	}
+	#VectorLocationsTable .Label.Reserved{
+		opacity			: 0.75;
+	}
+
+  </style>
+
+ </head>
+ <body>
+
+  <!-- Title -->
+  <header>
+   <h1>65816 CheatSheet</h1>
+  </header>
+
+  <!-- Contents -->
+  <main>
+
+   <div id="Content">
+
+    <section>
+     <h2><a id="Register" name="Register">Register</a></h2>
+      <table id="RegisterTable">
+       <thead>
+        <tr><th>Name</th				><th>Short</th			><th>Length</th	></tr>
+       </thead>
+       <tbody>
+        <tr><td class="Name">Accumulator</td		><td class="Short">A (B, C)</td	><td class="Length">8/16</td	></tr>
+        <tr><td class="Name">Index register (X)</td	><td class="Short">X</td	><td class="Length">8/16</td	></tr>
+        <tr><td class="Name">Index register (Y)</td	><td class="Short">Y</td	><td class="Length">8/16</td	></tr>
+        <tr><td class="Name">Stack pointer</td		><td class="Short">SP</td	><td class="Length">16</td	></tr>
+        <tr><td class="Name">Program counter</td	><td class="Short">PC</td	><td class="Length">16</td	></tr>
+        <tr><td class="Name">Processor status</td	><td class="Short">P</td	><td class="Length">8</td	></tr>
+        <tr><td class="Name">Direct pointer</td		><td class="Short">D</td	><td class="Length">16</td	></tr>
+        <tr><td class="Name">Program bank register</td	><td class="Short">PB (K)</td	><td class="Length">8</td	></tr>
+        <tr><td class="Name">Data bank register</td	><td class="Short">DB (B)</td	><td class="Length">8</td	></tr>
+       </tbody>
+      </table>
+    </section>
+
+    <section>
+     <h2><a id="StatusFlag" name="StatusFlag">Status flag</a></h2>
+      <table id="StatusFlagTable">
+       <thead>
+        <tr			><th>bit</th		><th>Name</th		><th>Description</th								></tr>
+       </thead>
+       <tbody>
+        <tr			><td class="Bit">7</td	><td class="Name">N</td	><td class="Description">Negative flag</td					></tr>
+        <tr			><td class="Bit">6</td	><td class="Name">V</td	><td class="Description">Overflow flag</td					></tr>
+        <tr			><td class="Bit">5</td	><td class="Name">M</td	><td class="Description">Memory select (0=16 / 1=8)</td				></tr>
+        <tr class="Emulation"	><td class="Bit">5</td	><td class="Name">R</td	><td class="Description">(Emulation mode) Reserved (always 1)</td		></tr>
+        <tr			><td class="Bit">4</td	><td class="Name">X</td	><td class="Description">Index register select (0=16 / 1=8)</td			></tr>
+        <tr class="Emulation"	><td class="Bit">4</td	><td class="Name">B</td	><td class="Description">(Emulation mode) Break flag (0=IRQ / 1=BRK)</td	></tr>
+        <tr			><td class="Bit">3</td	><td class="Name">D</td	><td class="Description">Decimal mode (0=Binary / 1=Decimal)</td		></tr>
+        <tr			><td class="Bit">2</td	><td class="Name">I</td	><td class="Description">IRQ disable (0=IRQ Enable / 1=IRQ Disable)</td		></tr>
+        <tr			><td class="Bit">1</td	><td class="Name">Z</td	><td class="Description">Zero flag</td						></tr>
+        <tr			><td class="Bit">0</td	><td class="Name">C</td	><td class="Description">Carry flag</td						></tr>
+        <tr			><td class="Bit">-</td	><td class="Name">E</td	><td class="Description">Emulation flag (0=Native / 1=Emulation)</td		></tr>
+       </tbody>
+      </table>
+    </section>
+
+    <section>
+     <h2><a id="Addressing" name="Addressing">Addressing mode</a></h2>
+      <table id="AddressingTable">
+       <thead>
+        <tr>
+         <th>Name</th>
+         <th>Short</th>
+         <th>Description</th>
+         <th>Syntax</th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <td class="Name"	>Implied</td>
+         <td class="Short"	></td>
+         <td class="Description"></td>
+         <td class="Syntax"	></td>
+        </tr>
+        <tr>
+         <td class="Name"	>Accumulator</td>
+         <td class="Short"	>A</td>
+         <td class="Description"></td>
+         <td class="Syntax"	></td>
+        </tr>
+        <tr>
+         <td class="Name"	>Stack</td>
+         <td class="Short"	>S</td>
+         <td class="Description"></td>
+         <td class="Syntax"	></td>
+        </tr>
+        <tr>
+         <td class="Name"	>Immediate</td>
+         <td class="Short"	>#imm</td>
+         <td class="Description">operand</td>
+         <td class="Syntax"	>#$01</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page (Zero page)</td>
+         <td class="Short"	>dp</td>
+         <td class="Description">[D + dp]</td>
+         <td class="Syntax"	>$01</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indexed, X</td>
+         <td class="Short"	>dp,X</td>
+         <td class="Description">[D + dp + X]</td>
+         <td class="Syntax"	>$01,X</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indexed, Y</td>
+         <td class="Short"	>dp,Y</td>
+         <td class="Description">[D + dp + Y]</td>
+         <td class="Syntax"	>$01,Y</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indirect</td>
+         <td class="Short"	>(dp)</td>
+         <td class="Description">[DB + [D + dp]]</td>
+         <td class="Syntax"	>($01)</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indexed Indirect, X</td>
+         <td class="Short"	>(dp,X)</td>
+         <td class="Description">[DB + [D + dp + X]]</td>
+         <td class="Syntax"	>($01,X)</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indirect Indexed, Y</td>
+         <td class="Short"	>(dp),Y</td>
+         <td class="Description">[DB + [D + dp] + Y]</td>
+         <td class="Syntax"	>($01),Y</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indirect Long</td>
+         <td class="Short"	>[dp]</td>
+         <td class="Description">[[D + dp]]</td>
+         <td class="Syntax"	>[$01]</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Direct page Indirect Long Indexed, Y</td>
+         <td class="Short"	>[dp],Y</td>
+         <td class="Description">[[D + dp] + Y]</td>
+         <td class="Syntax"	>[$01],Y</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute</td>
+         <td class="Short"	>abs</td>
+         <td class="Description">[DB + abs]</td>
+         <td class="Syntax"	>$0123</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Indexed, X</td>
+         <td class="Short"	>abs,X</td>
+         <td class="Description">[DB + abs + X]</td>
+         <td class="Syntax"	>$0123,X</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Indexed, Y</td>
+         <td class="Short"	>abs,Y</td>
+         <td class="Description">[DB + abs + Y]</td>
+         <td class="Syntax"	>$0123,Y</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Indirect</td>
+         <td class="Short"	>(abs)</td>
+         <td class="Description">[[PB + abs]]</td>
+         <td class="Syntax"	>($0123)</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Indexed Indirect</td>
+         <td class="Short"	>(abs,X)</td>
+         <td class="Description">[[PB + abs + X]]</td>
+         <td class="Syntax"	>($0123,X)</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Indirect Long</td>
+         <td class="Short"	>[abs]</td>
+         <td class="Description">[[abs]]</td>
+         <td class="Syntax"	>[$0123]</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Long</td>
+         <td class="Short"	>long</td>
+         <td class="Description">[long]</td>
+         <td class="Syntax"	>$012345</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Absolute Long Indexed, X</td>
+         <td class="Short"	>long,X</td>
+         <td class="Description">[long + X]</td>
+         <td class="Syntax"	>$012345,X</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Relative</td>
+         <td class="Short"	>rel</td>
+         <td class="Description">[PB + PC + rel]</td>
+         <td class="Syntax"	>#$01</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Relative Long</td>
+         <td class="Short"	>rlong</td>
+         <td class="Description">[PB + PC + rlong]</td>
+         <td class="Syntax"	>#$0123</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Stack Relative</td>
+         <td class="Short"	>sr,S</td>
+         <td class="Description">[SP + sr]</td>
+         <td class="Syntax"	>$01,S</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Stack Relative Indirect Indexed, Y</td>
+         <td class="Short"	>(sr,S),Y</td>
+         <td class="Description">[DB + [SP + sr] + Y]</td>
+         <td class="Syntax"	>($01,S),Y</td>
+        </tr>
+        <tr>
+         <td class="Name"	>Block Move</td>
+         <td class="Short"	>xyc</td>
+         <td class="Description">[dst:Y] = [src:X]</td>
+         <td class="Syntax"	>dst, src</td>
+        </tr>
+       </tbody>
+      </table>
+    </section>
+
+    <section>
+     <h2><a id="InstructionSet_Binary" name="InstructionSet_Binary">Instruction Set (Binary)</a></h2>
+      <table class="InstructionSetTable" id="InstructionSetTable_Binary">
+       <thead>
+        <tr>
+         <th></th>
+         <th>00</th>
+         <th>01</th>
+         <th>02</th>
+         <th>03</th>
+         <th>04</th>
+         <th>05</th>
+         <th>06</th>
+         <th>07</th>
+         <th>08</th>
+         <th>09</th>
+         <th>0A</th>
+         <th>0B</th>
+         <th>0C</th>
+         <th>0D</th>
+         <th>0E</th>
+         <th>0F</th>
+        </tr>
+       </thead>
+       <tbody>
+        <tr>
+         <th>00</th>
+         <td><span class="OpCode">BRK S</span		><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*8</span	></td>
+         <td><span class="OpCode">ORA (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">COP S</span		><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*8</span	></td>
+         <td><span class="OpCode">ORA sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">TSB dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ORA dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ASL dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ORA [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">PHP S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ORA #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">ASL A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">PHD S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TSB abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ORA abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ASL abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ORA long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>10</th>
+         <td><span class="OpCode">BPL rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">ORA (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">ORA (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ORA (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">TRB dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ORA dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ASL dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ORA [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CLC</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ORA abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">INC A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TCS</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TRB abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ORA abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">ASL abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ORA long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>20</th>
+         <td><span class="OpCode">JSR abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">AND (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">JSL long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">8</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">AND sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">BIT dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">AND dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ROL dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">AND [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">PLP S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">AND #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">ROL A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">PLD S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">5</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">BIT abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">AND abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ROL abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">AND long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>30</th>
+         <td><span class="OpCode">BMI rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">AND (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">AND (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">AND (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">BIT dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">AND dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ROL dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">AND [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SEC</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">AND abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">DEC A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TSC</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">BIT abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">AND abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ROL abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">AND long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>40</th>
+         <td><span class="OpCode">RTI S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">6</span></span><span class="Comment">*8</span	></td>
+         <td><span class="OpCode">EOR (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">WDM #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">MVP xyc</span		><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LSR dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">EOR [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">PHA S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">EOR #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">LSR A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">PHK S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JMP abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LSR abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">EOR long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>50</th>
+         <td><span class="OpCode">BVC rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">EOR (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">EOR (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">EOR (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">MVN xyc</span		><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LSR dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">EOR [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CLI</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">PHY S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">TCD</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JML long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">4</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">EOR abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LSR abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">EOR long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>60</th>
+         <td><span class="OpCode">RTS S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ADC (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">PER rlong</span	><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ADC sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STZ dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ADC dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ROR dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ADC [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">PLA S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ADC #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">ROR A</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">RTL S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JMP (abs)</span	><span class="Note"><span class="Length">3</span><span class="Cycle">5</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ADC abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ROR abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ADC long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>70</th>
+         <td><span class="OpCode">BVS rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">ADC (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">ADC (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ADC (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STZ dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ADC dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">ROR dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">ADC [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SEI</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ADC abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">PLY S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">TDC</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JMP (abs,X)</span	><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">ADC abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">ROR abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">ADC long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>80</th>
+         <td><span class="OpCode">BRA rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">STA (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">BRL rlong</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">STA sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STY dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STA dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STX dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STA [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">DEY</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">BIT #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">TXA</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">PHB S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">STY abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STA abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STX abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STA long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>90</th>
+         <td><span class="OpCode">BCC rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">STA (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">STA (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STA (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STY dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STA dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STX dp,Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">STA [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">TYA</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">STA abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">5</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">TXS</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TXY</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">STZ abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STA abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STZ abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STA long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>A0</th>
+         <td><span class="OpCode">LDY #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">LDA (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDX #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">LDA sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDY dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDA dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDX dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDA [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">TAY</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">LDA #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">TAX</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">PLB S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">LDY abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDA abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDX abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDA long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>B0</th>
+         <td><span class="OpCode">BCS rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">LDA (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">LDA (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDA (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDY dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDA dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDX dp,Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">LDA [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CLV</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">LDA abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">TSX</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">TYX</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">LDY abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDA abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">LDX abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">LDA long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>C0</th>
+         <td><span class="OpCode">CPY #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">CMP (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">REP #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CMP sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">CPY dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CMP dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">DEC dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">CMP [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">INY</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CMP #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">DEX</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">WAI</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CPY abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">CMP abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">DEC abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">CMP long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>D0</th>
+         <td><span class="OpCode">BNE rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">CMP (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">CMP (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CMP (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">PEI (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*4</span	></td>
+         <td><span class="OpCode">CMP dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">DEC dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">CMP [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">CLD</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CMP abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">PHX S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">STP</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JML [abs]</span	><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CMP abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">DEC abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">CMP long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>E0</th>
+         <td><span class="OpCode">CPX #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">SBC (dp,X)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SEP #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">SBC sr,S</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">CPX dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SBC dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">3</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">INC dp</span		><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">SBC [dp]</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">INX</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">SBC #imm</span	><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*1,2</span	></td>
+         <td><span class="OpCode">NOP</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">XBA</span		><span class="Note"><span class="Length">1</span><span class="Cycle">3</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">CPX abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">SBC abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">INC abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">6</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">SBC long</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+        <tr>
+         <th>F0</th>
+         <td><span class="OpCode">BEQ rel</span		><span class="Note"><span class="Length">2</span><span class="Cycle">2</span></span><span class="Comment">*6,7</span	></td>
+         <td><span class="OpCode">SBC (dp),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4,5</span	></td>
+         <td><span class="OpCode">SBC (dp)</span	><span class="Note"><span class="Length">2</span><span class="Cycle">5</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SBC (sr,S),Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">7</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">PEA abs</span		><span class="Note"><span class="Length">3</span><span class="Cycle">5</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">SBC dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">4</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">INC dp,X</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*3,4</span	></td>
+         <td><span class="OpCode">SBC [dp],Y</span	><span class="Note"><span class="Length">2</span><span class="Cycle">6</span></span><span class="Comment">*2,4</span	></td>
+         <td><span class="OpCode">SED</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">SBC abs,Y</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2,5</span	></td>
+         <td><span class="OpCode">PLX S</span		><span class="Note"><span class="Length">1</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">XCE</span		><span class="Note"><span class="Length">1</span><span class="Cycle">2</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">JSR (abs,X)</span	><span class="Note"><span class="Length">3</span><span class="Cycle">8</span></span><span class="Comment"></span	></td>
+         <td><span class="OpCode">SBC abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">4</span></span><span class="Comment">*2</span	></td>
+         <td><span class="OpCode">INC abs,X</span	><span class="Note"><span class="Length">3</span><span class="Cycle">7</span></span><span class="Comment">*3</span	></td>
+         <td><span class="OpCode">SBC long,X</span	><span class="Note"><span class="Length">4</span><span class="Cycle">5</span></span><span class="Comment">*2</span	></td>
+        </tr>
+       </tbody>
+      </table>
+      <p>
+       <dt>Legend</dt><dd>Byte / Cycle</dd>
+      </p>
+      <p class="Notice">
+       <ol>
+        <li>Add 1 byte if register is 16bit length mode.</li>
+        <li>Add 1 cycle if register is 16bit length mode.</li>
+        <li>Add 2 cycle if register is 16bit length mode.</li>
+        <li>Add 1 cycle if lower byte of D register is not zero.</li>
+        <li>Add 1 cycle if index register is 16bit, or write access, or crosses page boundary.</li>
+        <li>Add 1 cycle if branch is taken.</li>
+        <li>Add 1 cycle if branch is taken and page boundary is crossed in emulation mode.</li>
+        <li>Add 1 cycle if native mode.</li>
+       </ol>
+      </p>
+    </section>
+
+    <section>
+     <h2><a id="InstructionSet_Addressing" name="InstructionSet_Addressing">Instruction Set (Addressing)</a></h2>
+      <table class="InstructionSetTable" id="InstructionSetTable_Addressing">
+       <thead>
+        <tr>
+         <th class="Mnemonic"	>Mnemonic</th>
+         <th class="Addressing"	>imp</th>
+         <th class="Addressing"	>A</th>
+         <th class="Addressing"	>S</th>
+         <th class="Addressing"	>#imm</th>
+         <th class="Addressing"	>dp</th>
+         <th class="Addressing"	>dp,X</th>
+         <th class="Addressing"	>dp,Y</th>
+         <th class="Addressing"	>(dp)</th>
+         <th class="Addressing"	>(dp,X)</th>
+         <th class="Addressing"	>(dp),Y</th>
+         <th class="Addressing"	>[dp]</th>
+         <th class="Addressing"	>[dp],Y</th>
+         <th class="Addressing"	>abs</th>
+         <th class="Addressing"	>abs,X</th>
+         <th class="Addressing"	>abs,Y</th>
+         <th class="Addressing"	>(abs)</th>
+         <th class="Addressing"	>(abs,X)</th>
+         <th class="Addressing"	>[abs]</th>
+         <th class="Addressing"	>long</th>
+         <th class="Addressing"	>long,X</th>
+         <th class="Addressing"	>rel</th>
+         <th class="Addressing"	>rlong</th>
+         <th class="Addressing"	>sr,S</th>
+         <th class="Addressing"	>(sr,S),Y</th>
+         <th class="Addressing"	>xyc</th>
+         <th class="Flags"	>Flags</th>
+        </tr>
+       </thead>
+       <tbody>
+         <!--imp        A          S          #imm       dp         dp,X       dp,Y       (dp)       (dp,X)     (dp),Y     [dp]       [dp],Y
+             abs        abs,X      abs,Y      (abs)      (abs,X)    [abs]      long       long,X     rel        rlong      sr,S       (sr,S),Y   xyc -->
+        <tr>
+         <td class="Mnemonic"	>ADC</td>
+         <td  ></td><td  ></td><td  ></td><td>69</td><td>65</td><td>75</td><td  ></td><td>72</td><td>61</td><td>71</td><td>67</td><td>77</td>
+         <td>6D</td><td>7D</td><td>79</td><td  ></td><td  ></td><td  ></td><td>6F</td><td>7F</td><td  ></td><td  ></td><td>63</td><td>73</td><td  ></td>
+         <td class="Flags"	>NV----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>AND</td>
+         <td  ></td><td  ></td><td  ></td><td>29</td><td>25</td><td>35</td><td  ></td><td>32</td><td>21</td><td>31</td><td>27</td><td>37</td>
+         <td>2D</td><td>3D</td><td>39</td><td  ></td><td  ></td><td  ></td><td>2F</td><td>3F</td><td  ></td><td  ></td><td>23</td><td>33</td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>ASL</td>
+         <td  ></td><td>0A</td><td  ></td><td  ></td><td>06</td><td>16</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>0E</td><td>1E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BCC</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>90</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BCS</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>B0</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BEQ</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>F0</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>BGE</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>B0</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BIT</td>
+         <td  ></td><td  ></td><td  ></td><td>89</td><td>24</td><td>34</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>2C</td><td>3C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>NV----Z- (N=opr.bit7, V=opr.bit6) / #imm : ------Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>BLT</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>90</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BMI</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>30</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BNE</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>D0</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BPL</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>10</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BRA</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>80</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BRK</td>
+         <td  ></td><td  ></td><td>00</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>----DI-- (D=0, I=1)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BRL</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>82</td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BVC</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>50</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>BVS</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>70</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CLC</td>
+         <td>18</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-------C (C=0)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CLD</td>
+         <td>D8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>----D--- (D=0)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CLI</td>
+         <td>58</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-----I-- (I=0)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CLV</td>
+         <td>B8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-V------ (V=0)</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>CMA</td>
+         <td  ></td><td  ></td><td  ></td><td>C9</td><td>C5</td><td>D5</td><td  ></td><td>D2</td><td>C1</td><td>D1</td><td>C7</td><td>D7</td>
+         <td>CD</td><td>DD</td><td>D9</td><td  ></td><td  ></td><td  ></td><td>CF</td><td>DF</td><td  ></td><td  ></td><td>C3</td><td>D3</td><td  ></td>
+         <td class="Flags"	>N-----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CMP</td>
+         <td  ></td><td  ></td><td  ></td><td>C9</td><td>C5</td><td>D5</td><td  ></td><td>D2</td><td>C1</td><td>D1</td><td>C7</td><td>D7</td>
+         <td>CD</td><td>DD</td><td>D9</td><td  ></td><td  ></td><td  ></td><td>CF</td><td>DF</td><td  ></td><td  ></td><td>C3</td><td>D3</td><td  ></td>
+         <td class="Flags"	>N-----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>COP</td>
+         <td  ></td><td  ></td><td>02</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>----DI-- (D=0, I=1)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CPX</td>
+         <td  ></td><td  ></td><td  ></td><td>E0</td><td>E4</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>EC</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>CPY</td>
+         <td  ></td><td  ></td><td  ></td><td>C0</td><td>C4</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>CC</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----ZC</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>DEA</td>
+         <td  ></td><td>3A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>DEC</td>
+         <td  ></td><td>3A</td><td  ></td><td  ></td><td>C6</td><td>D6</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>CE</td><td>DE</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>DEX</td>
+         <td>CA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>DEY</td>
+         <td>88</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>EOR</td>
+         <td  ></td><td  ></td><td  ></td><td>49</td><td>45</td><td>55</td><td  ></td><td>52</td><td>41</td><td>51</td><td>47</td><td>57</td>
+         <td>4D</td><td>5D</td><td>59</td><td  ></td><td  ></td><td  ></td><td>4F</td><td>5F</td><td  ></td><td  ></td><td>43</td><td>53</td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>INA</td>
+         <td  ></td><td>1A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>INC</td>
+         <td  ></td><td>1A</td><td  ></td><td  ></td><td>E6</td><td>F6</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>EE</td><td>FE</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>INX</td>
+         <td>E8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>INY</td>
+         <td>C8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>JML</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>DC</td><td>5C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>JMP</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>4C</td><td  ></td><td  ></td><td>6C</td><td>7C</td><td>DC</td><td>5C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>JSL</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>22</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>JSR</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>20</td><td  ></td><td  ></td><td  ></td><td>FC</td><td  ></td><td>22</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>LDA</td>
+         <td  ></td><td  ></td><td  ></td><td>A9</td><td>A5</td><td>B5</td><td  ></td><td>B2</td><td>A1</td><td>B1</td><td>A7</td><td>B7</td>
+         <td>AD</td><td>BD</td><td>B9</td><td  ></td><td  ></td><td  ></td><td>AF</td><td>BF</td><td  ></td><td  ></td><td>A3</td><td>B3</td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>LDX</td>
+         <td  ></td><td  ></td><td  ></td><td>A2</td><td>A6</td><td  ></td><td>B6</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>AE</td><td  ></td><td>BE</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>LDY</td>
+         <td  ></td><td  ></td><td  ></td><td>A0</td><td>A4</td><td>B4</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>AC</td><td>BC</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>LSR</td>
+         <td  ></td><td>4A</td><td  ></td><td  ></td><td>46</td><td>56</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>4E</td><td>5E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----ZC (N=0)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>MVN</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>54</td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>MVP</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>44</td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>NOP</td>
+         <td>EA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>ORA</td>
+         <td  ></td><td  ></td><td  ></td><td>09</td><td>05</td><td>15</td><td  ></td><td>12</td><td>01</td><td>11</td><td>07</td><td>17</td>
+         <td>0D</td><td>1D</td><td>19</td><td  ></td><td  ></td><td  ></td><td>0F</td><td>1F</td><td  ></td><td  ></td><td>03</td><td>13</td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PEA</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>F4</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PEI</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>D4</td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PER</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td>62</td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHA</td>
+         <td  ></td><td  ></td><td>48</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHB</td>
+         <td  ></td><td  ></td><td>8B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHD</td>
+         <td  ></td><td  ></td><td>0B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHK</td>
+         <td  ></td><td  ></td><td>4B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHP</td>
+         <td  ></td><td  ></td><td>08</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHX</td>
+         <td  ></td><td  ></td><td>DA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PHY</td>
+         <td  ></td><td  ></td><td>5A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLA</td>
+         <td  ></td><td  ></td><td>68</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLB</td>
+         <td  ></td><td  ></td><td>AB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLD</td>
+         <td  ></td><td  ></td><td>2B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLP</td>
+         <td  ></td><td  ></td><td>28</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>NVMXDIZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLX</td>
+         <td  ></td><td  ></td><td>FA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>PLY</td>
+         <td  ></td><td  ></td><td>7A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>REP</td>
+         <td  ></td><td  ></td><td  ></td><td>C2</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>NVMXDIZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>ROL</td>
+         <td  ></td><td>2A</td><td  ></td><td  ></td><td>26</td><td>36</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>2E</td><td>3E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>ROR</td>
+         <td  ></td><td>6A</td><td  ></td><td  ></td><td>66</td><td>76</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>6E</td><td>7E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>RTI</td>
+         <td  ></td><td  ></td><td>40</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>NVMXDIZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>RTL</td>
+         <td  ></td><td  ></td><td>6B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>RTS</td>
+         <td  ></td><td  ></td><td>60</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>SBC</td>
+         <td  ></td><td  ></td><td  ></td><td>E9</td><td>E5</td><td>F5</td><td  ></td><td>F2</td><td>E1</td><td>F1</td><td>E7</td><td>F7</td>
+         <td>ED</td><td>FD</td><td>F9</td><td  ></td><td  ></td><td  ></td><td>EF</td><td>FF</td><td  ></td><td  ></td><td>E3</td><td>F3</td><td  ></td>
+         <td class="Flags"	>NV----ZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>SEC</td>
+         <td>38</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-------C (C=1)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>SED</td>
+         <td>F8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>----D--- (D=1)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>SEI</td>
+         <td>78</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-----I-- (I=1)</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>SEP</td>
+         <td  ></td><td  ></td><td  ></td><td>E2</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>NVMXDIZC</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>STA</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>85</td><td>95</td><td  ></td><td>92</td><td>81</td><td>91</td><td>87</td><td>97</td>
+         <td>8D</td><td>9D</td><td>99</td><td  ></td><td  ></td><td  ></td><td>8F</td><td>9F</td><td  ></td><td  ></td><td>83</td><td>93</td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>STP</td>
+         <td>DB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>STX</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>86</td><td  ></td><td>96</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>8E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>STY</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>84</td><td>94</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>8C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>STZ</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>64</td><td>74</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>9C</td><td>9E</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>SWA</td>
+         <td>EB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>TAD</td>
+         <td>5B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>TAS</td>
+         <td>1B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TAX</td>
+         <td>AA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TAY</td>
+         <td>A8</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TCD</td>
+         <td>5B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TCS</td>
+         <td>1B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>TDA</td>
+         <td>7B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TDC</td>
+         <td>7B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TRB</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>14</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>1C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>------Z-</td>
+        </tr>
+        <tr class="Alias">
+         <td class="Mnemonic"	>TSA</td>
+         <td>3B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TSB</td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td>04</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td>0C</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>------Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TSC</td>
+         <td>3B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TSX</td>
+         <td>BA</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TXA</td>
+         <td>8A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TXS</td>
+         <td>9A</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TXY</td>
+         <td>9B</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TYA</td>
+         <td>98</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>TYX</td>
+         <td>BB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>WAI</td>
+         <td>CB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>WDM</td>
+         <td  ></td><td  ></td><td  ></td><td>42</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>--------</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>XBA</td>
+         <td>EB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>N-----Z-</td>
+        </tr>
+        <tr>
+         <td class="Mnemonic"	>XCE</td>
+         <td>FB</td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td><td  ></td>
+         <td class="Flags"	>-------C (C=E, E=C)</td>
+        </tr>
+       </tbody>
+      </table>
+    </section>
+
+    <section>
+     <h2><a id="VectorLocations" name="VectorLocations">Vector Locations</a></h2>
+      <table id="VectorLocationsTable">
+       <thead>
+        <tr><th class="Address">Address</th	><th class="Mode">Mode</th	><th class="Label">Label</th	></tr>
+       </thead>
+       <tbody>
+        <tr><td class="Address">$00FFE0</td	><td class="Mode">Native</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFE2</td	><td class="Mode">Native</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFE4</td	><td class="Mode">Native</td	><td class="Label"		>COP</td	></tr>
+        <tr><td class="Address">$00FFE6</td	><td class="Mode">Native</td	><td class="Label"		>BRK</td	></tr>
+        <tr><td class="Address">$00FFE8</td	><td class="Mode">Native</td	><td class="Label"		>ABORT</td	></tr>
+        <tr><td class="Address">$00FFEA</td	><td class="Mode">Native</td	><td class="Label"		>NMI</td	></tr>
+        <tr><td class="Address">$00FFEC</td	><td class="Mode">Native</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFEE</td	><td class="Mode">Native</td	><td class="Label"		>IRQ</td	></tr>
+        <tr><td class="Address">$00FFF0</td	><td class="Mode">Emulation</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFF2</td	><td class="Mode">Emulation</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFF4</td	><td class="Mode">Emulation</td	><td class="Label"		>COP</td	></tr>
+        <tr><td class="Address">$00FFF6</td	><td class="Mode">Emulation</td	><td class="Label Reserved"	>(Reserved)</td	></tr>
+        <tr><td class="Address">$00FFF8</td	><td class="Mode">Emulation</td	><td class="Label"		>ABORT</td	></tr>
+        <tr><td class="Address">$00FFFA</td	><td class="Mode">Emulation</td	><td class="Label"		>NMI</td	></tr>
+        <tr><td class="Address">$00FFFC</td	><td class="Mode">Emulation</td	><td class="Label"		>RESET</td	></tr>
+        <tr><td class="Address">$00FFFE</td	><td class="Mode">Emulation</td	><td class="Label"		>IRQ / BRK</td	></tr>
+       </tbody>
+      </table>
+    </section>
+
+   </div>	<!-- Content -->
+
+  </main>
+
+ </body>
+</html>
