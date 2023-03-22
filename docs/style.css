@@ -123,10 +123,9 @@ dl{
 dt{
 	float			: left;
 	clear			: left;
-	width			: 128px;
 	display			: list-item;
 	margin-left		: 24px;
-	width			: 192px;
+	min-width		: 128px;
 }
 dd:before{
 	content			: ": ";
