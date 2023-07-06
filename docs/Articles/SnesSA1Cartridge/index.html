@@ -1,0 +1,313 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>ZpIndIndY - SNES SA-1 Cartridge</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <style type="text/css">
+<!--
+-->
+  </style>
+ </head>
+ <body>
+  <header>
+   <h1><a href="../../">[$AB], Y</a> - SNES SA-1 Cartridge</h1>
+  </header>
+  <main>
+
+   <section>
+    <article>
+     <p>
+      とある理由でSA-1実機検証が必要になりました。
+     </p>
+     <p>
+      最終的に3枚基板発注しているので他の方のものより大がかりなうえに目新しいことはないです。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>設計</h2>
+    <article>
+     <h3>部品選定</h3>
+     <p>
+      FlashROMの取扱いが減って調達が面倒になりつつあります。<br>
+      海外サイトから仕入れてくる作例が多かったので、日本の通販サイトから購入できるパーツで構成してみます。<br>
+      <span class="jokeDel">ROMライターの調達先？うｎ…</span>
+     </p>
+     <p>
+      5V駆動, 16bit読み出しができるFlashROMを探します。<br>
+      <a href="https://www.marutsu.co.jp/pc/i/35601333/" target="_blank">M29F160FB5AN6F2</a>が見つかりました。2MiB品ですがひとまずこんなもんでしょう。
+     </p>
+     <p>
+      ROMライターで書き換えがしやすいように<a href="https://www.marutsu.co.jp/pc/i/2223775/" target="_blank">DIP変換基板</a>も探します。<br>
+      （注: 現在は販売終了しているため完成版では使用せず、自作プリント基板に置き換えています）
+     </p>
+     <p>
+      SRAMは勝手ながら<a href="https://twitter.com/bakuten_do/status/1572965909278621699" target="_blank">こちらのツイート</a>を参考にさせていただきました。<br>
+      ありがとうございます。
+     </p>
+     <p>
+      その他アドレスデコーダー用の74138とかコネクタとか適当なパーツを見繕います。<br>
+      ドナーカートはみんな使ってるミニ四駆。
+     </p>
+    </article>
+    <article>
+     <h3>試作</h3>
+     <p>
+      大失敗しました。
+     </p>
+     <p>
+      250本弱の配線をすることになったのですが、ユニバーサル基板のランドは取れるわUEW線はショートするわ切断したリボンケーブルは全くくっつかないわで全てがボロボロになりました。<br>
+      まったく起動しないし。
+     </p>
+     <p>
+      丸一か月手を尽くしてみましたが、修繕が崩壊に追いつかなくなってしまったので、諦めてプリント基板を作ることにしました。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>基板設計</h2>
+    <p>
+     回路設計全くわからないので線をつなぐだけ。
+    </p>
+    <p>
+     試しで乗り換えたCADのマニュアルを読まずに作ったのでGNDベタすらも入れてません。
+    </p>
+
+    <article>
+     <h3>FlashROM基板</h3>
+     <p>
+      DIP変換基板が販売終了してしまったことや、ROMライターのアダプタとピッチが合わなかったためTSOP-DIP変換基板を作成します。<br>
+      変換基板タワーも毎回やってられないので。
+     </p>
+     <img src="img_01.jpg" height="400" alt="変換基板タワー" title="試作段階の変換基板タワー">
+     <p>
+      適当に4枚FlashROM基板を横に並べたら一辺10cmを余裕で越えてしまったので、縦に積む方式にしました。
+     </p>
+     <img src="img_02.png" height="360" alt="FlashROM基板">
+     <p>
+      FlashROMと同じピン数にすれば48ピンですが、最大8MiBにしたいため <code class="inline">C1-C4</code> ピンを追加して <code class="inline">/CS</code> へ繋げました。<br>
+      パッドで何番目のROM基板であるかを選択します。<br>
+      今考えるとディップスイッチでもよかったのかな…。
+     </p>
+     <p>
+      ROMライターを使うときは本来の位置のピンを使いたいためこちらも接続しますが、このピン経由で積んだ全てのROMが接続されてしまうため逆流防止にダイオードを追加。
+     </p>
+     <p>
+      データシートに0.1μFのコンデンサがどうのこうのと書いてあったので、よく読んでませんがとりあえず入れます。
+     </p>
+    </article>
+    <article>
+     <h3>SA-1 ROM ブレークアウト基板</h3>
+     <p>
+      マスクROM信号をカートリッジシェルの外に引っ張り出す基板も作成。<br>
+      経年劣化もあるのかパッドが結構剥がれやすかったため、ケーブルをカートリッジ基板に直接つけるのは避けます。
+     </p>
+     <p>
+      ケーブルは40ピンがよくある本数なので、VCC, GNDに直接つながっているピンを省略してブレークアウト部を40ピンに収めました。<br>
+      そのためROMチップそのままは載らないです。
+     </p>
+     <img src="img_03.png" height="480" alt="ブレークアウト基板">
+     <p>
+      取付確認のしやすさから端面スルーホールにしたかったのですが、値段が跳ね上がったので断念。<br>
+      表面実装パッドの両端をスルーホールにしてはんだを流し込むことで接着させることにします。
+     </p>
+     <p>
+      ノギスを持っていないので<span class="small">（デジタル欲しいけど高い…）</span>勘でサイズを調整。<br>
+      2回目の試作でまあまあいい感じになりました。
+     </p>
+     <p>
+      ROMチップの左側にある表面実装コンデンサが結構邪魔で余白があまり取れません。
+     </p>
+    </article>
+    <article>
+     <h3>ROM基板</h3>
+     <p>
+      FlashROM基板を取り外しするときにブレークアウト基板へ余計な負荷を掛けたくなかったので、ケーブルで接続してその先でガチャガチャできるような構成にしました。
+     </p>
+     <p>
+      ユニバーサル基板で手作りする予定でしたが心が完全に折れたのでこれも発注。<br>
+      値段と時間を考えたら安いと自分に言い聞かせます。送料のほうが高いのでまとめて発注すれば実質数百円。
+     </p>
+     <p>
+      ブレークアウト基板から引っ張り出した信号をFlashROM基板に渡します。<br>
+      <code class="inline">A20-A21</code> をアドレスデコードするくらいで特に面白味はありません。
+     </p>
+    </article>
+
+    <p>
+     一通りの設計ができたら、基板製造業者に発注して到着まで1週間ほど待機。
+    </p>
+    <p class="small">
+     試作が一切動いていなかったのでずっと不安でした。
+    </p>
+   </section>
+
+   <section>
+    <h2>制作</h2>
+    <article>
+     <h3>カートリッジ基板</h3>
+     <p>
+      動作確認がしやすいSRAM, 電池の交換を最初におこないます。
+     </p>
+     <p>
+      ヒーターや専用のこて先は持っていないので、抑え工具で少しずつ足を浮かせていきます。<br>
+      <span class="small">低融点はんだは回収が面倒で…</span><br>
+      パッドが剥がれやすいのでICを回収しなくてもよいならピンの足切ってしまった方が安全で早いです。
+     </p>
+     <p>
+      カッターでレジストを剥がしたら1MBitのSRAMと交換します。<br>
+      SRAMがないと画面がいろいろとおかしくなるので、それらが正常化していたら交換成功です。
+     </p>
+     <p>
+      電池ソケットはカートリッジシェル内に収まるものもあると思いますが、いろいろあって上からしっかり押さえるタイプを使ってます。<br>
+      背面にがんばって穴開けます。
+     </p>
+     <p>
+      マスクROMも取り外したら、作成したブレークアウト基板を取り付けます。<br>
+      基板が外に出る部分もがんばって穴開けます。
+     </p>
+     <img src="img_04.jpg" height="480" alt="カートリッジ基板">
+    </article>
+    <article>
+     <h3>ROM基板</h3>
+     <p>
+      ここら辺は独自作成分なので手短に。
+     </p>
+     <p>
+      コネクタとか部品を取り付けるだけ。<br>
+      数も種類も多くないので一瞬で終わります。わ～いらくち～ん。
+     </p>
+     <img src="img_05.jpg" height="400" alt="ROM基板+FlashROM基板">
+
+     <p>
+      ダイオード(1N4007)を入れたらROMライターから書きこめませんでしたが、ダメ元でLEDをつけたらうまくいきました。電気的に正しいか全く保証できませんけど。<br>
+      アクティブローなので光ることは無いです。
+     </p>
+     <p>
+      LEDでもピン検出に失敗しますが無視して実行すれば書き込めます。
+     </p>
+    </article>
+    <article>
+     <h3>完成イメージ</h3>
+     <p>
+      全部を組み立ててSFCに接続するとこんな感じ。<br>
+      ケーブルの長さが半端で手持無沙汰感があります。
+     </p>
+     <img src="img_06.jpg" height="480" alt="完成イメージ">
+    </article>
+   </section>
+
+   <section>
+    <h2>動作確認</h2>
+    <article>
+     <p>
+      これまで一切動作しなかったので今回もしばらく調整が必要だろうなあと思いながら起動したら、一発で動きました。<br>
+      今までの苦労はいったい…？
+     </p>
+     <img src="img_07.png" height="360" alt="SNES-SA1 Speed Test">
+
+     <p>
+      3MBのハックロムも書いてみましょう。<br>
+      <span class="jokeDel">実機確認しないせいで度々痛い目にあってますからね。</span>
+     </p>
+     <img src="img_08.png" height="360" alt="Banzai" title="スプライトメモリ酷使">
+     <p class="small">
+      あるパッチの不具合に起因する微妙な差を見つけました。
+     </p>
+
+     <p class="jokeDel">
+      肝心の検証は想定と異なった結果が出てきてしまい有耶無耶に。え？
+     </p>
+
+    </article>
+   </section>
+
+   <section>
+    <h2>付録</h2>
+    <article>
+     <h3>使用部品</h3>
+     <p>
+      <ul>
+       <li><a href="https://www.marutsu.co.jp/pc/i/35601333/"		target="_blank">M29F160FB5AN6F2</a> - FlashROM 2MiB (1Mx16Bit)</li>
+       <li><a href="https://akizukidenshi.com/catalog/g/gI-01083/"	target="_blank">M68AF127B</a> - SRAM 1MBit</li>
+       <li><a href="https://www.marutsu.co.jp/pc/i/95796/"		target="_blank">SN74HC138N</a> - アドレスデコーダー （<a href="https://www.marutsu.co.jp/pc/i/18457/" target="_blank">AC</a>でも可）</li>
+       <li><a href="https://www.marutsu.co.jp/pc/i/13895/"		target="_blank">212116NE</a> - ICソケット</li>
+       <li><a href="https://www.marutsu.co.jp/pc/i/834991/"		target="_blank">RDER71H104K0K1H03B</a> - パスコンデンサ 1μF</li>
+       <li><a href="https://akizukidenshi.com/catalog/g/gI-06247/"	target="_blank">OSB5SA5B64A-5V</a> - ダイオード（LEDで代用）</li>
+       <li><a href="https://www.marutsu.co.jp/pc/i/549437/"		target="_blank">2160-A6-S213-0EBGA</a> - 連結ピンソケット 13x2P</li>
+       <li><a href="https://www.marutsu.co.jp/pc/i/10625/"		target="_blank">217040SE</a> - コネクタ 20x2P</li>
+       <li><a href="https://akizukidenshi.com/catalog/g/gC-08931/"	target="_blank">DG01032-0025-02</a> - コネクタ付きリボンケーブル 20x2P</li>
+       <li><a href="https://akizukidenshi.com/catalog/g/gP-00706/"	target="_blank">CH25-2032LF</a> - CR2032ホルダー</li>
+      </ul>
+     </p>
+     <p>
+      その他試作用に買ったものの無駄遣いに終わったあれこれ
+     </p>
+     <p>
+      なるべく通販サイトは統一しようとしましたが、片方のサイトにしかない商品もありこうなりました。
+     </p>
+    </article>
+    <article>
+     <h3>おまけ 1</h3>
+     <p>
+      <a href="https://www.youtube.com/watch?v=vlsXe8XWYVI">SRAMが接続されていない状態</a>。 (YouTube)<br>
+      会話の途中でフリーズするようです。<br>
+      エミュはまたちょっと違う動き。
+     </p>
+    </article>
+    <article>
+     <h3>おまけ 2</h3>
+     <img src="img_09.jpg" height="400" alt="Make in China">
+    </article>
+   </section>
+
+   <section>
+    <h2>さいごに</h2>
+    <article>
+     <h3>Q. 基板の頒布予定はありますか？</h3>
+     <p>
+      A. 今のところないです。ちゃんとした人が設計した基板を使ったほうがいいと思います。
+     </p>
+    </article>
+    <article>
+     <h3>諸注意</h3>
+     <p>
+      機器の改造・破壊は自己責任の下おこなってください。<br>
+      当記事によって発生したいかなるトラブル・損害に対して責任を負いかねます。
+     </p>
+    </article>
+   </section>
+
+<!-- Template
+   <section>
+    <h2></h2>
+    <article>
+     <h3></h3>
+     <p>
+      
+     </p>
+     <ul>
+      <li></li>
+     </ul>
+    </article>
+   </section>
+-->
+
+   <section>
+    <h2>更新履歴</h2>
+    <article>
+     <ul>
+      <li>2023/07/07 初版作成</li>
+     </ul>
+    </article>
+   </section>
+
+  <footer>
+   <p class="author"><a href="https://github.com/absindx">absindx</a></p>
+  </footer>
+ </body>
+</html>
