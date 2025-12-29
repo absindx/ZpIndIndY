@@ -1,0 +1,314 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+ <head>
+  <meta charset="UTF-8">
+  <title>ZpIndIndY - SNES SA-1 Backup</title>
+  <link rel="shortcut icon" href="favicon.ico">
+  <link rel="stylesheet" type="text/css" href="../../style.css">
+  <style type="text/css">
+<!--
+-->
+  </style>
+ </head>
+ <body>
+  <header>
+   <h1><a href="../../">[$AB], Y</a> - SNES SA-1 Backup</h1>
+  </header>
+  <main>
+
+   <section>
+    <article>
+     <p>
+      SA-1のバッテリーバックアップで電池を無駄に消耗しよう。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>SA-1 Backup</h2> 
+    <p>
+     SA-1のカートリッジにはバッテリーバックアップできる2つのメモリが存在します。
+    </p>
+
+    <article>
+     <h3>BW-RAM Backup</h3>
+     <p>
+      バッテリーバックアップと言われたら思い浮かぶ方法で、基板に取り付けられたSRAMをバックアップする方法です。<br>
+      SA-1のカートリッジにおいては「BW-RAM」と呼んでいます。
+     </p>
+     <p>
+      SA-1カートリッジではSA-1 CPU側からSNESメインメモリが見えないため、BW-RAMを普通のメモリとして使用したり、
+      Character conversion DMAやBitmap image projectionによる画像データ変換の作業領域として使用したりしています。<br>
+      そのため、バッテリーバックアップをしていなくても揮発するワーキング用メモリとしてBW-RAMが搭載されています。
+     </p>
+    </article>
+    <article>
+     <h3>I-RAM Backup</h3>
+     <p>
+      SA-1には2KiBのRAMがチップ内に内蔵されており、「I-RAM」と呼んでいます。<br>
+      I-RAMはBW-RAMよりもアクセス速度が速いので、よく使うデータはI-RAM側に置かれます。
+     </p>
+     <p>
+      Development manual Book II, Section 1 1.2 System configurationでは、SA-1チップとバッテリーが接続されている図があります。<br>
+      これはI-RAMがバッテリーバックアップできることを示していますが、ほとんどのゲームではBW-RAMのバッテリーバックアップがあるため、
+      I-RAMを電源断で揮発するワーキング用メモリとして使用しています。
+     </p>
+     <img src="img_01.png" height="480" alt="Figure 1-1-1 Super Accelerator System Configuration（を基に再作成）によるSA-1カートリッジの構成図">
+     <p>
+      …ただ1つのゲームを除いて。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>カートリッジ基板の型番</h2>
+    <p>
+     SNESのカートリッジ基板に刻印された型番を見ると、おおよそどのような構成であるかがわかります。<br>
+     例えば、「<a href="https://snescentral.com/pcbboards.php?chip=SHVC-1A0N-01" target="_blank">SHVC-1A0N</a>」の場合はROMチップが1つ(1), LoROM(A), SRAMなし(0), バッテリーバックアップなし(N)、<br>
+     「<a href="https://snescentral.com/pcbboards.php?chip=SHVC-3J3M-01" target="_blank">SHVC-3J3M</a>」の場合はROMチップが3つ(3), HiROM(J), SRAM 8KiB(3), バッテリーバックアップあり(M)です。
+    </p>
+    <p>
+     いろいろ例外はあると思いますが、概ねそんな感じです。
+    </p>
+    <p class="small">
+     近年の偽物カートリッジはここら辺の型番が実際のマッピングとあっておらず詰めが甘いなあと思ったりすることもあるのですが、今後どんどん巧妙化されていってしまうのでしょうか。
+    </p>
+
+    <article>
+     <h3>SHVC-1L0B-01</h3>
+     <p>
+      SA-1 I-RAM Backupのカートリッジは、BW-RAMが搭載されていないため、基板の型番は「SHVC-1L0B」になります。<br>
+      ROMチップが1つ(1), SA-1(L), SRAMなし(0), バッテリーバックアップあり(B)を意味します。
+     </p>
+     <img src="img_02.jpg" height="480" alt="SHVC-1L0B-01基板全体（電池とマスクROM除去済）">
+     <p>
+      「パチスロ物語 パル工業スペシャル」、それがSA-1 I-RAM Backupを取り扱う唯一のタイトルです。
+     </p>
+     <p class="small">
+      <a href="https://gamemanual.midnightmeattrain.com/entry/%E3%83%91%E3%83%81%E3%82%B9%E3%83%AD%E7%89%A9%E8%AA%9E_%E3%83%91%E3%83%AB%E5%B7%A5%E6%A5%AD%E3%82%B9%E3%83%9A%E3%82%B7%E3%83%A3%E3%83%AB">説明書</a>には<q>スーパーアクセラレーターチップを搭載し、今までのパチスロゲームになかった2人同時対戦や美しいグラフィックを実現しています。</q>と記載がありますが、残念ながらSA-1特有の機能は使用しておらず、バックアップメモリのコントローラでしかありません。<br>
+      SA-1 CPUを起動しようとするルーチンやリセットベクタの残骸はありますが、肝心の起動する処理が存在しません。<br>
+      このゲームのプログラムの変なところを挙げだすとキリがなくなって本旨から逸れるのでほどほどに。
+     </p>
+     <p>
+      SRAMが搭載されていないにも関わらず、電池が搭載されている一見不思議な基板です。<br>
+      配線を追うと、電池は電源管理IC MM1026を経由してSA-1チップの100, 101ピンに接続されています。
+     </p>
+     <table>
+      <tr>
+       <th>MM1026 pin</th>
+       <th>SA-1 pin</th>
+      </tr>
+      <tr>
+       <td>5: /CS</td>
+       <td>100 (GND)</td>
+      </tr>
+      <tr>
+       <td>6: Vout</td>
+       <td>101 (VCC)</td>
+      </tr>
+     </table>
+     <p>
+      ※括弧内はSHVC-1L5B-20の場合の接続先
+     </p>
+    </article>
+
+   <section>
+    <h2>I-RAM Backup + BW-RAM Backup</h2>
+    <p>
+     公式カートリッジではI-RAMまたはBW-RAMどちらか片方のバッテリーバックアップしか実現されませんでしたが、I-RAMとBW-RAMの両方をバッテリーバックアップにすることはできるのでしょうか。<br>
+     実現するには二つのアプローチがあります。
+    </p>
+    <ol>
+     <li>I-RAM Backup基板にBW-RAMを取り付ける</li>
+     <li>BW-RAM Backup基板でI-RAM Backupを有効化する</li>
+    </ol>
+    <article>
+     <h3>I-RAM Backup + BW-RAM</h3>
+     <p class="jokeDel">
+      どうして大変なパターンを先に選んでしまったんですか。
+     </p>
+     <p>
+      SHVC-1L0B-01にBW-RAM用のSRAMを接続します。<br>
+      言ってしまえば簡単ですが、基板にはBW-RAM関係の配線パターンが出ていないため0.5mmピッチのICの根元に30本近いジャンパー線をはんだ付けします。
+     </p>
+      <img src="img_03.jpg" height="640" alt="SA-1チップのBW-RAM関係ピンにジャンパー線を配線した様子">
+     <p>
+      しました。<br>
+      BW-RAMに対していくつかのテストをしたかったため信号をシェルの外に引っ張り出すだけになっています。
+     </p>
+     <p>
+      最初は切断したIDEケーブルに直接繋いでいたのですが、ケーブルの反対側のコネクタ部分が断線しました。<br>
+      <span class="jokeDel">引っ張ってコネクタから取り外す方が楽なんで…。</span>
+     </p>
+     <p>
+      ケーブルが交換できるように、<a href="../SnesSA1Cartridge/">余っていた変換基板</a>に繋げました。<br>
+      SHVC-1L0B-01はマスクROMを縦方向に配置するため、ROMブレークアウト基板はまた新規で起こしています。
+     </p>
+     <h4>BW-RAM基板</h4>
+      <p>
+       SA-1チップにSRAMを直接接続してもよかったのですが、BW-RAMに対して実施したいテストがあったためBW-RAM基板を作成しました。
+      </p>
+      <img src="img_04.jpg" height="480" alt="作成したBW-RAM基板">
+      <p>
+       以下のことができるようにしました。
+       <ul>
+        <li>メモリサイズの制御: 1byte～256KiB（SA-1規格上最大）をDIPスイッチで制御</li>
+        <li>信号のプローブ: ロジックアナライザーを接続できるようにピンソケットを取り付け</li>
+       </ul>
+      </p>
+      <div class="center">
+       <p class="center">
+        <a href="img_05.png" target="_blank"><img src="img_05.png" height="480" alt="BW-RAM基板 回路図" class="inline-block"></a><br>
+        回路図（画像クリックで別タブで開きます）
+       </p>
+      </div>
+      <p>
+       BW-RAMのアドレスバスを、プルアップしたDIPスイッチの信号と7408でANDマスクする基板です。
+      </p>
+      <p>
+       SRAMには<a href="https://www.marutsu.co.jp/pc/i/43626533/" target="_blank">CY62138FLL</a>を使用しました。
+      </p>
+     <h4>完成</h4>
+      <p>
+       ROMも繋ぐとこんな感じ。<br>
+       ※コネクタ断線前のIDEケーブル直接接続当時のもの
+      </p>
+      <img src="img_06.jpg" height="360" alt="ROM基板とBW-RAM基板を繋いだSA-1基板をSNESに挿して起動">
+    </article>
+    <article>
+     <h3>I-RAM enable</h3>
+     <p>
+      SHVC-1L5B-20のI-RAM Backupを有効化します。<br>
+      こちらはBW-RAMがもともと載っているので追加部品はナシ。
+     </p>
+     <p>
+      この基板ではI-RAM BackupのピンにSNES本体から供給されるVCC, GNDが接続されています。（当記事冒頭の表参照）<br>
+      電池からカートリッジ全体に電源が供給され続けないように、コンデンサ<code class="inline">C6</code>の取り外しとパターンカットをします。<br>
+      コンデンサの跡はジャンパ線のパッドとして利用できるので、その下をパターンカットするのがおすすめ。
+     </p>
+     <img src="img_07.jpg" height="480" alt="SA-1チップのI-RAM Backup関連ピンのパターンカット">
+     <p>
+      <code class="inline">C6</code>のパッドとMM1026の<code class="inline">Vout</code>, <code class="inline">/CS</code>を接続します。
+     </p>
+     <img src="img_08.jpg" height="480" alt="I-RAM Backupを有効にするためのSA-1チップとMM1026の配線">
+     <p>
+      これだけで完成です。<br>
+      I-RAM Backup + BW-RAMよりもはるかに簡単ですね。
+     </p>
+     <p>
+      今回はやっていませんが、お好みでSRAMを交換して容量拡張をしてもよいでしょう。
+     </p>
+    </article>
+   </section>
+
+   <section>
+    <h2>動作確認・測定</h2>
+    <article>
+     <h3>動作確認</h3>
+     <p>
+      I-RAMとBW-RAMのメモリ内容を簡易的に調べる<a href="https://github.com/absindx/SNES-TestRoms/tree/main/SA1BackupUtility" target="_blank">テストROM</a>を作りました。<br>
+      固定の値をそれぞれのメモリに書き込んで、再度起動されたときに元の値と比較することでバッテリーバックアップされているかどうかやどれくらい揮発しているかを調べます。
+     </p>
+     <p>
+      電池を取り付けた状態で、10分電源断をしてもI-RAM, BW-RAM共に完全一致で保持されていたため、両方がバッテリーバックアップされるようになったと判断しました。
+     </p>
+     <p class="small">
+      (補足) 電池を取り外した状態での各メモリの値保持期間について<br>
+      SHVC-1L0B-01のI-RAMは未給電でも<a href="https://www.youtube.com/watch?v=beJ3SHh4Ngo" target="_blank">6分半</a>は値が保持されます。<br>
+      SHVC-1L5B-20のBW-RAMは未給電で0.5秒以内には揮発が始まります。<br>
+     </p>
+     <img src="img_09.png" height="360" alt="テストROM実行結果画面 SHVC-1L0B-01基板でI-RAM, BW-RAMが両バックアップされている">
+     <p>
+      また、DIPスイッチによってBW-RAMの容量を縮小できていることも確認できました。<br>
+      （画像「BW-RAM SIZE」 <code class="inline">$040000</code>→<code class="inline">$000100</code>）
+     </p>
+     <img src="img_10.png" height="360" alt="テストROM実行結果画面 BW-RAMのサイズが256KiBから256Bytesに縮小した">
+    </article>
+    <article>
+     <h3>消費電力測定</h3>
+     <p class="jokeDel">
+      某所で「消費電力は？」と聞かれてしまったので。
+     </p>
+     <table>
+      <tr>
+       <th>基板</th>
+       <th>(変更なし) I-RAM Backup</th>
+       <th>(変更なし) BW-RAM Backup</th>
+       <th>(変更あり) I-RAM Backup + BW-RAM Backup</th>
+      </tr>
+      <tr>
+       <td>SHVC-1L0B-01</td>
+       <td><img src="img_11.jpg" height="360" alt="SHVC-1L0B-01 I-RAM Backup 消費電力測定">0.0 [uA]</td>
+       <td class="center">N/A</td>
+       <td><img src="img_12.jpg" height="360" alt="SHVC-1L0B-01 I-RAM Backup + BW-RAM Backup 消費電力測定">1.2 [uA] (SRAM: 256KiB)</td>
+      </tr>
+      <tr>
+       <td>SHVC-1L5B-20</td>
+       <td class="center">N/A</td>
+       <td><img src="img_13.jpg" height="360" alt="SHVC-1L5B-20 BW-RAM Backup 消費電力測定">0.0 [uA] (SRAM: 32KiB)</td>
+       <td><img src="img_14.jpg" height="360" alt="SHVC-1L5B-20 I-RAM Backup + BW-RAM Backup 消費電力測定">0.0 [uA] (SRAM: 32KiB)</td>
+      </tr>
+     </table>
+    </article>
+   </section>
+
+   <section>
+    <h2>存在意義</h2>
+    <article>
+     <h3>エミュレーション</h3>
+     <p>
+      エミュレータではどちらのメモリがバッテリーバックアップされているのかを<a href="https://snes.nesdev.org/wiki/ROM_header" target="_blank">ROM内のカートリッジ情報</a>から推測することになります。<br>
+      残念ながらカートリッジ情報のフォーマットでは「I-RAM, BW-RAMの両方バッテリーバックアップ」を表現することができません。
+     </p>
+     <p>
+      higanのbmlファイルのように外部からの追加情報が必要です。
+     </p>
+     <h3>メリット</h3>
+     <p class="large">
+      I-RAM, BW-RAMの両方バッテリーバックアップのメリットは一切ないです。
+     </p>
+     <p>
+      こんなことをやっていますが、有限なハードウェアの個体数が減ることを私は望んでいません。
+     </p>
+    </article>
+
+   <section>
+    <h2>さいごに</h2>
+    <article>
+     <h3>諸注意</h3>
+     <p>
+      機器の改造・破壊は自己責任の下おこなってください。<br>
+      当記事によって発生したいかなるトラブル・損害に対して責任を負いかねます。
+     </p>
+    </article>
+   </section>
+
+<!-- Template
+   <section>
+    <h2></h2>
+    <article>
+     <h3></h3>
+     <p>
+      
+     </p>
+     <ul>
+      <li></li>
+     </ul>
+    </article>
+   </section>
+-->
+
+   <section>
+    <h2>更新履歴</h2>
+    <article>
+     <ul>
+      <li>2025/12/30 初版作成</li>
+     </ul>
+    </article>
+   </section>
+
+  <footer>
+   <p class="author"><a href="https://github.com/absindx">absindx</a></p>
+  </footer>
+ </body>
+</html>
