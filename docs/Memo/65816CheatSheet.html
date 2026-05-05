@@ -7,6 +7,9 @@
   <title>65816 CheatSheet</title>
 
   <style type="text/css">
+	html{
+		min-width		: max-content;
+	}
 	body{
 		margin			: 0px;
 		padding			: 0px;
@@ -139,7 +142,7 @@
 		width			: 80px;
 	}
 
-	#InstructionSetTable_Addressing{
+	#InstructionSetTable_Addressing, #CompareTable .Condition, #CompareTable .Flag, #SubOverflowTable .Flag{
 		font-family		: "SFMono-Regular", "Consolas", "Liberation Mono", "Menlo", "Courier", "monospace";
 		text-align		: center;
 	}
@@ -1421,6 +1424,40 @@
         <tr><td class="Address">$00FFFA</td	><td class="Mode">Emulation</td	><td class="Label"		>NMI</td	></tr>
         <tr><td class="Address">$00FFFC</td	><td class="Mode">Emulation</td	><td class="Label"		>RESET</td	></tr>
         <tr><td class="Address">$00FFFE</td	><td class="Mode">Emulation</td	><td class="Label"		>IRQ / BRK</td	></tr>
+       </tbody>
+      </table>
+    </section>
+
+    <section>
+     <h2><a id="Compare" name="Compare">Compare</a></h2>
+      <h3>CMP flags</h3>
+      <table id="CompareTable">
+       <thead>
+        <tr><th>Condition</th				><th>N</th		><th>V</th		><th>Z</th		><th>C</th		></tr>
+       </thead>
+       <tbody>
+        <tr><td class="Condition">A &lt;&nbsp; op</td	><td class="Flag">1</td	><td class="Flag">-</td	><td class="Flag">0</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Condition">A == op</td		><td class="Flag">0</td	><td class="Flag">0</td	><td class="Flag">1</td	><td class="Flag">1</td	></tr>
+        <tr><td class="Condition">A &gt;&nbsp; op</td	><td class="Flag">0</td	><td class="Flag">-</td	><td class="Flag">0</td	><td class="Flag">1</td	></tr>
+        <tr><td class="Condition">A &lt;= op</td	><td class="Flag">-</td	><td class="Flag">-</td	><td class="Flag">-</td	><td class="Flag">-</td	></tr>
+        <tr><td class="Condition">A &gt;= op</td	><td class="Flag">-</td	><td class="Flag">-</td	><td class="Flag">-</td	><td class="Flag">1</td	></tr>
+        <tr><td class="Condition">A != op</td		><td class="Flag">-</td	><td class="Flag">-</td	><td class="Flag">0</td	><td class="Flag">-</td	></tr>
+       </tbody>
+      </table>
+      <h3>SBC V flag</h3>
+      <table id="SubOverflowTable">
+       <thead>
+        <tr><th>A</th				><th>Operand</th		><th>Result</th			><th>V</th		></tr>
+       </thead>
+       <tbody>
+        <tr><td class="Sign">Positive</td	><td class="Sign">Positive</td	><td class="Sign">Positive</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Sign">Positive</td	><td class="Sign">Positive</td	><td class="Sign">Negative</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Sign">Positive</td	><td class="Sign">Negative</td	><td class="Sign">Positive</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Sign">Positive</td	><td class="Sign">Negative</td	><td class="Sign">Negative</td	><td class="Flag">1</td	></tr>
+        <tr><td class="Sign">Negative</td	><td class="Sign">Positive</td	><td class="Sign">Positive</td	><td class="Flag">1</td	></tr>
+        <tr><td class="Sign">Negative</td	><td class="Sign">Positive</td	><td class="Sign">Negative</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Sign">Negative</td	><td class="Sign">Negative</td	><td class="Sign">Positive</td	><td class="Flag">0</td	></tr>
+        <tr><td class="Sign">Negative</td	><td class="Sign">Negative</td	><td class="Sign">Negative</td	><td class="Flag">0</td	></tr>
        </tbody>
       </table>
     </section>
